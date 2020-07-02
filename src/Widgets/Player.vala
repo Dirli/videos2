@@ -4,6 +4,7 @@ namespace Videos2 {
         public signal void duration_changed (int64 d);
         public signal void progress_changed (int64 p);
         public signal void uri_changed (string u);
+        public signal void ended_stream ();
 
         private uint progress_timer = 0;
 
@@ -21,7 +22,9 @@ namespace Videos2 {
 
         public unowned int64 position {
             set {
-                playbin.seek_simple (fmt, Gst.SeekFlags.FLUSH, value);
+                if (value >= 0) {
+                    playbin.seek_simple (fmt, Gst.SeekFlags.FLUSH, value);
+                }
             }
             get {
                 int64 p = 0;
@@ -60,7 +63,7 @@ namespace Videos2 {
         }
 
         public void set_uri (string uri) {
-            stop ();
+            playbin_state_change (Gst.State.READY, false);
             playbin.uri = uri;
             play ();
 
@@ -70,11 +73,11 @@ namespace Videos2 {
         }
 
         public void play () {
-            playbin_state_change (Gst.State.PLAYING);
+            playbin_state_change (Gst.State.PLAYING, true);
         }
 
         public void pause () {
-            playbin_state_change (Gst.State.PAUSED);
+            playbin_state_change (Gst.State.PAUSED, true);
         }
 
         public void toggle_playing () {
@@ -87,11 +90,13 @@ namespace Videos2 {
         }
 
         public void stop () {
-            playbin_state_change (Gst.State.READY);
+            playbin_state_change (Gst.State.READY, true);
         }
 
-        public void seek_jump_percent (double percent) {
-            position = (int64) (percent * duration);
+        public void seek_jump_value (int64 val) {
+            stop_timer ();
+            position = val;
+            start_timer ();
         }
 
         public void seek_jump_seconds (int seconds) {
@@ -108,10 +113,11 @@ namespace Videos2 {
             if (duration > position + offset && position + offset > 0) {
                 position = position + offset;
             }
+
             playbin.set_state (cur_state);
         }
 
-        private void playbin_state_change (Gst.State state) {
+        private void playbin_state_change (Gst.State state, bool emit) {
             playbin.set_state (state);
 
             if (state == Gst.State.PLAYING) {
@@ -120,11 +126,10 @@ namespace Videos2 {
                 stop_timer ();
             }
 
-            if (state == Gst.State.NULL) {
-                return;
+            if (state != Gst.State.NULL && emit) {
+                playbin_state_changed (state);
             }
 
-            playbin_state_changed (state);
         }
 
         public Gst.State get_playbin_state () {
@@ -135,12 +140,12 @@ namespace Videos2 {
         }
 
         private void start_timer () {
-            if (progress_timer > 0) {
-                stop_timer ();
-            }
+            stop_timer ();
 
             progress_timer = GLib.Timeout.add (500, () => {
-                progress_changed (position);
+                if (position > 0) {
+                    progress_changed (position);
+                }
                 return true;
             });
         }
@@ -159,9 +164,10 @@ namespace Videos2 {
                     string debug;
                     message.parse_error (out err, out debug);
                     warning ("Error: %s\n%s\n", err.message, debug);
+                    ended_stream ();
                     break;
                 case Gst.MessageType.EOS:
-                    warning ("End of stream");
+                    ended_stream ();
                     break;
                 default:
                     break;
