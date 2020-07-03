@@ -1,6 +1,8 @@
 namespace Videos2 {
     public class Widgets.BottomBar : Gtk.Revealer {
         public signal void play_toggled ();
+        public signal bool play_next ();
+        public signal bool play_prev ();
         public signal void seeked (int64 val);
         public signal void select_media (string uri);
         public signal void clear_media ();
@@ -12,7 +14,9 @@ namespace Videos2 {
 
         public Gtk.ToggleButton repeat_button;
 
+        private Gtk.Button prev_button;
         private Gtk.Button play_button;
+        private Gtk.Button next_button;
         private Gtk.MenuButton playlist_button;
         private Gtk.Popover playlist_popover;
         private Granite.SeekBar time_bar;
@@ -90,11 +94,28 @@ namespace Videos2 {
 
         private void build_ui () {
             // control button
+            prev_button = new Gtk.Button.from_icon_name ("media-skip-backward-symbolic", Gtk.IconSize.BUTTON);
+            prev_button.tooltip_text = _("Previous");
+            prev_button.clicked.connect (() => {
+                if (!play_prev ()) {
+                    prev_button.sensitive = false;
+                }
+            });
+
             play_button = new Gtk.Button.from_icon_name ("media-playback-start-symbolic", Gtk.IconSize.BUTTON);
             play_button.tooltip_text = _("Play");
             play_button.clicked.connect (() => {
                 play_toggled ();
             });
+
+            next_button = new Gtk.Button.from_icon_name ("media-skip-forward-symbolic", Gtk.IconSize.BUTTON);
+            next_button.tooltip_text = _("Next");
+            next_button.clicked.connect (() => {
+                if (!play_next ()) {
+                    next_button.sensitive = false;
+                }
+            });
+
             // time bar
             time_bar = new Granite.SeekBar (0.0);
             time_bar.scale.vexpand = true;
@@ -161,7 +182,9 @@ namespace Videos2 {
 
             var main_actionbar = new Gtk.ActionBar ();
 
+            main_actionbar.pack_start (prev_button);
             main_actionbar.pack_start (play_button);
+            main_actionbar.pack_start (next_button);
             main_actionbar.set_center_widget (time_bar);
             main_actionbar.pack_end (playlist_button);
 
@@ -173,6 +196,11 @@ namespace Videos2 {
             seeked (new_position);
 
             return false;
+        }
+
+        public void change_nav (bool can_prev, bool can_next) {
+            prev_button.sensitive = can_prev;
+            next_button.sensitive = can_next;
         }
 
         public void change_duration (int64 dur) {

@@ -13,6 +13,7 @@ namespace Videos2 {
         public PlaylistBox () {
             Object (can_focus: true,
                     expand: true,
+                    activate_on_single_click: false,
                     selection_mode: Gtk.SelectionMode.BROWSE);
         }
 
@@ -76,8 +77,6 @@ namespace Videos2 {
             if (source == target) {
                 return;
             }
-
-            // warning ("Position old %d new %d".printf (old_position, new_position));
 
             remove (source);
             insert (source, new_position);

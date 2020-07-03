@@ -46,6 +46,9 @@ namespace Videos2 {
                 bottom_bar.clear_playlist_box ();
             });
             playlist.added_item.connect (bottom_bar.add_playlist_item);
+            playlist.changed_nav.connect ((first, last) => {
+                bottom_bar.change_nav (!first, !last);
+            });
         }
 
         private void build_ui () {
@@ -93,6 +96,8 @@ namespace Videos2 {
             bottom_bar.select_media.connect (playlist.select_media);
             bottom_bar.clear_media.connect (playlist.clear_media);
             bottom_bar.dnd_media.connect (playlist.change_media_position);
+            bottom_bar.play_next.connect (playlist.next);
+            bottom_bar.play_prev.connect (playlist.previous);
 
             var player_page = new Gtk.Overlay ();
             player_page.add (player);
@@ -129,7 +134,7 @@ namespace Videos2 {
             var view_name = main_stack.get_visible_child_name ();
 
             switch (view_name) {
-                case "welcome":
+                case "previouswelcome":
                     //
                     break;
                 case "player":

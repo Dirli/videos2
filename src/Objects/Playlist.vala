@@ -2,6 +2,7 @@ namespace Videos2 {
     public class Objects.Playlist : GLib.Object {
         public signal void play_media (string uri, int index);
         public signal void added_item (string uri, string basename);
+        public signal void changed_nav (bool first, bool last);
         public signal void cleared_playlist ();
 
         private Gee.ArrayList<string> uris_array;
@@ -15,6 +16,7 @@ namespace Videos2 {
                 _current = value;
                 if (uris_array.size > value && value > -1) {
                     play_media (uris_array.@get (value), value);
+                    changed_nav (value == 0, value + 1 == uris_array.size);
                 }
             }
         }
@@ -58,6 +60,11 @@ namespace Videos2 {
 
             added_item (uri, path.get_basename ());
             uris_array.add (uri);
+
+            if (current > -1 && uris_array.size > 1 && current + 2 == uris_array.size) {
+                changed_nav (current == 0, false);
+            }
+
             if (uris_array.size == 1) {
                 current = 0;
             }
