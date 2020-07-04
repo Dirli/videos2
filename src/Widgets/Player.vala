@@ -65,11 +65,13 @@ namespace Videos2 {
         public void set_uri (string uri) {
             playbin_state_change (Gst.State.READY, false);
             playbin.uri = uri;
-            play ();
+            if (uri != "") {
+                play ();
 
-            while (duration < 1) {};
+                while (duration < 1) {};
 
-            duration_changed (duration);
+                duration_changed (duration);
+            }
         }
 
         public void play () {

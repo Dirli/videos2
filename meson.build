@@ -18,6 +18,7 @@ executable(
     'src/Services/Utils.vala',
     'src/Views/WelcomePage.vala',
     'src/Widgets/BottomBar.vala',
+    'src/Widgets/HeadBar.vala',
     'src/Widgets/Player.vala',
     'src/Widgets/PlaylistBox.vala',
     'src/Widgets/PlaylistItem.vala',

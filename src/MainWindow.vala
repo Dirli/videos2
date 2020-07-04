@@ -7,6 +7,7 @@ namespace Videos2 {
         private Views.WelcomePage welcome_page;
 
         private Widgets.Player player;
+        private Widgets.HeadBar header_bar;
         private Widgets.BottomBar bottom_bar;
 
         private const ActionEntry[] ACTION_ENTRIES = {
@@ -64,6 +65,11 @@ namespace Videos2 {
                 }
             });
 
+            header_bar = new Widgets.HeadBar ();
+            header_bar.navigation_clicked.connect (on_navigation_clicked);
+
+            set_titlebar (header_bar);
+
             player = new Widgets.Player ();
             bottom_bar = new Widgets.BottomBar ();
 
@@ -71,6 +77,7 @@ namespace Videos2 {
                 if (state == Gst.State.PLAYING || state == Gst.State.PAUSED) {
                     bottom_bar.playing = (state == Gst.State.PLAYING);
                 } else {
+                    title = _("Videos");
                     main_stack.set_visible_child_name ("welcome");
                 }
             });
@@ -110,10 +117,12 @@ namespace Videos2 {
             main_stack.add_named (welcome_page, "welcome");
             main_stack.add_named (player_page, "player");
 
+            main_stack.show_all ();
             main_stack.notify["visible-child-name"].connect (on_changed_child);
 
             add (main_stack);
-            show_all ();
+
+            main_stack.set_visible_child_name ("welcome");
         }
 
         public void action_open () {
@@ -132,9 +141,10 @@ namespace Videos2 {
 
         private void on_changed_child () {
             var view_name = main_stack.get_visible_child_name ();
+            header_bar.navigation_visible = (view_name != "welcome");
 
             switch (view_name) {
-                case "previouswelcome":
+                case "welcome":
                     //
                     break;
                 case "player":
@@ -143,10 +153,18 @@ namespace Videos2 {
             }
         }
 
+        public void on_navigation_clicked (string nav_label) {
+            if (player.get_playbin_state () == Gst.State.PLAYING || player.get_playbin_state () == Gst.State.PAUSED) {
+                player.stop ();
+            }
+        }
+
         public void open_files (GLib.File[] files, bool clear = true) {
             playlist.clear_media ();
 
             main_stack.set_visible_child_name ("player");
+            header_bar.navigation_label = Constants.NAV_BUTTON_WELCOME;
+
             foreach (GLib.File file in files) {
                 playlist.add_media (file);
             }

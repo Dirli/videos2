@@ -3,6 +3,8 @@ namespace Videos2.Constants {
     public const string PULSE_CLASS = "pulse";
     public const string PULSE_TYPE = "attention";
 
+    public const string NAV_BUTTON_WELCOME = _("Back");
+
     // actions
     public const string ACTION_PREFIX = "win.";
     public const string ACTION_OPEN = "action-open";

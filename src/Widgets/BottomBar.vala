@@ -71,7 +71,6 @@ namespace Videos2 {
 
             init_events ();
             build_ui ();
-            show_all ();
         }
 
         private void init_events () {
