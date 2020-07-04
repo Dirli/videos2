@@ -9,6 +9,7 @@ namespace Videos2.Constants {
     public const string ACTION_PREFIX = "win.";
     public const string ACTION_OPEN = "action-open";
     public const string ACTION_ADD = "action-add";
+    public const string ACTION_QUIT = "action-quit";
     public const string ACTION_SEARCH = "action-search";
 
     // 204/255 = 80% opacity

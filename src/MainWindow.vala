@@ -1,6 +1,5 @@
 namespace Videos2 {
     public class MainWindow : Gtk.Window {
-
         private Objects.Playlist playlist;
 
         private Gtk.Stack main_stack;
@@ -8,9 +7,26 @@ namespace Videos2 {
 
         private Widgets.Player player;
         private Widgets.HeadBar header_bar;
+        private Widgets.TopBar top_bar;
         private Widgets.BottomBar bottom_bar;
 
+        private bool _fullscreened = false;
+        public bool fullscreened {
+            get {
+                return _fullscreened;
+            }
+            set {
+                _fullscreened = value;
+                if (value && bottom_bar.child_revealed == true) {
+                    top_bar.reveal_child = true;
+                } else if (!value && bottom_bar.child_revealed) {
+                    top_bar.reveal_child = false;
+                }
+            }
+        }
+
         private const ActionEntry[] ACTION_ENTRIES = {
+            { Constants.ACTION_QUIT, action_quit },
             { Constants.ACTION_OPEN, action_open },
             { Constants.ACTION_ADD, action_add },
             // { Constants.ACTION_SEARCH, action_search }
@@ -22,6 +38,7 @@ namespace Videos2 {
                     application: app,
                     title: _("Videos"));
 
+            application.set_accels_for_action (Constants.ACTION_PREFIX + Constants.ACTION_QUIT, {"<Control>q"});
             application.set_accels_for_action (Constants.ACTION_PREFIX + Constants.ACTION_OPEN, {"<Control>o"});
             application.set_accels_for_action (Constants.ACTION_PREFIX + Constants.ACTION_ADD, {"<Control><Shift>o"});
             // application.set_accels_for_action (Constants.ACTION_PREFIX + Constants.ACTION_SEARCH, {"<Control>f"});
@@ -50,6 +67,27 @@ namespace Videos2 {
             playlist.changed_nav.connect ((first, last) => {
                 bottom_bar.change_nav (!first, !last);
             });
+
+            window_state_event.connect ((e) => {
+                if (Gdk.WindowState.FULLSCREEN in e.changed_mask) {
+                    fullscreened = Gdk.WindowState.FULLSCREEN in e.new_window_state;
+                    header_bar.visible = !fullscreened;
+
+                    if (!fullscreened) {
+                        unmaximize ();
+                    }
+                }
+
+                if (Gdk.WindowState.MAXIMIZED in e.changed_mask) {
+                    bool currently_maximixed = Gdk.WindowState.MAXIMIZED in e.new_window_state;
+
+                    if (main_stack.visible_child_name == "player" && currently_maximixed) {
+                       fullscreen ();
+                    }
+                }
+
+                return false;
+            });
         }
 
         private void build_ui () {
@@ -71,13 +109,30 @@ namespace Videos2 {
             set_titlebar (header_bar);
 
             player = new Widgets.Player ();
+
+            top_bar = new Widgets.TopBar ();
+            top_bar.unfullscreen.connect (() => {
+                unfullscreen ();
+            });
+
             bottom_bar = new Widgets.BottomBar ();
+            bottom_bar.notify["reveal-child"].connect (() => {
+                if (bottom_bar.reveal_child == true && fullscreened == true) {
+                    top_bar.reveal_child = true;
+                } else if (bottom_bar.reveal_child == false) {
+                    top_bar.reveal_child = false;
+                }
+            });
+
 
             player.playbin_state_changed.connect ((state) => {
                 if (state == Gst.State.PLAYING || state == Gst.State.PAUSED) {
                     bottom_bar.playing = (state == Gst.State.PLAYING);
                 } else {
                     title = _("Videos");
+                    if (fullscreened) {
+                        unfullscreen ();
+                    }
                     main_stack.set_visible_child_name ("welcome");
                 }
             });
@@ -97,6 +152,13 @@ namespace Videos2 {
                     player.stop ();
                 }
             });
+            player.toggled_fullscreen.connect (() => {
+                if (fullscreened) {
+                    unfullscreen ();
+                } else {
+                    fullscreen ();
+                }
+            });
 
             bottom_bar.play_toggled.connect (player.toggle_playing);
             bottom_bar.seeked.connect (player.seek_jump_value);
@@ -109,6 +171,7 @@ namespace Videos2 {
             var player_page = new Gtk.Overlay ();
             player_page.add (player);
             player_page.add_overlay (bottom_bar);
+            player_page.add_overlay (top_bar);
 
             main_stack = new Gtk.Stack ();
             main_stack.transition_type = Gtk.StackTransitionType.SLIDE_LEFT_RIGHT;
@@ -137,6 +200,11 @@ namespace Videos2 {
             if (files.length > 0) {
                 open_files (files, false);
             }
+        }
+
+        public void action_quit () {
+            player.stop ();
+            destroy ();
         }
 
         private void on_changed_child () {

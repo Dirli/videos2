@@ -22,6 +22,7 @@ executable(
     'src/Widgets/Player.vala',
     'src/Widgets/PlaylistBox.vala',
     'src/Widgets/PlaylistItem.vala',
+    'src/Widgets/TopBar.vala',
     dependencies: [
         dependency ('gee-0.8'),
         dependency ('glib-2.0'),

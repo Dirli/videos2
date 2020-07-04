@@ -3,6 +3,7 @@ namespace Videos2 {
         public signal void playbin_state_changed (Gst.State playbin_state);
         public signal void duration_changed (int64 d);
         public signal void progress_changed (int64 p);
+        public signal void toggled_fullscreen ();
         public signal void uri_changed (string u);
         public signal void ended_stream ();
 
@@ -55,6 +56,11 @@ namespace Videos2 {
             button_press_event.connect ((event) => {
                 if (event.button == Gdk.BUTTON_SECONDARY) {
                     toggle_playing ();
+                    return true;
+                }
+
+                if (event.button == Gdk.BUTTON_PRIMARY && event.type == Gdk.EventType.2BUTTON_PRESS) {
+                    toggled_fullscreen ();
                     return true;
                 }
 
