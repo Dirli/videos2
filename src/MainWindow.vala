@@ -2,6 +2,8 @@ namespace Videos2 {
     public class MainWindow : Gtk.Window {
         private Objects.Playlist playlist;
 
+        private Services.Inhibitor inhibitor;
+
         private Gtk.Stack main_stack;
         private Views.WelcomePage welcome_page;
 
@@ -51,6 +53,7 @@ namespace Videos2 {
 
             set_default_size (800, 680);
 
+            inhibitor = new Services.Inhibitor (this);
             playlist = new Objects.Playlist ();
 
             build_ui ();
@@ -128,12 +131,16 @@ namespace Videos2 {
             player.playbin_state_changed.connect ((state) => {
                 if (state == Gst.State.PLAYING || state == Gst.State.PAUSED) {
                     bottom_bar.playing = (state == Gst.State.PLAYING);
+
+                    inhibitor.inhibit ();
                 } else {
                     title = _("Videos");
                     if (fullscreened) {
                         unfullscreen ();
                     }
                     main_stack.set_visible_child_name ("welcome");
+
+                    inhibitor.uninhibit ();
                 }
             });
             player.motion_notify_event.connect ((event) => {
@@ -280,7 +287,9 @@ namespace Videos2 {
         // }
 
         public override bool delete_event (Gdk.EventAny event) {
-            player.stop ();
+            if (player.get_playbin_state () == Gst.State.PLAYING || player.get_playbin_state () == Gst.State.PAUSED) {
+                player.stop ();
+            }
 
             return false;
         }
