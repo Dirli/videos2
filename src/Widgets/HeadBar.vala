@@ -30,6 +30,33 @@ namespace Videos2 {
         construct {
             get_style_context ().add_class ("compact");
 
+            int top = 0;
+
+            var menu_grid = new Gtk.Grid ();
+            menu_grid.column_spacing = 12;
+            menu_grid.row_spacing = 6;
+            menu_grid.margin = 6;
+
+            var about_button = new Gtk.ModelButton ();
+            about_button.text = _("About");
+            about_button.clicked.connect (() => {
+                var about = new Dialogs.About ();
+                about.run ();
+            });
+
+            menu_grid.attach (about_button, 0, top++);
+
+            menu_grid.show_all ();
+            var popover_menu = new Gtk.Popover (null);
+            popover_menu.add (menu_grid);
+
+            var menu_button = new Gtk.MenuButton ();
+            menu_button.image = new Gtk.Image.from_icon_name ("open-menu-symbolic", Gtk.IconSize.LARGE_TOOLBAR);
+            menu_button.popover = popover_menu;
+            menu_button.valign = Gtk.Align.CENTER;
+
+            pack_end (menu_button);
+
             show_all ();
 
             nav_button = new Gtk.Button ();
@@ -40,6 +67,7 @@ namespace Videos2 {
             nav_button.clicked.connect (navigation_click);
 
             pack_start (nav_button);
+
         }
 
         public void navigation_click () {

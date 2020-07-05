@@ -9,11 +9,20 @@ add_global_arguments(
     language:'c'
 )
 
+conf_data = configuration_data()
+conf_data.set_quoted('VERSION', meson.project_version())
+config_header = configure_file(
+    input : 'src/config.vala.in',
+    output : 'config.vala',
+    configuration : conf_data
+)
+
 executable(
     meson.project_name(),
     'src/Application.vala',
     'src/Constants.vala',
     'src/MainWindow.vala',
+    'src/Dialogs/About.vala',
     'src/Interfaces/Client.vala',
     'src/Objects/Playlist.vala',
     'src/Services/Inhibitor.vala',
@@ -25,6 +34,7 @@ executable(
     'src/Widgets/PlaylistBox.vala',
     'src/Widgets/PlaylistItem.vala',
     'src/Widgets/TopBar.vala',
+    config_header,
     dependencies: [
         dependency ('gee-0.8'),
         dependency ('glib-2.0'),
