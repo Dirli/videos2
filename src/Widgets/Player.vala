@@ -5,6 +5,7 @@ namespace Videos2 {
         public signal void progress_changed (int64 p);
         public signal void toggled_fullscreen ();
         public signal void uri_changed (string u);
+        public signal void audio_changed (int index);
         public signal void ended_stream ();
 
         private uint progress_timer = 0;
@@ -22,7 +23,7 @@ namespace Videos2 {
         }
 
         public unowned int64 position {
-            set {
+            private set {
                 if (value >= 0) {
                     playbin.seek_simple (fmt, Gst.SeekFlags.FLUSH, value);
                 }
@@ -43,6 +44,8 @@ namespace Videos2 {
             playbin.notify["uri"].connect (() => {
                 uri_changed (playbin.uri);
             });
+            playbin.set_property ("subtitle-font-desc", "Sans 16");
+
             var gtksink = Gst.ElementFactory.make ("gtksink", null);
             gtksink.get ("widget", out video_area);
             playbin["video-sink"] = gtksink;
@@ -69,15 +72,45 @@ namespace Videos2 {
         }
 
         public void set_uri (string uri) {
-            playbin_state_change (Gst.State.READY, false);
+            playbin_state_change (Gst.State.NULL, false);
             playbin.uri = uri;
+
             if (uri != "") {
                 play ();
 
                 while (duration < 1) {};
 
                 duration_changed (duration);
+                audio_changed (playbin.current_audio);
             }
+        }
+
+        public void set_active_audio (int index) {
+            if (index >= (int) playbin.n_audio) {
+                return;
+            }
+
+            if ((int) playbin.current_audio != index) {
+                playbin.set_property ("current-audio", index);
+            }
+        }
+
+        public void set_active_subtitle (int index) {
+            if (index >= (int) playbin.n_text) {
+                return;
+            }
+
+            int flags;
+            playbin.get ("flags", out flags);
+            flags &= ~(1 << 2);
+
+            playbin.set_property ("current-text", index);
+
+            if (index >= 0) {
+                flags |= (1 << 2);
+            }
+
+            playbin.set ("flags", flags);
         }
 
         public void play () {
@@ -99,6 +132,7 @@ namespace Videos2 {
 
         public void stop () {
             playbin_state_change (Gst.State.READY, true);
+            // playbin.set_state (Gst.State.NULL);
         }
 
         public void seek_jump_value (int64 val) {

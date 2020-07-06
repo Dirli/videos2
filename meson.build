@@ -42,6 +42,8 @@ executable(
         dependency ('granite'),
         dependency ('gtk+-3.0', version: '>=3.22'),
         dependency ('gstreamer-1.0'),
+        dependency ('gstreamer-tag-1.0'),
+        dependency ('gstreamer-base-1.0'),
         dependency ('gstreamer-pbutils-1.0'),
     ],
     install : true

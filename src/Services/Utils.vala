@@ -50,4 +50,22 @@ namespace Videos2.Utils {
     public inline int64 sec_to_nano (int64 seconds) {
         return (int64) (seconds * Constants.NANO_INV / Constants.SEC_INV);
     }
+
+    public static Gst.PbUtils.DiscovererInfo? get_discoverer_info (string uri) {
+        Gst.PbUtils.Discoverer discoverer = null;
+        try {
+            discoverer = new Gst.PbUtils.Discoverer ((Gst.ClockTime) (Constants.DISCOVERER_TIMEOUT * Gst.SECOND));
+        } catch (Error e) {
+            debug ("Could not create Gst discoverer object: %s", e.message);
+        }
+
+        Gst.PbUtils.DiscovererInfo discoverer_info = null;
+        try {
+            discoverer_info = discoverer.discover_uri (uri);
+        } catch (Error e) {
+            debug ("Discoverer Error %d: %s\n", e.code, e.message);
+        }
+
+        return discoverer_info;
+    }
 }

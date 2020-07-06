@@ -112,6 +112,8 @@ namespace Videos2 {
             set_titlebar (header_bar);
 
             player = new Widgets.Player ();
+            header_bar.audio_selected.connect (player.set_active_audio);
+            header_bar.subtitle_selected.connect (player.set_active_subtitle);
 
             top_bar = new Widgets.TopBar ();
             top_bar.unfullscreen.connect (() => {
@@ -152,8 +154,12 @@ namespace Videos2 {
             player.uri_changed.connect ((uri) => {
                 if (uri != "") {
                     title = Utils.get_title (uri);
+                    header_bar.setup_uri_meta (uri);
+                } else {
+                    header_bar.clear_meta ();
                 }
             });
+            player.audio_changed.connect (header_bar.set_active_audio);
             player.ended_stream.connect (() => {
                 if (!playlist.next ()) {
                     player.stop ();

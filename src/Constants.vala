@@ -18,6 +18,8 @@ namespace Videos2.Constants {
     // 204/255 = 80% opacity
     public const uint GLOBAL_OPACITY = 204;
 
+    public const int DISCOVERER_TIMEOUT = 5;
+
     public const int64 SEC_INV = 1;
     public const int64 NANO_INV = 1000000000;
 
