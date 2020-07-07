@@ -6,6 +6,7 @@ namespace Videos2 {
         public signal void seeked (int64 val);
         public signal void select_media (string uri);
         public signal void clear_media ();
+        public signal void volume_changed (double val);
         public signal int dnd_media (int old_position, int new_position);
 
         private uint hiding_timer = 0;
@@ -17,9 +18,11 @@ namespace Videos2 {
         private Gtk.Button prev_button;
         private Gtk.Button play_button;
         private Gtk.Button next_button;
+        private Gtk.VolumeButton volume_button;
         private Gtk.MenuButton playlist_button;
         private Gtk.Popover playlist_popover;
         private Granite.SeekBar time_bar;
+
 
         private bool playlist_glowing = false;
 
@@ -38,6 +41,21 @@ namespace Videos2 {
                 } else {
                     reveal_control ();
                 }
+            }
+        }
+
+        public double volume_value {
+            set {
+                var new_value = volume_button.get_value () + value;
+                volume_button.set_value (new_value > 1.0 ? 1.0 :
+                                         new_value < 0.0 ? 0.0 :
+                                         new_value);
+            }
+        }
+
+        public bool volume_sensitive {
+            set {
+                volume_button.sensitive = value;
             }
         }
 
@@ -119,6 +137,11 @@ namespace Videos2 {
             time_bar = new Granite.SeekBar (0.0);
             time_bar.scale.vexpand = true;
             time_bar.scale.change_value.connect (on_change_value);
+            // volume
+            volume_button = new Gtk.VolumeButton ();
+            volume_button.value_changed.connect ((val) => {
+                volume_changed (val);
+            });
             // playlist
             var add_button = new Gtk.Button.from_icon_name ("document-open-symbolic", Gtk.IconSize.BUTTON);
             add_button.set_action_name (Constants.ACTION_PREFIX + Constants.ACTION_ADD);
@@ -185,6 +208,7 @@ namespace Videos2 {
             main_actionbar.pack_start (play_button);
             main_actionbar.pack_start (next_button);
             main_actionbar.set_center_widget (time_bar);
+            main_actionbar.pack_end (volume_button);
             main_actionbar.pack_end (playlist_button);
 
             add (main_actionbar);
@@ -254,7 +278,7 @@ namespace Videos2 {
             }
 
             hiding_timer = GLib.Timeout.add (2000, () => {
-                if (hovered || playlist_popover.visible || !playing) {
+                if (hovered || playlist_popover.visible || volume_button.get_popup ().visible || !playing) {
                     hiding_timer = 0;
 
                     return false;

@@ -31,6 +31,7 @@ namespace Videos2 {
             { Constants.ACTION_QUIT, action_quit },
             { Constants.ACTION_OPEN, action_open },
             { Constants.ACTION_ADD, action_add },
+            { Constants.ACTION_VOLUME, action_volume, "b" },
             // { Constants.ACTION_SEARCH, action_search }
         };
 
@@ -43,6 +44,8 @@ namespace Videos2 {
             application.set_accels_for_action (Constants.ACTION_PREFIX + Constants.ACTION_QUIT, {"<Control>q"});
             application.set_accels_for_action (Constants.ACTION_PREFIX + Constants.ACTION_OPEN, {"<Control>o"});
             application.set_accels_for_action (Constants.ACTION_PREFIX + Constants.ACTION_ADD, {"<Control><Shift>o"});
+            application.set_accels_for_action (Constants.ACTION_PREFIX + Constants.ACTION_VOLUME + "(true)", {"<Release>KP_Add"});
+            application.set_accels_for_action (Constants.ACTION_PREFIX + Constants.ACTION_VOLUME + "(false)", {"<Release>KP_Subtract"});
             // application.set_accels_for_action (Constants.ACTION_PREFIX + Constants.ACTION_SEARCH, {"<Control>f"});
         }
 
@@ -180,6 +183,10 @@ namespace Videos2 {
             bottom_bar.dnd_media.connect (playlist.change_media_position);
             bottom_bar.play_next.connect (playlist.next);
             bottom_bar.play_prev.connect (playlist.previous);
+            bottom_bar.volume_changed.connect ((val) => {
+                player.volume = val;
+            });
+            bottom_bar.volume_value = 1.0;
 
             var player_page = new Gtk.Overlay ();
             player_page.add (player);
@@ -202,14 +209,14 @@ namespace Videos2 {
         }
 
         public void action_open () {
-            var files = Utils.run_file_chooser ();
+            var files = Utils.run_file_chooser (this);
             if (files.length > 0) {
                 open_files (files);
             }
         }
 
         public void action_add () {
-            var files = Utils.run_file_chooser ();
+            var files = Utils.run_file_chooser (this);
             if (files.length > 0) {
                 open_files (files, false);
             }
@@ -218,6 +225,14 @@ namespace Videos2 {
         public void action_quit () {
             player.stop ();
             destroy ();
+        }
+
+        public void action_volume (GLib.SimpleAction action, GLib.Variant? pars) {
+            if (main_stack.get_visible_child_name () == "player") {
+                bool vol_value;
+                pars.@get ("b", out vol_value);
+                bottom_bar.volume_value = vol_value ? 0.2 : -0.2;
+            }
         }
 
         private void on_changed_child () {
@@ -235,7 +250,8 @@ namespace Videos2 {
         }
 
         public void on_navigation_clicked (string nav_label) {
-            if (player.get_playbin_state () == Gst.State.PLAYING || player.get_playbin_state () == Gst.State.PAUSED) {
+            var state = player.get_playbin_state ();
+            if (state == Gst.State.PLAYING || state == Gst.State.PAUSED) {
                 player.stop ();
             }
         }
@@ -254,20 +270,41 @@ namespace Videos2 {
         public override bool key_press_event (Gdk.EventKey e) {
             switch (e.keyval) {
                 case Gdk.Key.space:
-                    player.toggle_playing ();
-                    return true;
+                    if (main_stack.get_visible_child_name () == "player") {
+                        player.toggle_playing ();
+                        return true;
+                    }
+                    break;
                 case Gdk.Key.Down:
-                    player.seek_jump_seconds (-60);
-                    return true;
+                    if (main_stack.get_visible_child_name () == "player") {
+                        player.seek_jump_seconds (-60);
+                        return true;
+                    }
+                    break;
                 case Gdk.Key.Left:
-                    player.seek_jump_seconds (-10);
-                    return true;
+                    if (main_stack.get_visible_child_name () == "player") {
+                        player.seek_jump_seconds (-10);
+                        return true;
+                    }
+                    break;
                 case Gdk.Key.Right:
-                    player.seek_jump_seconds (10);
-                    return true;
+                    if (main_stack.get_visible_child_name () == "player") {
+                        player.seek_jump_seconds (10);
+                        return true;
+                    }
+                    break;
                 case Gdk.Key.Up:
-                    player.seek_jump_seconds (60);
-                    return true;
+                    if (main_stack.get_visible_child_name () == "player") {
+                        player.seek_jump_seconds (60);
+                        return true;
+                    }
+                    break;
+                case Gdk.Key.m:
+                    if (main_stack.get_visible_child_name () == "player") {
+                        bottom_bar.volume_sensitive = !player.toggle_mute ();
+                        return true;
+                    }
+                    break;
             }
 
             return base.key_press_event (e);

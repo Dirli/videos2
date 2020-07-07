@@ -16,7 +16,7 @@ namespace Videos2.Utils {
         return launcher_base;
     }
 
-    public GLib.File[] run_file_chooser () {
+    public GLib.File[] run_file_chooser (Gtk.Window? parent) {
         var all_files_filter = new Gtk.FileFilter ();
         all_files_filter.set_filter_name (_("All files"));
         all_files_filter.add_pattern ("*");
@@ -26,7 +26,7 @@ namespace Videos2.Utils {
         video_filter.add_mime_type ("video/*");
 
         var file_chooser = new Gtk.FileChooserNative (_("Open"),
-                                                      null,
+                                                      parent,
                                                       Gtk.FileChooserAction.OPEN,
                                                       _("_Open"),
                                                       _("_Cancel"));

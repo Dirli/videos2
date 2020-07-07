@@ -14,6 +14,7 @@ namespace Videos2.Constants {
     public const string ACTION_ADD = "action-add";
     public const string ACTION_QUIT = "action-quit";
     public const string ACTION_SEARCH = "action-search";
+    public const string ACTION_VOLUME = "action-volume";
 
     // 204/255 = 80% opacity
     public const uint GLOBAL_OPACITY = 204;

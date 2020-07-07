@@ -35,6 +35,19 @@ namespace Videos2 {
             }
         }
 
+        public double volume {
+            get {
+                var val = GLib.Value (typeof (double));
+                playbin.get_property ("volume", ref val);
+                return (double) val;
+            }
+            set {
+                if (0.0 <= value && value <= 1.0) {
+                    playbin.set_property ("volume", value);
+                }
+            }
+        }
+
         public Player () {}
 
         construct {
@@ -113,6 +126,11 @@ namespace Videos2 {
             playbin.set ("flags", flags);
         }
 
+        public bool toggle_mute () {
+            playbin.mute = !((bool) playbin.mute);
+            return playbin.mute;
+        }
+
         public void play () {
             playbin_state_change (Gst.State.PLAYING, true);
         }
@@ -132,7 +150,6 @@ namespace Videos2 {
 
         public void stop () {
             playbin_state_change (Gst.State.READY, true);
-            // playbin.set_state (Gst.State.NULL);
         }
 
         public void seek_jump_value (int64 val) {
