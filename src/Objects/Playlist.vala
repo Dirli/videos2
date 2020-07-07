@@ -47,7 +47,7 @@ namespace Videos2 {
             return false;
         }
 
-        public void add_media (GLib.File path) {
+        public void add_media (GLib.File path, bool start_playback) {
             if (!path.query_exists ()) {
                 return;
             }
@@ -65,7 +65,7 @@ namespace Videos2 {
                 changed_nav (current == 0, false);
             }
 
-            if (uris_array.size == 1) {
+            if (start_playback && uris_array.size == 1) {
                 current = 0;
             }
         }
@@ -100,6 +100,16 @@ namespace Videos2 {
             });
 
             return medias;
+        }
+
+        public void restore_medias (string[] uris, string current_uri) {
+            for (int i = 0; i < uris.length; i++) {
+                if (uris[i] == current_uri) {
+                    _current = i;
+                }
+
+                add_media (GLib.File.new_for_uri (uris[i]), false);
+            }
         }
 
         public void remove_media () {}

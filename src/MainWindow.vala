@@ -2,6 +2,7 @@ namespace Videos2 {
     public class MainWindow : Gtk.Window {
         private Objects.Playlist playlist;
 
+        private GLib.Settings settings;
         private Services.Inhibitor inhibitor;
 
         private Gtk.Stack main_stack;
@@ -56,7 +57,9 @@ namespace Videos2 {
 
             set_default_size (800, 680);
 
+            settings = new GLib.Settings (Constants.APP_NAME);
             inhibitor = new Services.Inhibitor (this);
+
             playlist = new Objects.Playlist ();
 
             build_ui ();
@@ -66,16 +69,19 @@ namespace Videos2 {
                 player.set_uri (uri);
                 welcome_page.update_replay_button (uri);
                 bottom_bar.playlist_current_item (index);
+                settings.set_string ("current-uri", uri);
             });
             playlist.cleared_playlist.connect (() => {
                 player.stop ();
                 bottom_bar.clear_playlist_box ();
                 welcome_page.update_replay_button ("");
+                settings.set_string ("current-uri", "");
             });
             playlist.added_item.connect (bottom_bar.add_playlist_item);
             playlist.changed_nav.connect ((first, last) => {
                 bottom_bar.change_nav (!first, !last);
             });
+            playlist.restore_medias (settings.get_strv ("last-played-videos"), settings.get_string ("current-uri"));
 
             window_state_event.connect ((e) => {
                 if (Gdk.WindowState.FULLSCREEN in e.changed_mask) {
@@ -119,7 +125,9 @@ namespace Videos2 {
                         action_open ();
                         break;
                     case 1:
-                        resume_last_videos ();
+                        if (!resume_last_videos ()) {
+                            welcome_page.update_replay_button ("");
+                        }
                         break;
                 }
             });
@@ -200,8 +208,9 @@ namespace Videos2 {
             bottom_bar.play_prev.connect (playlist.previous);
             bottom_bar.volume_changed.connect ((val) => {
                 player.volume = val;
+                settings.set_double ("volume", val);
             });
-            bottom_bar.volume_value = 1.0;
+            bottom_bar.volume_value = settings.get_double ("volume");
 
             var player_page = new Gtk.Overlay ();
             player_page.add (player);
@@ -221,7 +230,7 @@ namespace Videos2 {
             add (main_stack);
 
             main_stack.set_visible_child_name ("welcome");
-            welcome_page.update_replay_button ("");
+            welcome_page.update_replay_button (settings.get_string ("current-uri"));
         }
 
         public void action_open () {
@@ -280,7 +289,7 @@ namespace Videos2 {
             header_bar.navigation_label = Constants.NAV_BUTTON_WELCOME;
 
             foreach (GLib.File file in files) {
-                playlist.add_media (file);
+                playlist.add_media (file, true);
             }
         }
 
@@ -331,12 +340,14 @@ namespace Videos2 {
             return base.key_press_event (e);
         }
 
-        public void resume_last_videos () {
+        public bool resume_last_videos () {
             var last_played = playlist.current;
             if (last_played > -1) {
                 header_bar.navigation_label = Constants.NAV_BUTTON_WELCOME;
                 playlist.current = last_played;
+                return true;
             }
+            return false;
         }
 
         public bool is_privacy_mode_enabled () {
@@ -349,16 +360,18 @@ namespace Videos2 {
             return false;
         }
 
-        // public void save_playlist () {
-        //     if (is_privacy_mode_enabled ()) {
-        //         return;
-        //     }
-        //
-        //     var videos = playlist.get_medias ();
-        //     settings.set_strv ("last-played-videos", videos);
-        // }
+        public void save_playlist () {
+            if (is_privacy_mode_enabled ()) {
+                return;
+            }
+
+            var uris = playlist.get_medias ();
+            settings.set_strv ("last-played-videos", uris);
+        }
 
         public override bool delete_event (Gdk.EventAny event) {
+            save_playlist ();
+
             if (player.get_playbin_state () == Gst.State.PLAYING || player.get_playbin_state () == Gst.State.PAUSED) {
                 player.stop ();
             }
