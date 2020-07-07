@@ -9,7 +9,7 @@ namespace Videos2 {
 
         public override void open (GLib.File[] files, string hint) {
             activate ();
-            main_window.open_files (files);
+            main_window.open_files (files, true);
         }
 
         protected override void activate () {

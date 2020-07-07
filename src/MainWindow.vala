@@ -62,12 +62,15 @@ namespace Videos2 {
             build_ui ();
 
             playlist.play_media.connect ((uri, index) => {
+                main_stack.set_visible_child_name ("player");
                 player.set_uri (uri);
+                welcome_page.update_replay_button (uri);
                 bottom_bar.playlist_current_item (index);
             });
             playlist.cleared_playlist.connect (() => {
                 player.stop ();
                 bottom_bar.clear_playlist_box ();
+                welcome_page.update_replay_button ("");
             });
             playlist.added_item.connect (bottom_bar.add_playlist_item);
             playlist.changed_nav.connect ((first, last) => {
@@ -94,6 +97,18 @@ namespace Videos2 {
 
                 return false;
             });
+
+            Gtk.TargetEntry uris = {"text/uri-list", 0, 0};
+            Gtk.drag_dest_set (this, Gtk.DestDefaults.ALL, {uris}, Gdk.DragAction.MOVE);
+            drag_data_received.connect ((ctx, x, y, sel, info, time) => {
+                var files = new GLib.Array<GLib.File> ();
+                foreach (var uri in sel.get_uris ()) {
+                    var file = GLib.File.new_for_uri (uri);
+                    files.append_val (file);
+                }
+
+                open_files (files.data, player.get_playbin_state () == Gst.State.PLAYING ? false : true);
+            });
         }
 
         private void build_ui () {
@@ -104,7 +119,7 @@ namespace Videos2 {
                         action_open ();
                         break;
                     case 1:
-                        //
+                        resume_last_videos ();
                         break;
                 }
             });
@@ -206,19 +221,20 @@ namespace Videos2 {
             add (main_stack);
 
             main_stack.set_visible_child_name ("welcome");
+            welcome_page.update_replay_button ("");
         }
 
         public void action_open () {
             var files = Utils.run_file_chooser (this);
             if (files.length > 0) {
-                open_files (files);
+                open_files (files, true);
             }
         }
 
         public void action_add () {
             var files = Utils.run_file_chooser (this);
             if (files.length > 0) {
-                open_files (files, false);
+                open_files (files, player.get_playbin_state () == Gst.State.PLAYING ? false : true);
             }
         }
 
@@ -256,10 +272,11 @@ namespace Videos2 {
             }
         }
 
-        public void open_files (GLib.File[] files, bool clear = true) {
-            playlist.clear_media ();
+        public void open_files (GLib.File[] files, bool clear) {
+            if (clear) {
+                playlist.clear_media ();
+            }
 
-            main_stack.set_visible_child_name ("player");
             header_bar.navigation_label = Constants.NAV_BUTTON_WELCOME;
 
             foreach (GLib.File file in files) {
@@ -273,7 +290,11 @@ namespace Videos2 {
                     if (main_stack.get_visible_child_name () == "player") {
                         player.toggle_playing ();
                         return true;
+                    } else if (main_stack.get_visible_child_name () == "welcome") {
+                        resume_last_videos ();
+                        return true;
                     }
+
                     break;
                 case Gdk.Key.Down:
                     if (main_stack.get_visible_child_name () == "player") {
@@ -308,6 +329,14 @@ namespace Videos2 {
             }
 
             return base.key_press_event (e);
+        }
+
+        public void resume_last_videos () {
+            var last_played = playlist.current;
+            if (last_played > -1) {
+                header_bar.navigation_label = Constants.NAV_BUTTON_WELCOME;
+                playlist.current = last_played;
+            }
         }
 
         public bool is_privacy_mode_enabled () {

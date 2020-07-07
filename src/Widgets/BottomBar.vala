@@ -208,8 +208,8 @@ namespace Videos2 {
             main_actionbar.pack_start (play_button);
             main_actionbar.pack_start (next_button);
             main_actionbar.set_center_widget (time_bar);
-            main_actionbar.pack_end (volume_button);
             main_actionbar.pack_end (playlist_button);
+            main_actionbar.pack_end (volume_button);
 
             add (main_actionbar);
         }
