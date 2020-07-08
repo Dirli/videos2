@@ -1,14 +1,8 @@
 namespace Videos2 {
     public class Widgets.PlaylistBox : Gtk.ListBox {
-        // public signal void play (GLib.File path);
-        // public signal void stop_video ();
         public signal int dnd_media (int old_position, int new_position);
 
         private int current = -1;
-
-        // ~PlaylistBox () {
-        //     save_playlist ();
-        // }
 
         public PlaylistBox () {
             Object (can_focus: true,
@@ -20,9 +14,6 @@ namespace Videos2 {
         construct {
             Gtk.drag_dest_set (this, Gtk.DestDefaults.ALL, Constants.TARGET_ENTRIES, Gdk.DragAction.MOVE);
             drag_data_received.connect (on_drag_data_received);
-
-            // Automatically load from gsettings last_played_videos
-            // restore_playlist ();
         }
 
         public void remove_item (uint index) {
@@ -51,16 +42,6 @@ namespace Videos2 {
                 }
             }
         }
-
-        // private void restore_playlist () {
-        //     current = 0;
-        //
-        //     for (int i = 0; i < settings.get_strv ("last-played-videos").length; i++) {
-        //         if (settings.get_strv ("last-played-videos")[i] == settings.get_string ("current-video"))
-        //             current = i;
-        //         add_item (GLib.File.new_for_uri (settings.get_strv ("last-played-videos")[i]));
-        //     }
-        // }
 
         private void on_drag_data_received (Gdk.DragContext context, int x, int y, Gtk.SelectionData selection_data, uint target_type, uint time) {
             Widgets.PlaylistItem? target = get_row_at_y (y) as Widgets.PlaylistItem;

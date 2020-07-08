@@ -1,6 +1,6 @@
 [Desktop Entry]
 Version=1.0
-Name=Videos
+Name=Videos2
 GenericName=Video Player
 Comment=Watch videos and movies
 Exec=io.elementary.videos2 %U

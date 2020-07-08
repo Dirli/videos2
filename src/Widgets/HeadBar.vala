@@ -1,6 +1,6 @@
 namespace Videos2 {
     public class Widgets.HeadBar : Gtk.HeaderBar {
-        public signal void navigation_clicked (string navigation_label);
+        public signal void navigation_clicked ();
         public signal void audio_selected (int i);
         public signal void subtitle_selected (int i);
 
@@ -21,6 +21,9 @@ namespace Videos2 {
         }
 
         public string navigation_label {
+            get {
+                return nav_button.label;
+            }
             set {
                 nav_button.label = value;
             }
@@ -88,19 +91,14 @@ namespace Videos2 {
             nav_button.valign = Gtk.Align.CENTER;
             nav_button.vexpand = false;
             nav_button.get_style_context ().add_class ("back-button");
-            nav_button.clicked.connect (navigation_click);
+            nav_button.clicked.connect (() => {
+                navigation_clicked ();
+            });
 
             pack_start (nav_button);
 
             audio_streams.changed.connect (on_audio_changed);
             sub_streams.changed.connect (on_subtitles_changed);
-        }
-
-        public void navigation_click () {
-            string current_label = nav_button.label;
-            navigation_clicked (current_label);
-
-            // navigation_visible = false;
         }
 
         private void on_audio_changed () {
@@ -222,6 +220,20 @@ namespace Videos2 {
             sub_streams.sensitive = s_streams.length () > 0;
 
             return (int) s_streams.length ();
+        }
+
+        public void next_audio () {
+            int count = audio_streams.model.iter_n_children (null);
+            if (count > 0) {
+                audio_streams.active = (audio_streams.active + 1) % count;
+            }
+        }
+
+        public void next_subtitles () {
+            int count = sub_streams.model.iter_n_children (null);
+            if (count > 0) {
+                sub_streams.active = (sub_streams.active + 1) % count;
+            }
         }
     }
 }

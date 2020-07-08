@@ -32,6 +32,8 @@ namespace Videos2 {
             { Constants.ACTION_QUIT, action_quit },
             { Constants.ACTION_OPEN, action_open },
             { Constants.ACTION_ADD, action_add },
+            { Constants.ACTION_BACK, action_back },
+            { Constants.ACTION_JUMP, action_jump, "i" },
             { Constants.ACTION_VOLUME, action_volume, "b" },
             // { Constants.ACTION_SEARCH, action_search }
         };
@@ -45,6 +47,11 @@ namespace Videos2 {
             application.set_accels_for_action (Constants.ACTION_PREFIX + Constants.ACTION_QUIT, {"<Control>q"});
             application.set_accels_for_action (Constants.ACTION_PREFIX + Constants.ACTION_OPEN, {"<Control>o"});
             application.set_accels_for_action (Constants.ACTION_PREFIX + Constants.ACTION_ADD, {"<Control><Shift>o"});
+            application.set_accels_for_action (Constants.ACTION_PREFIX + Constants.ACTION_BACK, {"<Alt>Left"});
+            application.set_accels_for_action (Constants.ACTION_PREFIX + Constants.ACTION_JUMP + "(-10)", {"<Control>Left"});
+            application.set_accels_for_action (Constants.ACTION_PREFIX + Constants.ACTION_JUMP + "(10)", {"<Control>Right"});
+            application.set_accels_for_action (Constants.ACTION_PREFIX + Constants.ACTION_JUMP + "(-60)", {"<Control>Down"});
+            application.set_accels_for_action (Constants.ACTION_PREFIX + Constants.ACTION_JUMP + "(60)", {"<Control>Up"});
             application.set_accels_for_action (Constants.ACTION_PREFIX + Constants.ACTION_VOLUME + "(true)", {"<Release>KP_Add"});
             application.set_accels_for_action (Constants.ACTION_PREFIX + Constants.ACTION_VOLUME + "(false)", {"<Release>KP_Subtract"});
             // application.set_accels_for_action (Constants.ACTION_PREFIX + Constants.ACTION_SEARCH, {"<Control>f"});
@@ -133,7 +140,7 @@ namespace Videos2 {
             });
 
             header_bar = new Widgets.HeadBar ();
-            header_bar.navigation_clicked.connect (on_navigation_clicked);
+            header_bar.navigation_clicked.connect (action_back);
 
             set_titlebar (header_bar);
 
@@ -159,6 +166,10 @@ namespace Videos2 {
             player.playbin_state_changed.connect ((state) => {
                 if (state == Gst.State.PLAYING || state == Gst.State.PAUSED) {
                     bottom_bar.playing = (state == Gst.State.PLAYING);
+
+                    if (is_maximized) {
+                        fullscreen ();
+                    }
 
                     inhibitor.inhibit ();
                 } else {
@@ -233,26 +244,44 @@ namespace Videos2 {
             welcome_page.update_replay_button (settings.get_string ("current-uri"));
         }
 
-        public void action_open () {
+        private void action_open () {
             var files = Utils.run_file_chooser (this);
             if (files.length > 0) {
                 open_files (files, true);
             }
         }
 
-        public void action_add () {
+        private void action_add () {
             var files = Utils.run_file_chooser (this);
             if (files.length > 0) {
                 open_files (files, player.get_playbin_state () == Gst.State.PLAYING ? false : true);
             }
         }
 
-        public void action_quit () {
+        private void action_quit () {
             player.stop ();
             destroy ();
         }
 
-        public void action_volume (GLib.SimpleAction action, GLib.Variant? pars) {
+        private void action_back () {
+            if (main_stack.get_visible_child_name () != "welcome") {
+                var state = player.get_playbin_state ();
+                if (state == Gst.State.PLAYING || state == Gst.State.PAUSED) {
+                    player.stop ();
+                }
+            }
+        }
+
+        private void action_jump (GLib.SimpleAction action, GLib.Variant? pars) {
+            if (main_stack.get_visible_child_name () == "player") {
+                int sec_value;
+                pars.@get ("i", out sec_value);
+                player.seek_jump_seconds (sec_value);
+                bottom_bar.reveal_control ();
+            }
+        }
+
+        private void action_volume (GLib.SimpleAction action, GLib.Variant? pars) {
             if (main_stack.get_visible_child_name () == "player") {
                 bool vol_value;
                 pars.@get ("b", out vol_value);
@@ -274,13 +303,6 @@ namespace Videos2 {
             }
         }
 
-        public void on_navigation_clicked (string nav_label) {
-            var state = player.get_playbin_state ();
-            if (state == Gst.State.PLAYING || state == Gst.State.PAUSED) {
-                player.stop ();
-            }
-        }
-
         public void open_files (GLib.File[] files, bool clear) {
             if (clear) {
                 playlist.clear_media ();
@@ -295,6 +317,12 @@ namespace Videos2 {
 
         public override bool key_press_event (Gdk.EventKey e) {
             switch (e.keyval) {
+                case Gdk.Key.Escape:
+                    if (main_stack.get_visible_child_name () == "player" && fullscreened) {
+                        unfullscreen ();
+                        return true;
+                    }
+                    break;
                 case Gdk.Key.space:
                     if (main_stack.get_visible_child_name () == "player") {
                         player.toggle_playing ();
@@ -305,27 +333,13 @@ namespace Videos2 {
                     }
 
                     break;
-                case Gdk.Key.Down:
+                case Gdk.Key.f:
                     if (main_stack.get_visible_child_name () == "player") {
-                        player.seek_jump_seconds (-60);
-                        return true;
-                    }
-                    break;
-                case Gdk.Key.Left:
-                    if (main_stack.get_visible_child_name () == "player") {
-                        player.seek_jump_seconds (-10);
-                        return true;
-                    }
-                    break;
-                case Gdk.Key.Right:
-                    if (main_stack.get_visible_child_name () == "player") {
-                        player.seek_jump_seconds (10);
-                        return true;
-                    }
-                    break;
-                case Gdk.Key.Up:
-                    if (main_stack.get_visible_child_name () == "player") {
-                        player.seek_jump_seconds (60);
+                        if (fullscreened) {
+                            unfullscreen ();
+                        } else {
+                            fullscreen ();
+                        }
                         return true;
                     }
                     break;
@@ -340,7 +354,7 @@ namespace Videos2 {
             return base.key_press_event (e);
         }
 
-        public bool resume_last_videos () {
+        private bool resume_last_videos () {
             var last_played = playlist.current;
             if (last_played > -1) {
                 header_bar.navigation_label = Constants.NAV_BUTTON_WELCOME;

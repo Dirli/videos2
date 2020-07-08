@@ -13,6 +13,8 @@ namespace Videos2.Constants {
     public const string ACTION_OPEN = "action-open";
     public const string ACTION_ADD = "action-add";
     public const string ACTION_QUIT = "action-quit";
+    public const string ACTION_BACK = "action-back";
+    public const string ACTION_JUMP = "action-jump";
     public const string ACTION_SEARCH = "action-search";
     public const string ACTION_VOLUME = "action-volume";
 
