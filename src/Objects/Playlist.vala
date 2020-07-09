@@ -112,12 +112,20 @@ namespace Videos2 {
             }
         }
 
-        public void remove_media () {}
+        public bool clear_media (int index) {
+            if (index < 0) {
+                uris_array.clear ();
+                current = -1;
+                cleared_playlist ();
+            } else {
+                if (uris_array.size <= index || current == index) {
+                    return false;
+                }
 
-        public void clear_media () {
-            uris_array.clear ();
-            current = -1;
-            cleared_playlist ();
+                uris_array.remove_at (index);
+            }
+
+            return true;
         }
     }
 }

@@ -305,7 +305,7 @@ namespace Videos2 {
 
         public void open_files (GLib.File[] files, bool clear) {
             if (clear) {
-                playlist.clear_media ();
+                playlist.clear_media (-1);
             }
 
             header_bar.navigation_label = Constants.NAV_BUTTON_WELCOME;

@@ -3,8 +3,8 @@ namespace Videos2.Constants {
     public const string PULSE_CLASS = "pulse";
     public const string PULSE_TYPE = "attention";
 
-    private const string SCREENSAVER_IFACE = "org.freedesktop.ScreenSaver";
-    private const string SCREENSAVER_PATH = "/ScreenSaver";
+    public const string SCREENSAVER_IFACE = "org.freedesktop.ScreenSaver";
+    public const string SCREENSAVER_PATH = "/ScreenSaver";
 
     public const string NAV_BUTTON_WELCOME = _("Back");
 

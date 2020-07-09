@@ -4,20 +4,22 @@ project(
     version: '0.1.0'
 )
 
-add_global_arguments(
+add_global_arguments (
     '-DGETTEXT_PACKAGE="@0@"'.format(meson.project_name()),
     language:'c'
 )
 
-conf_data = configuration_data()
-conf_data.set_quoted('VERSION', meson.project_version())
-config_header = configure_file(
+conf_data = configuration_data ()
+conf_data.set ('EXEC_PATH', join_paths (get_option ('prefix'), get_option ('bindir'), meson.project_name ()))
+conf_data.set_quoted('VERSION', meson.project_version ())
+
+config_header = configure_file (
     input : 'src/config.vala.in',
     output : 'config.vala',
     configuration : conf_data
 )
 
-executable(
+executable (
     meson.project_name(),
     'src/Application.vala',
     'src/Constants.vala',

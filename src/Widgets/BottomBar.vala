@@ -5,7 +5,7 @@ namespace Videos2 {
         public signal bool play_prev ();
         public signal void seeked (int64 val);
         public signal void select_media (string uri);
-        public signal void clear_media ();
+        public signal bool clear_media (int index);
         public signal void volume_changed (double val);
         public signal int dnd_media (int old_position, int new_position);
 
@@ -154,8 +154,10 @@ namespace Videos2 {
             clear_button.tooltip_text = _("Clear Playlist");
             clear_button.clicked.connect (() => {
                 playlist_popover.popdown ();
-                clear_media ();
+                clear_media (-1);
             });
+            Gtk.drag_dest_set (clear_button, Gtk.DestDefaults.ALL, Constants.TARGET_ENTRIES, Gdk.DragAction.MOVE);
+            clear_button.drag_data_received.connect (on_drag_data_received);
 
             repeat_button = new Gtk.ToggleButton ();
             repeat_button.set_image (new Gtk.Image.from_icon_name ("media-playlist-no-repeat-symbolic", Gtk.IconSize.BUTTON));
@@ -212,6 +214,26 @@ namespace Videos2 {
             main_actionbar.pack_end (volume_button);
 
             add (main_actionbar);
+        }
+
+        private void on_drag_data_received (Gdk.DragContext context, int x, int y, Gtk.SelectionData selection_data, uint target_type, uint time) {
+            Gtk.Widget row = ((Gtk.Widget[]) selection_data.get_data ())[0];
+
+            var source = row.get_ancestor (typeof (Widgets.PlaylistItem));
+            if (source == null) {
+                return;
+            }
+
+            var playlist_item = source as Widgets.PlaylistItem;
+            if (playlist_item == null || playlist_item.is_playing) {
+                return;
+            }
+
+            var item_index = playlist_item.get_index ();
+
+            if (clear_media (item_index)) {
+                playlist_box.remove (playlist_item);
+            }
         }
 
         public virtual bool on_change_value (Gtk.ScrollType scroll, double val) {
