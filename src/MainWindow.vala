@@ -310,8 +310,26 @@ namespace Videos2 {
 
             header_bar.navigation_label = Constants.NAV_BUTTON_WELCOME;
 
+            string filename;
+            string content_type;
             foreach (GLib.File file in files) {
-                playlist.add_media (file, true);
+                if (!Utils.check_media (file, out filename, out content_type)) {
+                    var unsupported_file = new Dialogs.UnsupportedFile (this, file.get_uri (), filename, content_type);
+
+                    unsupported_file.response.connect (type => {
+                        if (type == Gtk.ResponseType.ACCEPT) {
+                            playlist.add_media (file, true);
+                        }
+
+                        unsupported_file.destroy ();
+                    });
+
+                    // for some reason, blocking seems more appropriate here
+                    unsupported_file.show_all ();
+                    unsupported_file.run ();
+                } else {
+                    playlist.add_media (file, true);
+                }
             }
         }
 

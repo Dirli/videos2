@@ -25,6 +25,7 @@ executable (
     'src/Constants.vala',
     'src/MainWindow.vala',
     'src/Dialogs/About.vala',
+    'src/Dialogs/UnsupportedFile.vala',
     'src/Interfaces/Client.vala',
     'src/Objects/Playlist.vala',
     'src/Services/Inhibitor.vala',

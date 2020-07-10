@@ -1,4 +1,27 @@
 namespace Videos2.Utils {
+    public bool check_media (GLib.File media, out string filename, out string type) {
+        type = "";
+        filename = "";
+
+        try {
+            GLib.FileInfo info = media.query_info (GLib.FileAttribute.STANDARD_CONTENT_TYPE + "," + GLib.FileAttribute.STANDARD_NAME, 0);
+            unowned string content_type = info.get_content_type ();
+            type = content_type;
+            filename = info.get_name ();
+
+            if (!GLib.ContentType.is_a (content_type, "video/*")) {
+                return false;
+            }
+
+            return true;
+        } catch (GLib.Error e) {
+            debug (e.message);
+        }
+
+
+        return false;
+    }
+
     public string get_title (string filename) {
         var title = get_basename (filename);
         title = GLib.Uri.unescape_string (title);
