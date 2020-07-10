@@ -145,17 +145,18 @@ namespace Videos2 {
             // playlist
             var add_button = new Gtk.Button.from_icon_name ("document-open-symbolic", Gtk.IconSize.BUTTON);
             add_button.set_action_name (Constants.ACTION_PREFIX + Constants.ACTION_ADD);
-            add_button.tooltip_text = _("Open file ") + Granite.accel_to_string (add_button.action_name);
+            add_button.tooltip_markup = Granite.markup_accel_tooltip ({"<Control><Shift>o"}, _("Open file "));
             add_button.clicked.connect (() => {
                 playlist_popover.popdown ();
             });
 
             var clear_button = new Gtk.Button.from_icon_name ("edit-delete-symbolic", Gtk.IconSize.BUTTON);
-            clear_button.tooltip_text = _("Clear Playlist");
+            clear_button.set_action_name (Constants.ACTION_PREFIX + Constants.ACTION_CLEAR);
+            clear_button.tooltip_markup = Granite.markup_accel_tooltip ({"<Control>w"}, _("Clear Playlist"));
             clear_button.clicked.connect (() => {
                 playlist_popover.popdown ();
-                clear_media (-1);
             });
+
             Gtk.drag_dest_set (clear_button, Gtk.DestDefaults.ALL, Constants.TARGET_ENTRIES, Gdk.DragAction.MOVE);
             clear_button.drag_data_received.connect (on_drag_data_received);
 
@@ -180,6 +181,7 @@ namespace Videos2 {
 
             var playlist_scrolled = new Gtk.ScrolledWindow (null, null);
             playlist_scrolled.min_content_height = 100;
+            playlist_scrolled.max_content_height = 400;
             playlist_scrolled.min_content_width = 260;
             playlist_scrolled.propagate_natural_height = true;
             playlist_scrolled.add (playlist_box);
@@ -197,10 +199,13 @@ namespace Videos2 {
             playlist_popover = new Gtk.Popover (null);
             playlist_popover.opacity = Constants.GLOBAL_OPACITY;
             playlist_popover.add (playlist_grid);
+            playlist_popover.closed.connect (() => {
+                reveal_control ();
+            });
 
             playlist_button = new Gtk.MenuButton ();
             playlist_button.image = new Gtk.Image.from_icon_name ("view-list-symbolic", Gtk.IconSize.BUTTON);
-            playlist_button.tooltip_text = _("Playlist");
+            playlist_button.tooltip_markup = Granite.markup_accel_tooltip ({"<Control>l"}, _("Playlist"));
             playlist_button.valign = Gtk.Align.CENTER;
             playlist_button.popover = playlist_popover;
 
@@ -241,6 +246,15 @@ namespace Videos2 {
             seeked (new_position);
 
             return false;
+        }
+
+        public void toggle_playlist () {
+            if (playlist_popover.visible) {
+                playlist_popover.popdown ();
+            } else {
+                reveal_control ();
+                playlist_popover.popup ();
+            }
         }
 
         public void change_nav (bool can_prev, bool can_next) {

@@ -33,8 +33,10 @@ namespace Videos2 {
             { Constants.ACTION_OPEN, action_open },
             { Constants.ACTION_ADD, action_add },
             { Constants.ACTION_BACK, action_back },
+            { Constants.ACTION_CLEAR, action_clear },
             { Constants.ACTION_JUMP, action_jump, "i" },
             { Constants.ACTION_VOLUME, action_volume, "b" },
+            { Constants.ACTION_PLAYLIST_VISIBLE, action_playlist_visible },
             // { Constants.ACTION_SEARCH, action_search }
         };
 
@@ -44,10 +46,12 @@ namespace Videos2 {
                     application: app,
                     title: _("Videos"));
 
+            application.set_accels_for_action (Constants.ACTION_PREFIX + Constants.ACTION_BACK, {"<Alt>Left"});
+            application.set_accels_for_action (Constants.ACTION_PREFIX + Constants.ACTION_CLEAR, {"<Control>w"});
+            application.set_accels_for_action (Constants.ACTION_PREFIX + Constants.ACTION_PLAYLIST_VISIBLE, {"<Control>l"});
             application.set_accels_for_action (Constants.ACTION_PREFIX + Constants.ACTION_QUIT, {"<Control>q"});
             application.set_accels_for_action (Constants.ACTION_PREFIX + Constants.ACTION_OPEN, {"<Control>o"});
             application.set_accels_for_action (Constants.ACTION_PREFIX + Constants.ACTION_ADD, {"<Control><Shift>o"});
-            application.set_accels_for_action (Constants.ACTION_PREFIX + Constants.ACTION_BACK, {"<Alt>Left"});
             application.set_accels_for_action (Constants.ACTION_PREFIX + Constants.ACTION_JUMP + "(-10)", {"<Control>Left"});
             application.set_accels_for_action (Constants.ACTION_PREFIX + Constants.ACTION_JUMP + "(10)", {"<Control>Right"});
             application.set_accels_for_action (Constants.ACTION_PREFIX + Constants.ACTION_JUMP + "(-60)", {"<Control>Down"});
@@ -62,7 +66,7 @@ namespace Videos2 {
             actions.add_action_entries (ACTION_ENTRIES, this);
             insert_action_group ("win", actions);
 
-            set_default_size (800, 680);
+            set_default_size (960, 540);
 
             settings = new GLib.Settings (Constants.APP_NAME);
             inhibitor = new Services.Inhibitor (this);
@@ -281,12 +285,22 @@ namespace Videos2 {
             }
         }
 
+        private void action_playlist_visible () {
+            if (main_stack.get_visible_child_name () == "player") {
+                bottom_bar.toggle_playlist ();
+            }
+        }
+
         private void action_volume (GLib.SimpleAction action, GLib.Variant? pars) {
             if (main_stack.get_visible_child_name () == "player") {
                 bool vol_value;
                 pars.@get ("b", out vol_value);
                 bottom_bar.volume_value = vol_value ? 0.2 : -0.2;
             }
+        }
+
+        private void action_clear () {
+            playlist.clear_media (-1);
         }
 
         private void on_changed_child () {
@@ -305,7 +319,7 @@ namespace Videos2 {
 
         public void open_files (GLib.File[] files, bool clear) {
             if (clear) {
-                playlist.clear_media (-1);
+                action_clear ();
             }
 
             header_bar.navigation_label = Constants.NAV_BUTTON_WELCOME;

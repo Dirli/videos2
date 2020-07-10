@@ -91,10 +91,23 @@ namespace Videos2 {
             if (uri != "") {
                 play ();
 
-                while (duration < 1) {};
+                int counter = 0;
+                GLib.Timeout.add (500, () => {
+                    if (duration > 0) {
+                        duration_changed (duration);
+                        audio_changed (playbin.current_audio);
 
-                duration_changed (duration);
-                audio_changed (playbin.current_audio);
+                        return false;
+                    }
+
+                    if (++counter == 10) {
+                        // the video could not be played, maybe the necessary plugin could not be installed
+                        ended_stream ();
+                        return false;
+                    }
+
+                    return true;
+                });
             }
         }
 

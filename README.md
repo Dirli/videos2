@@ -22,8 +22,6 @@ You'll need the following dependencies:
 * meson
 * valac
 
-
-
 ## How To Build
 
     meson build --prefix=/usr
