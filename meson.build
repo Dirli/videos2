@@ -4,6 +4,8 @@ project(
     version: '0.1.0'
 )
 
+gnome = import ('gnome')
+
 add_global_arguments (
     '-DGETTEXT_PACKAGE="@0@"'.format(meson.project_name()),
     language:'c'
@@ -19,6 +21,8 @@ config_header = configure_file (
     configuration : conf_data
 )
 
+subdir ('data')
+
 executable (
     meson.project_name(),
     'src/Application.vala',
@@ -33,11 +37,13 @@ executable (
     'src/Views/WelcomePage.vala',
     'src/Widgets/BottomBar.vala',
     'src/Widgets/HeadBar.vala',
+    'src/Widgets/InfoBar.vala',
     'src/Widgets/Player.vala',
     'src/Widgets/PlaylistBox.vala',
     'src/Widgets/PlaylistItem.vala',
     'src/Widgets/TopBar.vala',
     config_header,
+    gresource,
     dependencies: [
         dependency ('gee-0.8'),
         dependency ('glib-2.0'),
@@ -51,7 +57,5 @@ executable (
     ],
     install : true
 )
-
-subdir ('data')
 
 meson.add_install_script ('meson_post_install.py')

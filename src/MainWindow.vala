@@ -1,5 +1,7 @@
 namespace Videos2 {
     public class MainWindow : Gtk.Window {
+        private bool show_volume_info = false;
+
         private Objects.Playlist playlist;
 
         private GLib.Settings settings;
@@ -11,6 +13,7 @@ namespace Videos2 {
         private Widgets.Player player;
         private Widgets.HeadBar header_bar;
         private Widgets.TopBar top_bar;
+        private Widgets.InfoBar info_bar;
         private Widgets.BottomBar bottom_bar;
 
         private bool _fullscreened = false;
@@ -34,6 +37,7 @@ namespace Videos2 {
             { Constants.ACTION_ADD, action_add },
             { Constants.ACTION_BACK, action_back },
             { Constants.ACTION_CLEAR, action_clear },
+            { Constants.ACTION_MEDIAINFO, action_mediainfo },
             { Constants.ACTION_JUMP, action_jump, "i" },
             { Constants.ACTION_VOLUME, action_volume, "b" },
             { Constants.ACTION_PLAYLIST_VISIBLE, action_playlist_visible },
@@ -51,6 +55,7 @@ namespace Videos2 {
             application.set_accels_for_action (Constants.ACTION_PREFIX + Constants.ACTION_PLAYLIST_VISIBLE, {"<Control>l"});
             application.set_accels_for_action (Constants.ACTION_PREFIX + Constants.ACTION_QUIT, {"<Control>q"});
             application.set_accels_for_action (Constants.ACTION_PREFIX + Constants.ACTION_OPEN, {"<Control>o"});
+            application.set_accels_for_action (Constants.ACTION_PREFIX + Constants.ACTION_MEDIAINFO, {"<Control>i"});
             application.set_accels_for_action (Constants.ACTION_PREFIX + Constants.ACTION_ADD, {"<Control><Shift>o"});
             application.set_accels_for_action (Constants.ACTION_PREFIX + Constants.ACTION_JUMP + "(-10)", {"<Control>Left"});
             application.set_accels_for_action (Constants.ACTION_PREFIX + Constants.ACTION_JUMP + "(10)", {"<Control>Right"});
@@ -59,6 +64,10 @@ namespace Videos2 {
             application.set_accels_for_action (Constants.ACTION_PREFIX + Constants.ACTION_VOLUME + "(true)", {"<Release>KP_Add"});
             application.set_accels_for_action (Constants.ACTION_PREFIX + Constants.ACTION_VOLUME + "(false)", {"<Release>KP_Subtract"});
             // application.set_accels_for_action (Constants.ACTION_PREFIX + Constants.ACTION_SEARCH, {"<Control>f"});
+
+            var provider = new Gtk.CssProvider ();
+            provider.load_from_resource ("/io/elementary/videos2/style/application.css");
+            Gtk.StyleContext.add_provider_for_screen (Gdk.Screen.get_default (), provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION);
         }
 
         construct {
@@ -157,6 +166,8 @@ namespace Videos2 {
                 unfullscreen ();
             });
 
+            info_bar = new Widgets.InfoBar ();
+
             bottom_bar = new Widgets.BottomBar ();
             bottom_bar.notify["reveal-child"].connect (() => {
                 if (bottom_bar.reveal_child == true && fullscreened == true) {
@@ -224,6 +235,11 @@ namespace Videos2 {
             bottom_bar.volume_changed.connect ((val) => {
                 player.volume = val;
                 settings.set_double ("volume", val);
+                if (show_volume_info) {
+                    info_bar.show_volume (val);
+                }
+
+                show_volume_info = false;
             });
             bottom_bar.volume_value = settings.get_double ("volume");
 
@@ -231,6 +247,7 @@ namespace Videos2 {
             player_page.add (player);
             player_page.add_overlay (bottom_bar);
             player_page.add_overlay (top_bar);
+            player_page.add_overlay (info_bar);
 
             main_stack = new Gtk.Stack ();
             main_stack.transition_type = Gtk.StackTransitionType.SLIDE_LEFT_RIGHT;
@@ -293,9 +310,30 @@ namespace Videos2 {
 
         private void action_volume (GLib.SimpleAction action, GLib.Variant? pars) {
             if (main_stack.get_visible_child_name () == "player") {
+                show_volume_info = true;
                 bool vol_value;
                 pars.@get ("b", out vol_value);
-                bottom_bar.volume_value = vol_value ? 0.2 : -0.2;
+                bottom_bar.volume_value = vol_value ? 0.05 : -0.05;
+            }
+        }
+
+        private void action_mediainfo () {
+            if (main_stack.get_visible_child_name () == "player") {
+                var uri = settings.get_string ("current-uri");
+                if (uri == "") {
+                    return;
+                }
+
+                var discoverer_info = Utils.get_discoverer_info (uri);
+                if (discoverer_info != null) {
+                    var media_info = "";
+
+                    media_info += Utils.prepare_video_info (discoverer_info);
+                    media_info += Utils.prepare_audio_info (discoverer_info);
+                    media_info += Utils.prepare_sub_info (discoverer_info);
+
+                    info_bar.show_media_info (media_info);
+                }
             }
         }
 
