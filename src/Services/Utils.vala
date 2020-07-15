@@ -92,6 +92,10 @@ namespace Videos2.Utils {
         return discoverer_info;
     }
 
+    public string parse_bitrate (uint b) {
+        return "    <b>Bitrate:</b> %.0f kbps\n".printf (b / 1000.0);
+    }
+
     public string prepare_video_info (Gst.PbUtils.DiscovererInfo d_info) {
         var video_str = "<span size=\"large\"><b>Video</b></span>\n";
 
@@ -109,13 +113,13 @@ namespace Videos2.Utils {
 
                 uint bitrate;
                 if (video_tags.get_uint (Gst.Tags.BITRATE, out bitrate)) {
-                    video_str += "    <b>Bitrate:</b> %u\n".printf (bitrate);
+                    video_str += parse_bitrate (bitrate);
                 } else if (video_tags.get_uint (Gst.Tags.NOMINAL_BITRATE, out bitrate)) {
-                    video_str += "    <b>Bitrate:</b> %u\n".printf (bitrate);
+                    video_str += parse_bitrate (bitrate);
                 } else if (video_tags.get_uint (Gst.Tags.MAXIMUM_BITRATE, out bitrate)) {
-                    video_str += "    <b>Bitrate:</b> %u\n".printf (bitrate);
+                    video_str += parse_bitrate (bitrate);
                 } else if (video_tags.get_uint (Gst.Tags.MINIMUM_BITRATE, out bitrate)) {
-                    video_str += "    <b>Bitrate:</b> %u\n".printf (bitrate);
+                    video_str += parse_bitrate (bitrate);
                 }
             }
 
@@ -158,17 +162,17 @@ namespace Videos2.Utils {
 
                 uint bitrate;
                 if (audio_tags.get_uint (Gst.Tags.BITRATE, out bitrate)) {
-                    audio_str += "    <b>Bitrate:</b> %u\n".printf (bitrate);
+                    audio_str += parse_bitrate (bitrate);
                 } else if (audio_tags.get_uint (Gst.Tags.NOMINAL_BITRATE, out bitrate)) {
-                    audio_str += "    <b>Bitrate:</b> %u\n".printf (bitrate);
+                    audio_str += parse_bitrate (bitrate);
                 } else if (audio_tags.get_uint (Gst.Tags.MAXIMUM_BITRATE, out bitrate)) {
-                    audio_str += "    <b>Bitrate:</b> %u\n".printf (bitrate);
+                    audio_str += parse_bitrate (bitrate);
                 } else if (audio_tags.get_uint (Gst.Tags.MINIMUM_BITRATE, out bitrate)) {
-                    audio_str += "    <b>Bitrate:</b> %u\n".printf (bitrate);
+                    audio_str += parse_bitrate (bitrate);
                 }
             }
 
-            audio_str += "    <b>Sample rate:</b> %u%s\n".printf (audio_stream.get_sample_rate (),
+            audio_str += "    <b>Sample rate:</b> %0.1f kHz%s\n".printf (audio_stream.get_sample_rate () / 1000.0,
                                                                    channels > 0 ? ", <b>Channels:</b> %u".printf (channels) : "");
         }
 
@@ -176,10 +180,15 @@ namespace Videos2.Utils {
     }
 
     public string prepare_sub_info (Gst.PbUtils.DiscovererInfo d_info) {
-        var sub_str = "<span size=\"large\"><b>Subtitles</b></span>\n";
-
         var s_streams = d_info.get_subtitle_streams ();
+
+        if (s_streams.length () == 0) {
+            return "";
+        }
+
         s_streams.reverse ();
+
+        var sub_str = "<span size=\"large\"><b>Subtitles</b></span>\n";
         foreach (var sub_info in s_streams) {
             var sub_stream = sub_info as Gst.PbUtils.DiscovererSubtitleInfo;
             if (sub_stream != null) {
