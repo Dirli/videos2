@@ -6,6 +6,7 @@ namespace Videos2 {
 
         private GLib.Settings settings;
         private Services.Inhibitor inhibitor;
+        private Services.DiskManager disk_manager;
 
         private Gtk.Stack main_stack;
         private Views.WelcomePage welcome_page;
@@ -27,6 +28,20 @@ namespace Videos2 {
                     top_bar.reveal_child = true;
                 } else if (!value && bottom_bar.child_revealed) {
                     top_bar.reveal_child = false;
+                }
+            }
+        }
+
+        private Enums.MediaType _media_type;
+        public Enums.MediaType media_type {
+            get {
+                return _media_type;
+            }
+            set {
+                if (_media_type != value) {
+                    _media_type = value;
+
+                    bottom_bar.playlist_visible = value == Enums.MediaType.VIDEO;
                 }
             }
         }
@@ -79,12 +94,14 @@ namespace Videos2 {
 
             settings = new GLib.Settings (Constants.APP_NAME);
             inhibitor = new Services.Inhibitor (this);
+            disk_manager = new Services.DiskManager ();
 
             playlist = new Objects.Playlist ();
 
             build_ui ();
 
             playlist.play_media.connect ((uri, index) => {
+                media_type = Enums.MediaType.VIDEO;
                 main_stack.set_visible_child_name ("player");
                 player.set_uri (uri);
                 welcome_page.update_replay_button (uri);
@@ -102,6 +119,19 @@ namespace Videos2 {
                 bottom_bar.change_nav (!first, !last);
             });
             playlist.restore_medias (settings.get_strv ("last-played-videos"), settings.get_string ("current-uri"));
+
+            disk_manager.found_media.connect (() => {
+                welcome_page.update_media_button (true);
+            });
+            disk_manager.deleted_media.connect (() => {
+                welcome_page.update_media_button (false);
+                if (media_type == Enums.MediaType.DVD) {
+                    var state = player.get_playbin_state ();
+                    if (state == Gst.State.PLAYING || state == Gst.State.PAUSED) {
+                        player.stop ();
+                    }
+                }
+            });
 
             window_state_event.connect ((e) => {
                 if (Gdk.WindowState.FULLSCREEN in e.changed_mask) {
@@ -147,6 +177,11 @@ namespace Videos2 {
                     case 1:
                         if (!resume_last_videos ()) {
                             welcome_page.update_replay_button ("");
+                        }
+                        break;
+                    case 2:
+                        if (!run_open_dvd ()) {
+                            welcome_page.update_media_button (false);
                         }
                         break;
                 }
@@ -205,10 +240,16 @@ namespace Videos2 {
             player.progress_changed.connect (bottom_bar.change_progress);
             player.uri_changed.connect ((uri) => {
                 if (uri != "") {
-                    title = Utils.get_title (uri);
-                    header_bar.setup_uri_meta (uri);
+                    if (media_type == Enums.MediaType.DVD) {
+                        title = "DVD";
+                        header_bar.clear_meta ();
+                    } else {
+                        title = Utils.get_title (uri);
+                        header_bar.setup_uri_meta (uri);
+                    }
                 } else {
                     header_bar.clear_meta ();
+                    title = _("Videos");
                 }
             });
             player.audio_changed.connect (header_bar.set_active_audio);
@@ -263,6 +304,7 @@ namespace Videos2 {
 
             main_stack.set_visible_child_name ("welcome");
             welcome_page.update_replay_button (settings.get_string ("current-uri"));
+            welcome_page.update_media_button (disk_manager.has_media_mounts);
         }
 
         private void action_open () {
@@ -318,8 +360,8 @@ namespace Videos2 {
         }
 
         private void action_mediainfo () {
-            if (main_stack.get_visible_child_name () == "player") {
-                var uri = settings.get_string ("current-uri");
+            if (main_stack.get_visible_child_name () == "player" && media_type == Enums.MediaType.VIDEO) {
+                var uri = playlist.get_uri ();
                 if (uri == "") {
                     return;
                 }
@@ -338,7 +380,9 @@ namespace Videos2 {
         }
 
         private void action_clear () {
-            playlist.clear_media (-1);
+            if (media_type == Enums.MediaType.VIDEO) {
+                playlist.clear_media (-1);
+            }
         }
 
         private void on_changed_child () {
@@ -353,6 +397,18 @@ namespace Videos2 {
                     //
                     break;
             }
+        }
+
+        private bool run_open_dvd () {
+            unowned string root_uri = disk_manager.mount_uri;
+            if (root_uri == "") {
+                return false;
+            }
+
+            player.set_uri (root_uri.replace ("file:///", "dvd:///"));
+            media_type = Enums.MediaType.DVD;
+            main_stack.set_visible_child_name ("player");
+            return true;
         }
 
         public void open_files (GLib.File[] files, bool clear) {

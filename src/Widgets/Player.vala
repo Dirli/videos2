@@ -10,6 +10,8 @@ namespace Videos2 {
 
         private uint progress_timer = 0;
 
+        private int64 duration_cache = -1;
+
         private Gst.Format fmt = Gst.Format.TIME;
         private dynamic Gst.Element playbin;
         private Gst.Bus bus;
@@ -85,29 +87,32 @@ namespace Videos2 {
         }
 
         public void set_uri (string uri) {
+            duration_cache = -1;
             playbin_state_change (Gst.State.NULL, false);
             playbin.uri = uri;
 
             if (uri != "") {
                 play ();
 
-                int counter = 0;
-                GLib.Timeout.add (500, () => {
-                    if (duration > 0) {
-                        duration_changed (duration);
-                        audio_changed (playbin.current_audio);
+                if (!uri.has_prefix ("dvd:///")) {
+                    int counter = 0;
+                    GLib.Timeout.add (500, () => {
+                        if (++counter > 10) {
+                            return false;
+                        }
 
-                        return false;
-                    }
+                        if (duration > -1) {
+                            if (duration != duration_cache) {
+                                duration_changed (duration);
+                                duration_cache = duration;
+                            }
+                            audio_changed (playbin.current_audio);
+                            return false;
+                        }
 
-                    if (++counter == 10) {
-                        // the video could not be played, maybe the necessary plugin could not be installed
-                        ended_stream ();
-                        return false;
-                    }
-
-                    return true;
-                });
+                        return true;
+                    });
+                }
             }
         }
 
@@ -240,6 +245,14 @@ namespace Videos2 {
                     break;
                 case Gst.MessageType.EOS:
                     ended_stream ();
+                    break;
+                case Gst.MessageType.DURATION_CHANGED:
+                    // works correctly with DVDs, but not with regular videos
+                    if (duration > 0 && duration != duration_cache) {
+                        duration_changed (duration);
+                        duration_cache = duration;
+                    }
+
                     break;
                 default:
                     break;

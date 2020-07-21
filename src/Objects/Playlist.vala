@@ -89,13 +89,16 @@ namespace Videos2 {
             }
         }
 
+        public string get_uri () {
+            return current > -1 ? uris_array[current] : "";
+        }
+
         public string[] get_medias () {
             uint i = 0;
             var medias = new string[uris_array.size];
 
             uris_array.foreach ((uri) => {
                 medias[i++] = uri;
-                // i++;
                 return true;
             });
 

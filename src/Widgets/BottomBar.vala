@@ -59,6 +59,12 @@ namespace Videos2 {
             }
         }
 
+        public bool playlist_visible {
+            set {
+                playlist_button.visible = value; 
+            }
+        }
+
         private bool _playing = false;
         public bool playing {
             get {
