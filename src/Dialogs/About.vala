@@ -15,7 +15,7 @@ namespace Videos2 {
             var name_label = new AboutLabel ("Pantheon-videos2 " + Constants.VERSION);
             name_label.get_style_context ().add_class (Granite.STYLE_CLASS_H2_LABEL);
 
-            var comments_label = new AboutLabel (_("Simple video player designed for ElementaryOS\n"));
+            var comments_label = new AboutLabel (_("Simple video player designed for Pantheon DE\n"));
 
             var license_url = "http://www.gnu.org/licenses/lgpl.html";
             var license_label = new AboutLabel ("");

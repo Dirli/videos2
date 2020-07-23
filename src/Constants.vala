@@ -14,7 +14,6 @@ namespace Videos2.Constants {
     public const string ACTION_BACK = "action-back";
     public const string ACTION_CLEAR = "action-clear";
     public const string ACTION_MEDIAINFO = "action-mediainfo";
-    public const string ACTION_JUMP = "action-jump";
     public const string ACTION_OPEN = "action-open";
     public const string ACTION_PLAYLIST_VISIBLE = "action-playlist-visible";
     public const string ACTION_QUIT = "action-quit";

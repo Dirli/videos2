@@ -6,7 +6,6 @@ A new vision for the EOS video player.
 * Refused the clutter-gst (it seems more stable without it).
 * Added some features (such as volume control) that had no place in the original.
 * The library will be restored, but slightly modified (it is useless in its current form).
-* DVD support is still questionable, I just don't have an optical drive (or rather, it's already in the past?).
 
 ## Building, Testing, and Installation
 

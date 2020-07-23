@@ -37,15 +37,18 @@ namespace Videos2 {
             }
         }
 
+        private double _volume;
         public double volume {
             get {
-                var val = GLib.Value (typeof (double));
-                playbin.get_property ("volume", ref val);
-                return (double) val;
+                return _volume;
             }
             set {
-                if (0.0 <= value && value <= 1.0) {
-                    playbin.set_property ("volume", value);
+                _volume = value < 0.0 ? 0.0 :
+                          value > 1.0 ? 1.0 :
+                          value;
+
+                if (get_playbin_state () == Gst.State.PLAYING || get_playbin_state () == Gst.State.PAUSED) {
+                    playbin.set_property ("volume", _volume);
                 }
             }
         }
@@ -93,6 +96,7 @@ namespace Videos2 {
 
             if (uri != "") {
                 play ();
+                playbin.set_property ("volume", volume);
 
                 if (!uri.has_prefix ("dvd:///")) {
                     int counter = 0;

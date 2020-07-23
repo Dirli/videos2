@@ -53,7 +53,6 @@ namespace Videos2 {
             { Constants.ACTION_BACK, action_back },
             { Constants.ACTION_CLEAR, action_clear },
             { Constants.ACTION_MEDIAINFO, action_mediainfo },
-            { Constants.ACTION_JUMP, action_jump, "i" },
             { Constants.ACTION_VOLUME, action_volume, "b" },
             { Constants.ACTION_PLAYLIST_VISIBLE, action_playlist_visible },
             // { Constants.ACTION_SEARCH, action_search }
@@ -72,10 +71,6 @@ namespace Videos2 {
             application.set_accels_for_action (Constants.ACTION_PREFIX + Constants.ACTION_OPEN, {"<Control>o"});
             application.set_accels_for_action (Constants.ACTION_PREFIX + Constants.ACTION_MEDIAINFO, {"<Control>i"});
             application.set_accels_for_action (Constants.ACTION_PREFIX + Constants.ACTION_ADD, {"<Control><Shift>o"});
-            application.set_accels_for_action (Constants.ACTION_PREFIX + Constants.ACTION_JUMP + "(-10)", {"<Control>Left"});
-            application.set_accels_for_action (Constants.ACTION_PREFIX + Constants.ACTION_JUMP + "(10)", {"<Control>Right"});
-            application.set_accels_for_action (Constants.ACTION_PREFIX + Constants.ACTION_JUMP + "(-60)", {"<Control>Down"});
-            application.set_accels_for_action (Constants.ACTION_PREFIX + Constants.ACTION_JUMP + "(60)", {"<Control>Up"});
             application.set_accels_for_action (Constants.ACTION_PREFIX + Constants.ACTION_VOLUME + "(true)", {"<Release>KP_Add"});
             application.set_accels_for_action (Constants.ACTION_PREFIX + Constants.ACTION_VOLUME + "(false)", {"<Release>KP_Subtract"});
             // application.set_accels_for_action (Constants.ACTION_PREFIX + Constants.ACTION_SEARCH, {"<Control>f"});
@@ -335,15 +330,6 @@ namespace Videos2 {
             }
         }
 
-        private void action_jump (GLib.SimpleAction action, GLib.Variant? pars) {
-            if (main_stack.get_visible_child_name () == "player") {
-                int sec_value;
-                pars.@get ("i", out sec_value);
-                player.seek_jump_seconds (sec_value);
-                bottom_bar.reveal_control ();
-            }
-        }
-
         private void action_playlist_visible () {
             if (main_stack.get_visible_child_name () == "player") {
                 bottom_bar.toggle_playlist ();
@@ -474,6 +460,21 @@ namespace Videos2 {
                         bottom_bar.volume_sensitive = !player.toggle_mute ();
                         return true;
                     }
+                    break;
+                case Gdk.Key.Up:
+                case Gdk.Key.Down:
+                case Gdk.Key.Left:
+                case Gdk.Key.Right:
+                    if (main_stack.get_visible_child_name () == "player" && (e.state & Gdk.ModifierType.MOD1_MASK) == 0) {
+                        player.seek_jump_seconds (e.keyval == Gdk.Key.Up ? 60 :
+                                                  e.keyval == Gdk.Key.Down ? -60 :
+                                                  e.keyval == Gdk.Key.Left ? -10 :
+                                                  10);
+
+                        bottom_bar.reveal_control ();
+                        return true;
+                    }
+
                     break;
             }
 
