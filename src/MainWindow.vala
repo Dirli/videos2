@@ -47,7 +47,7 @@ namespace Videos2 {
         }
 
         private const ActionEntry[] ACTION_ENTRIES = {
-            { Constants.ACTION_QUIT, action_quit },
+            { Constants.ACTION_QUIT, action_quit, "b" },
             { Constants.ACTION_OPEN, action_open },
             { Constants.ACTION_ADD, action_add },
             { Constants.ACTION_BACK, action_back },
@@ -67,7 +67,8 @@ namespace Videos2 {
             application.set_accels_for_action (Constants.ACTION_PREFIX + Constants.ACTION_BACK, {"<Alt>Left"});
             application.set_accels_for_action (Constants.ACTION_PREFIX + Constants.ACTION_CLEAR, {"<Control>w"});
             application.set_accels_for_action (Constants.ACTION_PREFIX + Constants.ACTION_PLAYLIST_VISIBLE, {"<Control>l"});
-            application.set_accels_for_action (Constants.ACTION_PREFIX + Constants.ACTION_QUIT, {"<Control>q"});
+            application.set_accels_for_action (Constants.ACTION_PREFIX + Constants.ACTION_QUIT + "(false)", {"<Control>q"});
+            application.set_accels_for_action (Constants.ACTION_PREFIX + Constants.ACTION_QUIT + "(true)", {"<Control><Shift>q"});
             application.set_accels_for_action (Constants.ACTION_PREFIX + Constants.ACTION_OPEN, {"<Control>o"});
             application.set_accels_for_action (Constants.ACTION_PREFIX + Constants.ACTION_MEDIAINFO, {"<Control>i"});
             application.set_accels_for_action (Constants.ACTION_PREFIX + Constants.ACTION_ADD, {"<Control><Shift>o"});
@@ -96,9 +97,7 @@ namespace Videos2 {
             build_ui ();
 
             playlist.play_media.connect ((uri, index) => {
-                media_type = Enums.MediaType.VIDEO;
-                main_stack.set_visible_child_name ("player");
-                player.set_uri (uri);
+                play_uri (Enums.MediaType.VIDEO, uri);
                 welcome_page.update_replay_button (uri);
                 bottom_bar.playlist_current_item (index);
                 settings.set_string ("current-uri", uri);
@@ -114,6 +113,9 @@ namespace Videos2 {
                 bottom_bar.change_nav (!first, !last);
             });
             playlist.restore_medias (settings.get_strv ("last-played-videos"), settings.get_string ("current-uri"));
+
+            settings.set_strv ("last-played-videos", {""});
+            settings.set_string ("current-uri", "");
 
             disk_manager.found_media.connect (() => {
                 welcome_page.update_media_button (true);
@@ -316,8 +318,19 @@ namespace Videos2 {
             }
         }
 
-        private void action_quit () {
-            player.stop ();
+        private void action_quit (GLib.SimpleAction action, GLib.Variant? pars) {
+            if (player.get_playbin_state () == Gst.State.PLAYING || player.get_playbin_state () == Gst.State.PAUSED) {
+                player.stop ();
+            }
+
+            bool save_current_state;
+            pars.@get ("b", out save_current_state);
+            if (!save_current_state) {
+                settings.set_string ("current-uri", "");
+            } else {
+                save_playlist ();
+            }
+
             destroy ();
         }
 
@@ -391,9 +404,7 @@ namespace Videos2 {
                 return false;
             }
 
-            player.set_uri (root_uri.replace ("file:///", "dvd:///"));
-            media_type = Enums.MediaType.DVD;
-            main_stack.set_visible_child_name ("player");
+            play_uri (Enums.MediaType.DVD, root_uri.replace ("file:///", "dvd:///"));
             return true;
         }
 
@@ -425,6 +436,22 @@ namespace Videos2 {
                     playlist.add_media (file, true);
                 }
             }
+        }
+
+        private void play_uri (Enums.MediaType m_type, string uri) {
+            uint v_width = 0;
+            uint v_height = 0;
+            Utils.get_video_size (uri, out v_width, out v_height);
+
+            media_type = m_type;
+
+            if (v_height > 0 && v_width > 0) {
+                resize ((int) v_width, (int) v_height);
+            }
+
+            main_stack.set_visible_child_name ("player");
+
+            player.set_uri (uri);
         }
 
         public override bool key_press_event (Gdk.EventKey e) {
@@ -488,6 +515,7 @@ namespace Videos2 {
                 playlist.current = last_played;
                 return true;
             }
+
             return false;
         }
 

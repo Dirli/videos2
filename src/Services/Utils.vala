@@ -96,6 +96,19 @@ namespace Videos2.Utils {
         return "    <b>Bitrate:</b> %.0f kbps\n".printf (b / 1000.0);
     }
 
+    public void get_video_size (string uri, out uint width, out uint height) {
+        width = 0;
+        height = 0;
+        var info = get_discoverer_info (uri);
+        var video_streams = info.get_video_streams ();
+        var stream = video_streams.nth_data (0);
+        var video_stream = stream as Gst.PbUtils.DiscovererVideoInfo;
+        if (video_stream != null) {
+            width = video_stream.get_width ();
+            height = video_stream.get_height ();
+        }
+    }
+
     public string prepare_video_info (Gst.PbUtils.DiscovererInfo d_info) {
         var video_str = "<span size=\"large\"><b>Video</b></span>\n";
 
