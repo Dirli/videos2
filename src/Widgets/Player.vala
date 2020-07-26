@@ -58,6 +58,12 @@ namespace Videos2 {
         construct {
             Gtk.Widget video_area;
 
+            unowned Gst.Registry registry = Gst.Registry.@get ();
+            var gst_plugin = registry.find_plugin ("vaapi");
+            if (gst_plugin != null) {
+                registry.remove_plugin (gst_plugin);
+            }
+
             playbin = Gst.ElementFactory.make ("playbin", "bin");
             playbin.notify["uri"].connect (() => {
                 uri_changed (playbin.uri);

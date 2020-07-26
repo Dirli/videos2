@@ -439,8 +439,8 @@ namespace Videos2 {
         }
 
         private void play_uri (Enums.MediaType m_type, string uri) {
-            uint v_width = 0;
-            uint v_height = 0;
+            uint v_width;
+            uint v_height;
             Utils.get_video_size (uri, out v_width, out v_height);
 
             media_type = m_type;

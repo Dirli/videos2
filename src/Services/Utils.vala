@@ -106,6 +106,10 @@ namespace Videos2.Utils {
         if (video_stream != null) {
             width = video_stream.get_width ();
             height = video_stream.get_height ();
+            if (width > 960 || height > 540) {
+                width = (uint) (540.0 / height * width);
+                height = 540;
+            }
         }
     }
 
