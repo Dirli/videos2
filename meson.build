@@ -1,7 +1,7 @@
 project(
     'io.elementary.videos2',
     'vala', 'c',
-    version: '0.1.0'
+    version: '0.7.0'
 )
 
 gnome = import ('gnome')

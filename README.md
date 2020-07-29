@@ -3,9 +3,10 @@
 <img src="data/screenshot.png" title="Videos2 screenshot" width="720"> </img>
 
 A new vision for the EOS video player.
-* Refused the clutter-gst (it seems more stable without it).
+* Player plays video, perhaps even better than the original
 * Added some features (such as volume control) that had no place in the original.
-* The library will be restored, but slightly modified (it is useless in its current form).
+* Should add a PreviewPopover or shouldn't... (TimeBar)
+* The library will be restored, but slightly modified (it is useless in its current form). not enough motivation yet
 
 ## Building, Testing, and Installation
 
