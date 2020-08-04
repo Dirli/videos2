@@ -11,6 +11,9 @@ namespace Videos2 {
         private Gtk.Stack main_stack;
         private Views.WelcomePage welcome_page;
 
+        private uint current_h = 0;
+        private uint current_w = 0;
+
         private Widgets.Player player;
         private Widgets.HeadBar header_bar;
         private Widgets.TopBar top_bar;
@@ -137,6 +140,9 @@ namespace Videos2 {
 
                     if (!fullscreened) {
                         unmaximize ();
+                        if (current_h > 0 && current_w > 0) {
+                            resize ((int) current_w, (int) current_h);
+                        }
                     }
                 }
 
@@ -390,7 +396,7 @@ namespace Videos2 {
 
             switch (view_name) {
                 case "welcome":
-                    //
+                    resize (960, 540);
                     break;
                 case "player":
                     //
@@ -439,14 +445,12 @@ namespace Videos2 {
         }
 
         private void play_uri (Enums.MediaType m_type, string uri) {
-            uint v_width;
-            uint v_height;
-            Utils.get_video_size (uri, out v_width, out v_height);
+            Utils.get_video_size (uri, out current_w, out current_h);
 
             media_type = m_type;
 
-            if (v_height > 0 && v_width > 0) {
-                resize ((int) v_width, (int) v_height);
+            if (current_h > 0 && current_w > 0) {
+                resize ((int) current_w, (int) current_h);
             }
 
             main_stack.set_visible_child_name ("player");
