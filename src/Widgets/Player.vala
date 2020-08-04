@@ -12,6 +12,14 @@ namespace Videos2 {
 
         private int64 duration_cache = -1;
 
+        Gtk.Widget video_area;
+
+        public Gst.State playback_state {
+            get;
+            private set;
+            default = Gst.State.NULL;
+        }
+
         private Gst.Format fmt = Gst.Format.TIME;
         private dynamic Gst.Element playbin;
         private Gst.Bus bus;
@@ -56,23 +64,29 @@ namespace Videos2 {
         public Player () {}
 
         construct {
-            Gtk.Widget video_area;
-
-            unowned Gst.Registry registry = Gst.Registry.@get ();
-            var gst_plugin = registry.find_plugin ("vaapi");
-            if (gst_plugin != null) {
-                registry.remove_plugin (gst_plugin);
-            }
-
             playbin = Gst.ElementFactory.make ("playbin", "bin");
             playbin.notify["uri"].connect (() => {
                 uri_changed (playbin.uri);
             });
             playbin.set_property ("subtitle-font-desc", "Sans 16");
 
-            var gtksink = Gst.ElementFactory.make ("gtksink", null);
-            gtksink.get ("widget", out video_area);
-            playbin["video-sink"] = gtksink;
+            unowned Gst.Registry registry = Gst.Registry.@get ();
+            // var gst_plugin = registry.find_plugin ("vaapi");
+            if (registry.find_plugin ("vaapi") != null) {
+                video_area = new Gtk.DrawingArea ();
+                video_area.realize.connect (on_realize);
+                video_area.draw.connect (on_draw);
+                video_area.events |= Gdk.EventMask.POINTER_MOTION_MASK;
+
+                video_area.motion_notify_event.connect ((event) => {
+                    return false;
+                });
+            } else {
+                var gtksink = Gst.ElementFactory.make ("gtksink", null);
+                gtksink.get ("widget", out video_area);
+
+                playbin["video-sink"] = gtksink;
+            }
 
             add (video_area);
 
@@ -93,6 +107,29 @@ namespace Videos2 {
 
                 return base.button_press_event (event);
             });
+        }
+
+        private bool on_draw (Cairo.Context ctx) {
+            if (playback_state < Gst.State.PAUSED) {
+                Gtk.Allocation allocation;
+                video_area.get_allocation (out allocation);
+
+                ctx.set_source_rgb (0, 0, 0);
+                ctx.rectangle (0, 0, allocation.width, allocation.height);
+                ctx.fill ();
+            }
+
+            return false;
+        }
+
+        public void on_realize () {
+            var win = video_area.get_window ();
+            if (!win.ensure_native ()) {
+                return;
+            }
+
+            var win_xid  = (uint*) ((Gdk.X11.Window) win).get_xid ();
+            ((Gst.Video.Overlay) playbin).set_window_handle (win_xid);
         }
 
         public void set_uri (string uri) {
@@ -207,6 +244,8 @@ namespace Videos2 {
         private void playbin_state_change (Gst.State state, bool emit) {
             playbin.set_state (state);
 
+            playback_state = state;
+
             if (state == Gst.State.PLAYING) {
                 start_timer ();
             } else {
@@ -219,7 +258,7 @@ namespace Videos2 {
 
         }
 
-        public Gst.State get_playbin_state () {
+        public unowned Gst.State get_playbin_state () {
             Gst.State state = Gst.State.NULL;
             Gst.State pending;
             playbin.get_state (out state, out pending, (Gst.ClockTime) (Gst.SECOND));
