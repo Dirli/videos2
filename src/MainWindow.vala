@@ -27,9 +27,10 @@ namespace Videos2 {
             }
             set {
                 _fullscreened = value;
-                if (value && bottom_bar.child_revealed == true) {
+                if (value && bottom_bar.child_revealed) {
                     top_bar.reveal_child = true;
-                } else if (!value && bottom_bar.child_revealed) {
+                // } else if (!value && bottom_bar.child_revealed) {
+                } else {
                     top_bar.reveal_child = false;
                 }
             }
@@ -195,7 +196,10 @@ namespace Videos2 {
 
             set_titlebar (header_bar);
 
-            player = new Widgets.Player ();
+            unowned Gst.Registry registry = Gst.Registry.@get ();
+            bool has_vaapi = registry.find_plugin ("vaapi") != null;
+
+            player = new Widgets.Player (has_vaapi);
             header_bar.audio_selected.connect (player.set_active_audio);
             header_bar.subtitle_selected.connect (player.set_active_subtitle);
 
@@ -204,7 +208,7 @@ namespace Videos2 {
                 unfullscreen ();
             });
 
-            info_bar = new Widgets.InfoBar ();
+            info_bar = new Widgets.InfoBar (has_vaapi);
 
             bottom_bar = new Widgets.BottomBar ();
             bottom_bar.notify["reveal-child"].connect (() => {

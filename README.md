@@ -8,6 +8,8 @@ A new vision for the EOS video player.
 * Should add a PreviewPopover or shouldn't... (TimeBar)
 * The library will be restored, but slightly modified (it is useless in its current form). not enough motivation yet
 
+Unfortunately, there is a problem with fields when the aspect ratio does not match. They match the background of the app (and with transparency overlay widgets). If you don't like it very much, just delete the 'gstreamer-vaapi'.
+
 ## Building, Testing, and Installation
 
 You'll need the following dependencies:

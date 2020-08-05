@@ -4,7 +4,7 @@ namespace Videos2 {
 
         public TopBar () {
             Object (transition_type: Gtk.RevealerTransitionType.SLIDE_DOWN,
-                    halign: Gtk.Align.FILL,
+                    halign: Gtk.Align.END,
                     valign: Gtk.Align.START);
         }
 

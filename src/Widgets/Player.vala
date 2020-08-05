@@ -61,18 +61,16 @@ namespace Videos2 {
             }
         }
 
-        public Player () {}
-
-        construct {
+        public Player (bool has_vaapi) {
             playbin = Gst.ElementFactory.make ("playbin", "bin");
             playbin.notify["uri"].connect (() => {
                 uri_changed (playbin.uri);
             });
             playbin.set_property ("subtitle-font-desc", "Sans 16");
 
-            unowned Gst.Registry registry = Gst.Registry.@get ();
+            // unowned Gst.Registry registry = Gst.Registry.@get ();
             // var gst_plugin = registry.find_plugin ("vaapi");
-            if (registry.find_plugin ("vaapi") != null) {
+            if (has_vaapi) {
                 video_area = new Gtk.DrawingArea ();
                 video_area.realize.connect (on_realize);
                 video_area.draw.connect (on_draw);
