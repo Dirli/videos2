@@ -12,15 +12,15 @@ namespace Videos2 {
             logo_image.pixel_size = 128;
             logo_image.icon_name = "multimedia-video-player";
 
-            var name_label = new AboutLabel ("Pantheon-videos2 " + Constants.VERSION);
+            var name_label = new AboutLabel ("Videos2 " + Constants.VERSION);
             name_label.get_style_context ().add_class (Granite.STYLE_CLASS_H2_LABEL);
 
-            var comments_label = new AboutLabel (_("Simple video player designed for Pantheon DE\n"));
+            var comments_label = new AboutLabel (_("Simple video player designed for Pantheon DE") + "\n");
 
             var license_url = "http://www.gnu.org/licenses/lgpl.html";
             var license_label = new AboutLabel ("");
             license_label.set_markup (
-                "<span size=\"small\">" + _("This program is published under the terms of the %s license, it comes with ABSOLUTELY NO WARRANTY; for details, visit %s").printf (
+                "<span size=\"small\">" + _("This program is published under the terms of the '%s' license, it comes with ABSOLUTELY NO WARRANTY; for details, visit '%s'").printf (
                     "GPL",
                     "<a href=\"" + license_url + "\">" + license_url + "</a></span>\n"
                 )

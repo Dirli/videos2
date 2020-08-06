@@ -184,7 +184,7 @@ namespace Videos2 {
                             unowned string language_name = Gst.Tag.get_language_name (language_code);
                             audio_streams.prepend ("", language_name);
                         } else {
-                            audio_streams.prepend ("", _("Track %u").printf (track));
+                            audio_streams.prepend ("", _("Track '%u'").printf (track));
                         }
                     }
 
@@ -209,7 +209,7 @@ namespace Videos2 {
                         unowned string language_name = Gst.Tag.get_language_name (language_code);
                         sub_streams.prepend ("", language_name);
                     } else {
-                        sub_streams.prepend ("", _("Track %u").printf (track));
+                        sub_streams.prepend ("", _("Track '%u'").printf (track));
                     }
                 }
 

@@ -1,0 +1,178 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2020
+# This file is distributed under the same license as the io.elementary.videos2 package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: io.elementary.videos2\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2020-08-06 16:30+0300\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 2.3.1\n"
+"X-Poedit-Basepath: ../src\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n"
+"%10<=4 && (n%100<12 || n%100>14) ? 1 : 2);\n"
+"X-Poedit-SearchPath-0: .\n"
+
+#: Constants.vala:9
+msgid "Back"
+msgstr ""
+
+#: Dialogs/About.vala:18
+msgid "Simple video player designed for Pantheon DE"
+msgstr ""
+
+#: Dialogs/About.vala:23
+#, c-format
+msgid ""
+"This program is published under the terms of the '%s' license, it comes "
+"with ABSOLUTELY NO WARRANTY; for details, visit '%s'"
+msgstr ""
+
+#: Dialogs/About.vala:35
+msgid "Written by:"
+msgstr ""
+
+#: Dialogs/About.vala:63
+msgid "Close"
+msgstr ""
+
+#: Dialogs/UnsupportedFile.vala:8
+msgid "Unrecognized file format"
+msgstr ""
+
+#: Dialogs/UnsupportedFile.vala:9
+#, c-format
+msgid "Videos might not be able to play the file '%s'."
+msgstr ""
+
+#: Dialogs/UnsupportedFile.vala:19
+msgid "Play Anyway"
+msgstr ""
+
+#: Dialogs/UnsupportedFile.vala:22
+#, c-format
+msgid ""
+"Unable to play file at: '%s'\n"
+"The file is not a video ('%s')."
+msgstr ""
+
+#: MainWindow.vala:69 MainWindow.vala:233 MainWindow.vala:259
+msgid "Videos"
+msgstr ""
+
+#: Services/Utils.vala:44
+msgid "All files"
+msgstr ""
+
+#: Services/Utils.vala:48
+msgid "Video files"
+msgstr ""
+
+#: Services/Utils.vala:51 Services/Utils.vala:54
+msgid "Open"
+msgstr ""
+
+#: Services/Utils.vala:55
+msgid "Cancel"
+msgstr ""
+
+#: Views/WelcomePage.vala:8
+msgid "No Videos Open"
+msgstr ""
+
+#: Views/WelcomePage.vala:9
+msgid "Select a source to begin playing."
+msgstr ""
+
+#: Views/WelcomePage.vala:14 Widgets/BottomBar.vala:154
+msgid "Open file"
+msgstr ""
+
+#: Views/WelcomePage.vala:14
+msgid "Open a saved file."
+msgstr ""
+
+#: Views/WelcomePage.vala:15 Views/WelcomePage.vala:42
+msgid "Replay last video"
+msgstr ""
+
+#: Views/WelcomePage.vala:16
+msgid "Play from Disc"
+msgstr ""
+
+#: Views/WelcomePage.vala:16
+msgid "Watch a DVD or open a file from disc"
+msgstr ""
+
+#: Views/WelcomePage.vala:42
+msgid "Resume last video"
+msgstr ""
+
+#: Widgets/BottomBar.vala:76
+msgid "Pause"
+msgstr ""
+
+#: Widgets/BottomBar.vala:76 Widgets/BottomBar.vala:129
+msgid "Play"
+msgstr ""
+
+#: Widgets/BottomBar.vala:121
+msgid "Previous"
+msgstr ""
+
+#: Widgets/BottomBar.vala:135
+msgid "Next"
+msgstr ""
+
+#: Widgets/BottomBar.vala:161
+msgid "Clear Playlist"
+msgstr ""
+
+#: Widgets/BottomBar.vala:171 Widgets/BottomBar.vala:173
+msgid "Enable Repeat"
+msgstr ""
+
+#: Widgets/BottomBar.vala:173
+msgid "Disable Repeat"
+msgstr ""
+
+#: Widgets/BottomBar.vala:214
+msgid "Playlist"
+msgstr ""
+
+#: Widgets/HeadBar.vala:47
+msgid "Audio:"
+msgstr ""
+
+#: Widgets/HeadBar.vala:51 Widgets/HeadBar.vala:58 Widgets/HeadBar.vala:219
+msgid "None"
+msgstr ""
+
+#: Widgets/HeadBar.vala:54
+msgid "Subtitles:"
+msgstr ""
+
+#: Widgets/HeadBar.vala:67
+msgid "About"
+msgstr ""
+
+#: Widgets/HeadBar.vala:187 Widgets/HeadBar.vala:212
+#, c-format
+msgid "Track '%u'"
+msgstr ""
+
+#: Widgets/HeadBar.vala:194
+msgid "Default"
+msgstr ""
+
+#: Widgets/TopBar.vala:14
+msgid "Unfullscreen"
+msgstr ""

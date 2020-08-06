@@ -51,8 +51,8 @@ namespace Videos2.Utils {
         var file_chooser = new Gtk.FileChooserNative (_("Open"),
                                                       parent,
                                                       Gtk.FileChooserAction.OPEN,
-                                                      _("_Open"),
-                                                      _("_Cancel"));
+                                                      _("Open"),
+                                                      _("Cancel"));
 
         file_chooser.select_multiple = true;
         file_chooser.add_filter (video_filter);

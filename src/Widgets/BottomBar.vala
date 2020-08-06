@@ -61,7 +61,7 @@ namespace Videos2 {
 
         public bool playlist_visible {
             set {
-                playlist_button.visible = value; 
+                playlist_button.visible = value;
             }
         }
 
@@ -151,7 +151,7 @@ namespace Videos2 {
             // playlist
             var add_button = new Gtk.Button.from_icon_name ("document-open-symbolic", Gtk.IconSize.BUTTON);
             add_button.set_action_name (Constants.ACTION_PREFIX + Constants.ACTION_ADD);
-            add_button.tooltip_markup = Granite.markup_accel_tooltip ({"<Control><Shift>o"}, _("Open file "));
+            add_button.tooltip_markup = Granite.markup_accel_tooltip ({"<Control><Shift>o"}, _("Open file"));
             add_button.clicked.connect (() => {
                 playlist_popover.popdown ();
             });
