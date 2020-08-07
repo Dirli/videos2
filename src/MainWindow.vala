@@ -1,10 +1,11 @@
 namespace Videos2 {
     public class MainWindow : Gtk.Window {
         private bool show_volume_info = false;
+        private bool has_vaapi;
 
         private Objects.Playlist playlist;
 
-        private GLib.Settings settings;
+        public GLib.Settings settings;
         private Services.Inhibitor inhibitor;
         private Services.DiskManager disk_manager;
 
@@ -100,6 +101,8 @@ namespace Videos2 {
 
             build_ui ();
 
+            settings.bind ("block-sleep-mode", inhibitor, "allow-block", GLib.SettingsBindFlags.DEFAULT);
+
             playlist.play_media.connect ((uri, index) => {
                 play_uri (Enums.MediaType.VIDEO, uri);
                 welcome_page.update_replay_button (uri);
@@ -193,11 +196,25 @@ namespace Videos2 {
 
             header_bar = new Widgets.HeadBar ();
             header_bar.navigation_clicked.connect (action_back);
+            header_bar.show_preferences.connect (() => {
+                var preferences = new Dialogs.Preferences (this);
+                preferences.run ();
+            });
 
             set_titlebar (header_bar);
 
             unowned Gst.Registry registry = Gst.Registry.@get ();
-            bool has_vaapi = registry.find_plugin ("vaapi") != null;
+
+            var find_vaapi = registry.find_plugin ("vaapi");
+            if (!settings.get_boolean ("use-vaapi")) {
+                if (find_vaapi != null) {
+                    registry.remove_plugin (find_vaapi);
+                }
+
+                has_vaapi = false;
+            } else {
+                has_vaapi = find_vaapi != null;
+            }
 
             player = new Widgets.Player (has_vaapi);
             header_bar.audio_selected.connect (player.set_active_audio);
@@ -221,6 +238,7 @@ namespace Videos2 {
 
 
             player.playbin_state_changed.connect ((state) => {
+                inhibitor.playback_state = state;
                 if (state == Gst.State.PLAYING || state == Gst.State.PAUSED) {
                     bottom_bar.playing = (state == Gst.State.PLAYING);
 
@@ -228,7 +246,7 @@ namespace Videos2 {
                         fullscreen ();
                     }
 
-                    inhibitor.inhibit ();
+                    // inhibitor.inhibit ();
                 } else {
                     title = _("Videos");
                     if (fullscreened) {
@@ -236,7 +254,7 @@ namespace Videos2 {
                     }
                     main_stack.set_visible_child_name ("welcome");
 
-                    inhibitor.uninhibit ();
+                    // inhibitor.uninhibit ();
                 }
             });
             player.motion_notify_event.connect ((event) => {

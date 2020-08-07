@@ -1,5 +1,5 @@
 <schemalist>
-  <schema path="/io/elementary/videos2/" id="io.elementary.videos2">
+    <schema path="/io/elementary/videos2/" id="io.elementary.videos2">
         <key type="as" name="last-played-videos">
             <default>[]</default>
             <summary>List of last played videos</summary>
@@ -19,6 +19,16 @@
             <default>0.8</default>
             <summary>Saves the volume level value</summary>
             <description>Saves the volume level value</description>
+        </key>
+        <key type="b" name="block-sleep-mode">
+            <default>true</default>
+            <summary>Block sleep mode</summary>
+            <description>Allows you to block sleep mode</description>
+        </key>
+        <key type="b" name="use-vaapi">
+            <default>true</default>
+            <summary>Manual management of vaapi support</summary>
+            <description>Manual management of vaapi support</description>
         </key>
     </schema>
 </schemalist>

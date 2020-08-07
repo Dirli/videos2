@@ -3,6 +3,7 @@ namespace Videos2 {
         public signal void navigation_clicked ();
         public signal void audio_selected (int i);
         public signal void subtitle_selected (int i);
+        public signal void show_preferences ();
 
         private Gtk.Button nav_button;
         private Gtk.ComboBoxText audio_streams;
@@ -63,6 +64,12 @@ namespace Videos2 {
             menu_grid.attach (sub_label, 0, top, 1, 1);
             menu_grid.attach (sub_streams, 1, top++, 1, 1);
 
+            var pref_button = new Gtk.ModelButton ();
+            pref_button.text = _("Preferences");
+            pref_button.clicked.connect (() => {
+                show_preferences ();
+            });
+
             var about_button = new Gtk.ModelButton ();
             about_button.text = _("About");
             about_button.clicked.connect (() => {
@@ -71,6 +78,7 @@ namespace Videos2 {
             });
 
             menu_grid.attach (new Gtk.Separator (Gtk.Orientation.HORIZONTAL), 0, top++, 2, 1);
+            menu_grid.attach (pref_button, 0, top++, 2, 1);
             menu_grid.attach (about_button, 0, top++, 2, 1);
 
             menu_grid.show_all ();

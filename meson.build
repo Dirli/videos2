@@ -31,6 +31,7 @@ executable (
     'src/Enums.vala',
     'src/MainWindow.vala',
     'src/Dialogs/About.vala',
+    'src/Dialogs/Preferences.vala',
     'src/Dialogs/UnsupportedFile.vala',
     'src/Interfaces/Client.vala',
     'src/Objects/Playlist.vala',
