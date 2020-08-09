@@ -35,6 +35,10 @@ namespace Videos2 {
             vaapi_switch.halign = Gtk.Align.START;
             main_win.settings.bind ("use-vaapi", vaapi_switch, "active", GLib.SettingsBindFlags.DEFAULT);
 
+            var remember_switch = new Gtk.Switch ();
+            remember_switch.halign = Gtk.Align.START;
+            main_win.settings.bind ("remember-time", remember_switch, "active", GLib.SettingsBindFlags.DEFAULT);
+
             vaapi_switch.tooltip_text = vaapi_switch.active ?
                                         _("if plugin found, vaapi supports enabled") :
                                         _("Vaapi supports disabled");
@@ -49,8 +53,12 @@ namespace Videos2 {
             layout.row_spacing = 6;
 
             int top = 0;
-            layout.attach (new Granite.HeaderLabel (_("HW acceleration (need restart)")), 0, top++, 2, 1);
-            layout.attach (new SettingsLabel (_("Use vaapi:")), 0, top);
+            layout.attach (new Granite.HeaderLabel (_("Playback preferences")), 0, top++, 2, 1);
+
+            layout.attach (new SettingsLabel (_("Remember stopped time:")), 0, top);
+            layout.attach (remember_switch, 1, top++);
+
+            layout.attach (new SettingsLabel (_("Use vaapi (need restart):")), 0, top);
             layout.attach (vaapi_switch, 1, top++);
 
             layout.attach (new Granite.HeaderLabel (_("Desktop Integration")), 0, top++, 2, 1);

@@ -14,12 +14,6 @@ namespace Videos2 {
 
         Gtk.Widget video_area;
 
-        public Gst.State playback_state {
-            get;
-            private set;
-            default = Gst.State.NULL;
-        }
-
         private Gst.Format fmt = Gst.Format.TIME;
         private dynamic Gst.Element playbin;
         private Gst.Bus bus;
@@ -108,7 +102,7 @@ namespace Videos2 {
         }
 
         private bool on_draw (Cairo.Context ctx) {
-            if (playback_state < Gst.State.PAUSED) {
+            if (get_playbin_state () < Gst.State.PAUSED) {
                 Gtk.Allocation allocation;
                 video_area.get_allocation (out allocation);
 
@@ -132,11 +126,11 @@ namespace Videos2 {
 
         public void set_uri (string uri) {
             duration_cache = -1;
-            playbin_state_change (Gst.State.NULL, false);
+            playbin_state_change (Gst.State.READY, false);
             playbin.uri = uri;
 
             if (uri != "") {
-                play ();
+                playbin_state_change (Gst.State.PAUSED, false);
                 playbin.set_property ("volume", volume);
 
                 if (!uri.has_prefix ("dvd:///")) {
@@ -216,6 +210,10 @@ namespace Videos2 {
         }
 
         public void seek_jump_value (int64 val) {
+            if (val > duration) {
+                return;
+            }
+
             stop_timer ();
             position = val;
             start_timer ();
@@ -242,7 +240,7 @@ namespace Videos2 {
         private void playbin_state_change (Gst.State state, bool emit) {
             playbin.set_state (state);
 
-            playback_state = state;
+            // playback_state = state;
 
             if (state == Gst.State.PLAYING) {
                 start_timer ();
@@ -291,6 +289,7 @@ namespace Videos2 {
                     ended_stream ();
                     break;
                 case Gst.MessageType.EOS:
+                    playbin_state_change (Gst.State.NULL, false);
                     ended_stream ();
                     break;
                 case Gst.MessageType.DURATION_CHANGED:

@@ -7,6 +7,7 @@ namespace Videos2.Constants {
     public const string SCREENSAVER_PATH = "/ScreenSaver";
 
     public const string NAV_BUTTON_WELCOME = _("Back");
+    public const string NAV_BUTTON_BACK = _("Continue");
 
     // actions
     public const string ACTION_PREFIX = "win.";

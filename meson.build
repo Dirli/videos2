@@ -36,6 +36,7 @@ executable (
     'src/Interfaces/Client.vala',
     'src/Objects/Playlist.vala',
     'src/Services/DiskManager.vala',
+    'src/Services/RestoreManager.vala',
     'src/Services/Inhibitor.vala',
     'src/Services/Utils.vala',
     'src/Views/WelcomePage.vala',
