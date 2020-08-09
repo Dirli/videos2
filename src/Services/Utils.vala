@@ -142,9 +142,9 @@ namespace Videos2.Utils {
             if (video_tags != null) {
                 string codec;
                 if (video_tags.get_string (Gst.Tags.VIDEO_CODEC, out codec)) {
-                    video_str += "    <b>Video codec:</b> %s\n".printf (codec);
+                    video_str += @"    <b>Video codec:</b> $codec\n";
                 } else if (video_tags.get_string (Gst.Tags.CODEC, out codec)) {
-                    video_str += "    <b>Video codec:</b> %s\n".printf (codec);
+                    video_str += @"    <b>Video codec:</b> $codec\n";
                 }
 
                 uint bitrate;
@@ -161,7 +161,7 @@ namespace Videos2.Utils {
 
             var video_stream = video_info as Gst.PbUtils.DiscovererVideoInfo;
             if (video_stream != null) {
-                video_str += "    <b>Size:</b> %u x %u \n".printf (video_stream.get_width (), video_stream.get_height ());
+                video_str += @"    <b>Size:</b> $(video_stream.get_width ()) x $(video_stream.get_height ()) \n";
                 video_str += "    <b>Frame rate:</b> %0.3f fps\n".printf ((double) video_stream.get_framerate_num () / video_stream.get_framerate_denom ());
             }
         }
@@ -180,7 +180,7 @@ namespace Videos2.Utils {
             if (audio_stream != null) {
                 unowned string language_code = audio_stream.get_language ();
                 if (language_code != null) {
-                    audio_str += "  <b>Language:</b> %s\n".printf (Gst.Tag.get_language_name (language_code));
+                    audio_str += @"  <b>Language:</b> $(Gst.Tag.get_language_name (language_code))\n";
                 }
 
                 channels = audio_stream.get_channels ();
@@ -191,9 +191,9 @@ namespace Videos2.Utils {
 
                 string codec;
                 if (audio_tags.get_string (Gst.Tags.AUDIO_CODEC, out codec)) {
-                    audio_str += "    <b>Audio codec:</b> %s\n".printf (codec);
+                    audio_str += @"    <b>Audio codec:</b> $(codec)\n";
                 } else if (audio_tags.get_string (Gst.Tags.CODEC, out codec)) {
-                    audio_str += "    <b>Audio codec:</b> %s\n".printf (codec);
+                    audio_str += @"    <b>Audio codec:</b> $(codec)\n";
                 }
 
                 uint bitrate;

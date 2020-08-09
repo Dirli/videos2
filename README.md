@@ -2,9 +2,11 @@
 
 <img src="data/screenshot.png" title="Videos2 screenshot" width="720"> </img>
 
-A new vision for the EOS video player.
+A new vision for the EOS video player. I don't want to position this app as new or unique. This is an attempt to rid the native video player of existing bugs and add in demand functionality
 * Player plays video, perhaps even better than the original
 * Added some features (such as volume control) that had no place in the original.
+* Added vaapi supports (install 'gstreamer1.0-vaapi' plugin, disabled by default)
+* Added saving playback position and ability to continue viewing from the same place
 * Should add a PreviewPopover or shouldn't... (TimeBar)
 * The library will be restored, but slightly modified (it is useless in its current form). not enough motivation yet
 

@@ -26,7 +26,7 @@
             <description>Allows you to block sleep mode</description>
         </key>
         <key type="b" name="use-vaapi">
-            <default>true</default>
+            <default>false</default>
             <summary>Manual management of vaapi support</summary>
             <description>Manual management of vaapi support</description>
         </key>
