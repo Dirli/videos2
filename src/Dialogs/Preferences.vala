@@ -39,6 +39,50 @@ namespace Videos2 {
             remember_switch.halign = Gtk.Align.START;
             main_win.settings.bind ("remember-time", remember_switch, "active", GLib.SettingsBindFlags.DEFAULT);
 
+            var library_switch = new Gtk.Switch ();
+            library_switch.halign = Gtk.Align.START;
+            main_win.settings.bind ("enable-library", library_switch, "active", GLib.SettingsBindFlags.DEFAULT);
+
+            var library_filechooser = new Gtk.FileChooserButton (_("Select Video Folder…"), Gtk.FileChooserAction.SELECT_FOLDER);
+            library_filechooser.hexpand = true;
+            library_filechooser.sensitive = library_switch.active;
+
+            if (library_switch.active) {
+                var library_path = main_win.settings.get_string ("library-path");
+                if (library_path == "") {
+                    var default_library = GLib.Environment.get_user_special_dir (GLib.UserDirectory.VIDEOS);
+                    if (default_library != null) {
+                        library_path = default_library;
+                    }
+                }
+
+                if (library_path != "") {
+                    library_filechooser.set_current_folder (library_path);
+                }
+            }
+
+            library_filechooser.notify["sensitive"].connect (() => {
+                if (library_filechooser.sensitive) {
+                    var default_library = GLib.Environment.get_user_special_dir (GLib.UserDirectory.VIDEOS);
+                    if (default_library != null) {
+                        library_filechooser.set_current_folder (default_library);
+                        main_win.settings.set_string ("library-path", default_library);
+                    }
+                } else {
+                    main_win.settings.set_string ("library-path", "");
+                }
+            });
+            library_filechooser.file_set.connect (() => {
+                string? filename = library_filechooser.get_filename ();
+                if (filename != null) {
+                    main_win.settings.set_string ("library-path", filename);
+                }
+            });
+
+            library_switch.notify["active"].connect (() => {
+                library_filechooser.sensitive = library_switch.active;
+            });
+
             vaapi_switch.tooltip_text = vaapi_switch.active ?
                                         _("if plugin found, vaapi supports enabled") :
                                         _("Vaapi supports disabled");
@@ -61,9 +105,17 @@ namespace Videos2 {
             layout.attach (new SettingsLabel (_("Use vaapi (need restart):")), 0, top);
             layout.attach (vaapi_switch, 1, top++);
 
+            layout.attach (new Gtk.Separator (Gtk.Orientation.HORIZONTAL), 0, top++, 2, 1);
+
             layout.attach (new Granite.HeaderLabel (_("Desktop Integration")), 0, top++, 2, 1);
+
             layout.attach (new SettingsLabel (_("Block sleep mode")), 0, top);
             layout.attach (sleep_mode_switch, 1, top++);
+
+            layout.attach (new SettingsLabel (_("Video library")), 0, top);
+            layout.attach (library_switch, 1, top++);
+            layout.attach (library_filechooser, 0, top++, 2, 1);
+
 
             var content = get_content_area () as Gtk.Box;
             content.add (layout);

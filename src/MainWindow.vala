@@ -8,10 +8,12 @@ namespace Videos2 {
         public GLib.Settings settings;
         private Services.Inhibitor inhibitor;
         private Services.DiskManager disk_manager;
+        private Services.LibraryManager library_manager;
         private Services.RestoreManager? restore_manager;
 
         private Gtk.Stack main_stack;
         private Views.WelcomePage welcome_page;
+        private Views.LibraryPage library_page;
 
         private uint current_h = 0;
         private uint current_w = 0;
@@ -121,13 +123,20 @@ namespace Videos2 {
             changed_remember_time ();
             inhibitor = new Services.Inhibitor (this);
             disk_manager = new Services.DiskManager ();
+            library_manager = new Services.LibraryManager ();
 
             playlist = new Objects.Playlist ();
 
             build_ui ();
 
             settings.bind ("block-sleep-mode", inhibitor, "allow-block", GLib.SettingsBindFlags.DEFAULT);
+            settings.bind ("categories-count", library_manager, "categories-count", GLib.SettingsBindFlags.DEFAULT);
+            settings.bind ("library-path", library_manager, "root-path", GLib.SettingsBindFlags.GET);
+
+            changed_library_path ();
+
             settings.changed["remember-time"].connect (changed_remember_time);
+            settings.changed["library-path"].connect (changed_library_path);
 
             playlist.play_media.connect ((uri, index) => {
                 play_uri (Enums.MediaType.VIDEO, uri);
@@ -162,6 +171,9 @@ namespace Videos2 {
                     }
                 }
             });
+
+            library_manager.item_found.connect (library_page.add_item);
+            library_manager.parents_found.connect (header_bar.add_lib_path);
 
             window_state_event.connect ((e) => {
                 if (Gdk.WindowState.FULLSCREEN in e.changed_mask) {
@@ -217,6 +229,12 @@ namespace Videos2 {
                             welcome_page.update_media_button (false);
                         }
                         break;
+                    case 3:
+                        library_page.clear_box ();
+                        library_manager.init ();
+                        main_stack.set_visible_child_name ("library");
+                        break;
+
                 }
             });
 
@@ -278,7 +296,12 @@ namespace Videos2 {
                     if (fullscreened) {
                         unfullscreen ();
                     }
-                    main_stack.set_visible_child_name ("welcome");
+
+                    if (header_bar.navigation_label == Constants.NAV_BUTTON_WELCOME) {
+                        main_stack.set_visible_child_name ("welcome");
+                    } else if (header_bar.navigation_label == Constants.NAV_BUTTON_LIBRARY) {
+                        main_stack.set_visible_child_name ("library");
+                    }
 
                     // inhibitor.uninhibit ();
                 }
@@ -346,12 +369,24 @@ namespace Videos2 {
             player_page.add_overlay (top_bar);
             player_page.add_overlay (info_bar);
 
+            library_page = new Views.LibraryPage ();
+            library_page.select_category.connect (on_select_category);
+
+            library_page.select_media.connect ((uri) => {
+                action_clear ();
+                header_bar.navigation_label = Constants.NAV_BUTTON_LIBRARY;
+                playlist.add_media (GLib.File.new_for_uri (uri), true);
+            });
+
+            header_bar.select_category.connect (on_select_category);
+
             main_stack = new Gtk.Stack ();
             main_stack.transition_type = Gtk.StackTransitionType.SLIDE_LEFT_RIGHT;
             main_stack.expand = true;
 
             main_stack.add_named (welcome_page, "welcome");
             main_stack.add_named (player_page, "player");
+            main_stack.add_named (library_page, "library");
 
             main_stack.show_all ();
             main_stack.notify["visible-child-name"].connect (on_changed_child);
@@ -394,7 +429,9 @@ namespace Videos2 {
         }
 
         private void action_back () {
-            if (main_stack.get_visible_child_name () != "welcome") {
+            var v_child = main_stack.get_visible_child_name ();
+
+            if (v_child == "player") {
                 var state = player.get_playbin_state ();
                 if (state == Gst.State.PLAYING || state == Gst.State.PAUSED) {
                     if (media_type == Enums.MediaType.VIDEO && restore_manager != null) {
@@ -404,6 +441,8 @@ namespace Videos2 {
 
                     player.stop ();
                 }
+            } else if (v_child == "library") {
+                main_stack.set_visible_child_name ("welcome");
             }
         }
 
@@ -451,6 +490,7 @@ namespace Videos2 {
         private void on_changed_child () {
             var view_name = main_stack.get_visible_child_name ();
             header_bar.navigation_visible = (view_name != "welcome");
+            header_bar.library_button_visible = view_name == "library";
 
             switch (view_name) {
                 case "welcome":
@@ -459,11 +499,14 @@ namespace Videos2 {
                 case "player":
                     //
                     break;
+                case "library":
+                    header_bar.navigation_label = Constants.NAV_BUTTON_WELCOME;
+                    break;
             }
         }
 
         private void on_navigation_clicked () {
-            if (header_bar.navigation_label == Constants.NAV_BUTTON_WELCOME) {
+            if (header_bar.navigation_label == Constants.NAV_BUTTON_WELCOME || header_bar.navigation_label == Constants.NAV_BUTTON_LIBRARY) {
                 action_back ();
             } else if (header_bar.navigation_label == Constants.NAV_BUTTON_BACK) {
                 var pos = restore_manager.restore_position;
@@ -479,6 +522,11 @@ namespace Videos2 {
             }
         }
 
+        private void on_select_category (string uri) {
+            library_page.clear_box ();
+            library_manager.init (uri);
+        }
+
         private void changed_remember_time () {
             if (settings.get_boolean ("remember-time")) {
                 if (restore_manager == null) {
@@ -489,6 +537,18 @@ namespace Videos2 {
                     restore_manager.clear_cache ();
                 }
                 restore_manager = null;
+            }
+        }
+
+        private void changed_library_path () {
+            if (settings.get_string ("library-path") == "") {
+                if (main_stack.get_visible_child_name () == "library") {
+                    main_stack.set_visible_child_name ("welcome");
+                }
+
+                welcome_page.update_library_button (false);
+            } else {
+                welcome_page.update_library_button (true);
             }
         }
 

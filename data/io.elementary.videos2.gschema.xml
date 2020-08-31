@@ -30,5 +30,20 @@
             <summary>Manual management of vaapi support</summary>
             <description>Manual management of vaapi support</description>
         </key>
+        <key type="b" name="enable-library">
+            <default>false</default>
+            <summary>Adds a video library as a source</summary>
+            <description>Adds a video library as a source</description>
+        </key>
+        <key type="s" name="library-path">
+            <default>""</default>
+            <summary>Path to the video library</summary>
+            <description>Path to the video library</description>
+        </key>
+        <key type="i" name="categories-count">
+            <default>2</default>
+            <summary>Number of categories in the library</summary>
+            <description>Number of categories in the library</description>
+        </key>
     </schema>
 </schemalist>

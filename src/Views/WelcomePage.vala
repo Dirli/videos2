@@ -1,7 +1,6 @@
 namespace Videos2 {
     public class Views.WelcomePage : Granite.Widgets.Welcome {
         private Granite.Widgets.WelcomeButton replay_button;
-        private Granite.Widgets.WelcomeButton media_button;
 
         public WelcomePage () {
             Object (
@@ -14,13 +13,17 @@ namespace Videos2 {
             append ("document-open", _("Open file"), _("Open a saved file."));
             append ("media-playlist-repeat", _("Replay last video"), "");
             append ("media-cdrom", _("Play from Disc"), _("Watch a DVD or open a file from disc"));
+            append ("folder-videos", _("Browse Library"), _("Watch a movie from your library"));
 
             replay_button = get_button_from_index (1);
-            media_button = get_button_from_index (2);
         }
 
         public void update_media_button (bool show_media) {
             set_item_visible (2, show_media);
+        }
+
+        public void update_library_button (bool show_library) {
+            set_item_visible (3, show_library);
         }
 
         public void update_replay_button (string current_video) {

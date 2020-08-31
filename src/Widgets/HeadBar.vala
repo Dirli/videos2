@@ -4,10 +4,14 @@ namespace Videos2 {
         public signal void audio_selected (int i);
         public signal void subtitle_selected (int i);
         public signal void show_preferences ();
+        public signal void select_category (string uri);
 
         private Gtk.Button nav_button;
+        private Gtk.MenuButton lib_nav_button;
         private Gtk.ComboBoxText audio_streams;
         private Gtk.ComboBoxText sub_streams;
+
+        private Gtk.Box lib_nav_box;
 
         public bool navigation_visible {
             set {
@@ -16,6 +20,22 @@ namespace Videos2 {
                         nav_button.show ();
                     } else {
                         nav_button.hide ();
+                    }
+                }
+            }
+        }
+
+        public bool library_button_visible {
+            set {
+                if (lib_nav_button.visible != value) {
+                    if (value) {
+                        if (lib_nav_box.get_children ().length () == 0) {
+                            return;
+                        }
+
+                        lib_nav_button.show ();
+                    } else {
+                        lib_nav_button.hide ();
                     }
                 }
             }
@@ -86,11 +106,12 @@ namespace Videos2 {
             popover_menu.add (menu_grid);
 
             var menu_button = new Gtk.MenuButton ();
-            menu_button.image = new Gtk.Image.from_icon_name ("open-menu-symbolic", Gtk.IconSize.LARGE_TOOLBAR);
+            menu_button.image = new Gtk.Image.from_icon_name ("open-menu-symbolic", Gtk.IconSize.SMALL_TOOLBAR);
             menu_button.popover = popover_menu;
             menu_button.valign = Gtk.Align.CENTER;
 
             pack_end (menu_button);
+
 
             show_all ();
 
@@ -103,7 +124,19 @@ namespace Videos2 {
                 navigation_clicked ();
             });
 
+            lib_nav_box = new Gtk.Box (Gtk.Orientation.VERTICAL, 0);
+            lib_nav_box.show_all ();
+
+            var popover_lib_nav = new Gtk.Popover (null);
+            popover_lib_nav.add (lib_nav_box);
+
+            lib_nav_button = new Gtk.MenuButton ();
+            lib_nav_button.image = new Gtk.Image.from_icon_name ("go-down-symbolic", Gtk.IconSize.SMALL_TOOLBAR);
+            lib_nav_button.popover = popover_lib_nav;
+            lib_nav_button.valign = Gtk.Align.CENTER;
+
             pack_start (nav_button);
+            pack_start (lib_nav_button);
 
             audio_streams.changed.connect (on_audio_changed);
             sub_streams.changed.connect (on_subtitles_changed);
@@ -241,6 +274,33 @@ namespace Videos2 {
             int count = sub_streams.model.iter_n_children (null);
             if (count > 0) {
                 sub_streams.active = (sub_streams.active + 1) % count;
+            }
+        }
+
+        public void add_lib_path (GLib.Array<GLib.File> paths) {
+            foreach (unowned Gtk.Widget item in lib_nav_box.get_children ()) {
+                lib_nav_box.remove (item);
+            }
+
+            if (paths.length == 0) {
+                library_button_visible = false;
+            } else {
+                for (int i = 0; i < paths.length; i++) {
+                    GLib.File f = paths.index (i);
+
+                    var lib_path_button = new Gtk.ModelButton ();
+
+                    lib_path_button.text = f.get_basename ();
+                    lib_path_button.clicked.connect (() => {
+                        select_category (f.get_uri ());
+                    });
+
+                    lib_path_button.show_all ();
+
+                    lib_nav_box.add (lib_path_button);
+                }
+
+                library_button_visible = true;
             }
         }
     }

@@ -3,4 +3,9 @@ namespace Videos2.Enums {
         VIDEO,
         DVD,
     }
+
+    public enum ItemType {
+        CATEGORY,
+        MEDIA,
+    }
 }
