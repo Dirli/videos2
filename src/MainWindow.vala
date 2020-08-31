@@ -17,6 +17,7 @@ namespace Videos2 {
 
         private uint current_h = 0;
         private uint current_w = 0;
+        private uint cursor_timer = 0;
 
         private Widgets.Player player;
         private Widgets.HeadBar header_bar;
@@ -36,6 +37,12 @@ namespace Videos2 {
                 // } else if (!value && bottom_bar.child_revealed) {
                 } else {
                     top_bar.reveal_child = false;
+                }
+
+                if (!value) {
+                    show_mouse_cursor ();
+                } else {
+                    hide_mouse_cursor ();
                 }
             }
         }
@@ -308,6 +315,9 @@ namespace Videos2 {
             });
             player.motion_notify_event.connect ((event) => {
                 bottom_bar.reveal_control ();
+                if (fullscreened && cursor_timer == 0) {
+                    show_mouse_cursor ();
+                }
                 return false;
             });
             player.duration_changed.connect (bottom_bar.change_duration);
@@ -695,6 +705,28 @@ namespace Videos2 {
             }
 
             return false;
+        }
+
+        private void hide_mouse_cursor () {
+            var cursor = new Gdk.Cursor.for_display (get_window ().get_display (), Gdk.CursorType.BLANK_CURSOR);
+            get_window ().set_cursor (cursor);
+        }
+
+        private void show_mouse_cursor () {
+            if (cursor_timer != 0) {
+                GLib.Source.remove (cursor_timer);
+                cursor_timer = 0;
+            }
+
+            get_window ().set_cursor (null);
+            if (fullscreened) {
+                cursor_timer = GLib.Timeout.add (4000, () => {
+                    hide_mouse_cursor ();
+                    cursor_timer = 0;
+
+                    return false;
+                });
+            }
         }
 
         public void save_playlist () {
