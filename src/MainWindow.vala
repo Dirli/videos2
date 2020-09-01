@@ -34,7 +34,6 @@ namespace Videos2 {
                 _fullscreened = value;
                 if (value && bottom_bar.child_revealed) {
                     top_bar.reveal_child = true;
-                // } else if (!value && bottom_bar.child_revealed) {
                 } else {
                     top_bar.reveal_child = false;
                 }
@@ -296,8 +295,6 @@ namespace Videos2 {
                     if (is_maximized) {
                         fullscreen ();
                     }
-
-                    // inhibitor.inhibit ();
                 } else {
                     title = _("Videos");
                     if (fullscreened) {
@@ -309,8 +306,6 @@ namespace Videos2 {
                     } else if (header_bar.navigation_label == Constants.NAV_BUTTON_LIBRARY) {
                         main_stack.set_visible_child_name ("library");
                     }
-
-                    // inhibitor.uninhibit ();
                 }
             });
             player.motion_notify_event.connect ((event) => {
@@ -423,12 +418,19 @@ namespace Videos2 {
         }
 
         private void action_quit (GLib.SimpleAction action, GLib.Variant? pars) {
+            bool save_current_state;
+            pars.@get ("b", out save_current_state);
+
+            save_current_state = save_current_state && !is_privacy_mode_enabled ();
+
             if (player.get_playbin_state () == Gst.State.PLAYING || player.get_playbin_state () == Gst.State.PAUSED) {
+                if (save_current_state) {
+                    save_current_position (true);
+                }
+
                 player.stop ();
             }
 
-            bool save_current_state;
-            pars.@get ("b", out save_current_state);
             if (!save_current_state) {
                 settings.set_string ("current-uri", "");
             } else {
@@ -444,10 +446,7 @@ namespace Videos2 {
             if (v_child == "player") {
                 var state = player.get_playbin_state ();
                 if (state == Gst.State.PLAYING || state == Gst.State.PAUSED) {
-                    if (media_type == Enums.MediaType.VIDEO && restore_manager != null) {
-                        int64 current_position = player.position;
-                        restore_manager.push (settings.get_string ("current-uri"), current_position);
-                    }
+                    save_current_position (false);
 
                     player.stop ();
                 }
@@ -721,6 +720,10 @@ namespace Videos2 {
             get_window ().set_cursor (null);
             if (fullscreened) {
                 cursor_timer = GLib.Timeout.add (4000, () => {
+                    if (fullscreened && bottom_bar.child_revealed) {
+                        return true;
+                    }
+
                     hide_mouse_cursor ();
                     cursor_timer = 0;
 
@@ -729,19 +732,36 @@ namespace Videos2 {
             }
         }
 
-        public void save_playlist () {
+        private void save_current_position (bool synchronously) {
+            if (media_type == Enums.MediaType.VIDEO && restore_manager != null) {
+                int64 current_position = player.position;
+                if (synchronously) {
+                    restore_manager.push (settings.get_string ("current-uri"), current_position);
+                } else {
+                    restore_manager.push_async (settings.get_string ("current-uri"), current_position);
+                }
+            }
+        }
+
+        public bool save_playlist () {
             if (is_privacy_mode_enabled ()) {
-                return;
+                return true;
             }
 
             var uris = playlist.get_medias ();
             settings.set_strv ("last-played-videos", uris);
+
+            return false;
         }
 
         public override bool delete_event (Gdk.EventAny event) {
-            save_playlist ();
+            bool privacy = save_playlist ();
 
             if (player.get_playbin_state () == Gst.State.PLAYING || player.get_playbin_state () == Gst.State.PAUSED) {
+                if (!privacy) {
+                    save_current_position (true);
+                }
+
                 player.stop ();
             }
 

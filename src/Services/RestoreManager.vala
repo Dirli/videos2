@@ -41,36 +41,32 @@ namespace Videos2 {
         }
 
         private void save_cache () {
-            new GLib.Thread<void*> ("save_cache", () => {
-                if (cache.size == 0) {
-                    return null;
+            if (cache.size == 0) {
+                return;
+            }
+
+            GLib.File cache_file = Utils.get_cache_directory ().get_child ("p_cache");
+
+            try {
+                if (cache_file.query_exists ()) {
+                    cache_file.delete ();
                 }
 
-                GLib.File cache_file = Utils.get_cache_directory ().get_child ("p_cache");
+                var dos = new GLib.DataOutputStream (cache_file.create (GLib.FileCreateFlags.REPLACE_DESTINATION));
 
-                try {
-                    if (cache_file.query_exists ()) {
-                        cache_file.delete ();
+                cache.foreach ((entry) => {
+                    try {
+                        dos.put_string (@"$(entry.key)=$(entry.value)\n");
+                    } catch (Error e) {
+                        warning (e.message);
                     }
 
-                    var dos = new GLib.DataOutputStream (cache_file.create (GLib.FileCreateFlags.REPLACE_DESTINATION));
+                    return true;
+                });
 
-                    cache.foreach ((entry) => {
-                        try {
-                            dos.put_string (@"$(entry.key)=$(entry.value)\n");
-                        } catch (Error e) {
-                            warning (e.message);
-                        }
-
-                        return true;
-                    });
-
-                } catch (Error e) {
-                    warning ("Error: %s\n", e.message);
-                }
-
-                return null;
-            });
+            } catch (Error e) {
+                warning ("Error: %s\n", e.message);
+            }
         }
 
         public void clear_cache () {
@@ -87,6 +83,19 @@ namespace Videos2 {
             }
         }
 
+        public void push_async (string uri, int64 position) {
+            if (uri == "" || position == 0) {
+                return;
+            }
+
+            cache[uri.hash ()] = position;
+
+            new GLib.Thread<void*> ("save_cache", () => {
+                save_cache ();
+                return null;
+            });
+        }
+
         public void push (string uri, int64 position) {
             if (uri == "" || position == 0) {
                 return;
@@ -94,10 +103,7 @@ namespace Videos2 {
 
             cache[uri.hash ()] = position;
 
-            GLib.Timeout.add (1000, () => {
-                save_cache ();
-                return false;
-            });
+            save_cache ();
         }
 
         public bool pull (string uri) {
