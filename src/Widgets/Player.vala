@@ -9,6 +9,7 @@ namespace Videos2 {
         public signal void ended_stream ();
 
         private uint progress_timer = 0;
+        private int err_count = 0;
 
         private int64 duration_cache = -1;
 
@@ -62,8 +63,6 @@ namespace Videos2 {
             });
             playbin.set_property ("subtitle-font-desc", "Sans 16");
 
-            // unowned Gst.Registry registry = Gst.Registry.@get ();
-            // var gst_plugin = registry.find_plugin ("vaapi");
             if (has_vaapi) {
                 video_area = new Gtk.DrawingArea ();
                 video_area.realize.connect (on_realize);
@@ -125,6 +124,8 @@ namespace Videos2 {
         }
 
         public void set_uri (string uri) {
+            err_count = 0;
+
             duration_cache = -1;
             playbin_state_change (Gst.State.READY, false);
             playbin.uri = uri;
@@ -214,6 +215,8 @@ namespace Videos2 {
                 return;
             }
 
+            err_count = 0;
+
             stop_timer ();
             position = val;
             start_timer ();
@@ -224,6 +227,8 @@ namespace Videos2 {
             if (cur_state != Gst.State.PLAYING && cur_state != Gst.State.PAUSED) {
                 return;
             }
+
+            err_count = 0;
 
             var offset = Utils.sec_to_nano ((int64) seconds);
 
@@ -240,8 +245,6 @@ namespace Videos2 {
         private void playbin_state_change (Gst.State state, bool emit) {
             playbin.set_state (state);
 
-            // playback_state = state;
-
             if (state == Gst.State.PLAYING) {
                 start_timer ();
             } else {
@@ -251,7 +254,6 @@ namespace Videos2 {
             if (state != Gst.State.NULL && emit) {
                 playbin_state_changed (state);
             }
-
         }
 
         public unowned Gst.State get_playbin_state () {
@@ -286,6 +288,16 @@ namespace Videos2 {
                     string debug;
                     message.parse_error (out err, out debug);
                     warning ("Error: %s\n%s\n", err.message, debug);
+
+                    // Error: Decoding error
+                    // this is an abstract number. I still don't understand what
+                    // to do with this error, whether it is possible to restart
+                    // playback without a counter
+                    if (err.code == 7 && err_count++ < 50) {
+                        playbin.set_state (Gst.State.PLAYING);
+                        return true;
+                    }
+
                     ended_stream ();
                     break;
                 case Gst.MessageType.EOS:
