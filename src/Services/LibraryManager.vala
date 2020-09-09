@@ -111,7 +111,9 @@ namespace Videos2 {
                     } else {
                         string mime_type = file_info.get_content_type ();
                         if (!file_info.get_is_hidden () && mime_type.contains ("video")) {
-                            item_found (Enums.ItemType.MEDIA, file_info.get_name (),  directory.get_uri () + "/" + file_info.get_name ().replace ("#", "%23").replace ("%", "%25"));
+                            item_found (Enums.ItemType.MEDIA,
+                                        file_info.get_name (),
+                                        directory.get_uri () + "/" + file_info.get_name ().replace ("#", "%23").replace ("%", "%25"));
                         }
                     }
                 }

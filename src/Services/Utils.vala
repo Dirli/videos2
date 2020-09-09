@@ -1,4 +1,49 @@
 namespace Videos2.Utils {
+    public Gdk.Pixbuf? get_poster_from_file (string poster_path) {
+        Gdk.Pixbuf? pixbuf = null;
+
+        if (GLib.FileUtils.test (poster_path, GLib.FileTest.EXISTS)) {
+            try {
+                pixbuf = new Gdk.Pixbuf.from_file_at_scale (poster_path, -1, Constants.POSTER_HEIGHT, true);
+            } catch (Error e) {
+                warning (e.message);
+            }
+
+            if (pixbuf == null) {
+                return null;
+            }
+
+            int width = pixbuf.width;
+            if (width > Constants.POSTER_WIDTH) {
+                int x_offset = (width - Constants.POSTER_WIDTH) / 2;
+                pixbuf = new Gdk.Pixbuf.subpixbuf (pixbuf, x_offset, 0, Constants.POSTER_WIDTH, Constants.POSTER_HEIGHT);
+            }
+        }
+
+        return pixbuf;
+    }
+
+    public static string format_bytes (int64 bytes) {
+        string[] sizes = { "B", "KB", "MB", "GB", "TB" };
+        double len = (double) bytes;
+        int order = 0;
+        string bytes_str = "";
+
+        while (len >= 1024 && order < sizes.length - 1) {
+            order++;
+            len = len / 1024;
+        }
+
+        if (bytes < 0) {
+            len = 0;
+            order = 0;
+        }
+
+        bytes_str = "%.2f %s".printf (len, sizes[order]);
+
+        return bytes_str;
+    }
+
     public bool check_media (GLib.File media, out string filename, out string type) {
         type = "";
         filename = "";

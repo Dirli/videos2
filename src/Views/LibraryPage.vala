@@ -4,11 +4,15 @@ namespace Videos2 {
         public signal void select_media (string uri);
         public signal void play_media (string[] medias);
 
+        private bool exist_poster = true;
+        private string poster_path = "";
+
         private Gtk.ListBox movies_list;
+        private Widgets.MovieGrid movie_grid;
         private Gtk.ListBox categories_list;
         private Gtk.Box categories_box;
 
-        private Gtk.ScrolledWindow scrolled_window;
+        private Tumbler? thumbnail;
 
         public LibraryPage () {
             Object (orientation: Gtk.Orientation.HORIZONTAL,
@@ -16,20 +20,41 @@ namespace Videos2 {
         }
 
         construct {
-            scrolled_window = new Gtk.ScrolledWindow (null, null);
+            try {
+                thumbnail = GLib.Bus.get_proxy_sync (GLib.BusType.SESSION,
+                                                     Constants.THUMBNAILER_IFACE,
+                                                     Constants.THUMBNAILER_SERVICE);
+
+                thumbnail.finished.connect ((handle) => {
+                    if (!exist_poster && poster_path != "") {
+                        set_poster ();
+                    }
+                });
+                thumbnail.ready.connect ((handle, uris) => {
+                    // foreach (var uri in uris) {
+                    //
+                    // }
+                });
+
+            } catch (Error e) {
+                warning (e.message);
+                thumbnail = null;
+            }
+
+            var movies_pane = new Gtk.Paned (Gtk.Orientation.VERTICAL);
+
+            movie_grid = new Widgets.MovieGrid ();
+
+            var scrolled_window = new Gtk.ScrolledWindow (null, null);
             scrolled_window.expand = true;
             scrolled_window.margin_start = 6;
 
             movies_list = new Gtk.ListBox ();
             movies_list.selection_mode = Gtk.SelectionMode.BROWSE;
             movies_list.activate_on_single_click = false;
+            movies_list.row_selected.connect (on_row_selected);
             movies_list.row_activated.connect ((item) => {
                 select_media (item.name);
-            });
-            movies_list.row_selected.connect ((item) => {
-                if (item != null) {
-                    //
-                }
             });
 
             scrolled_window.add (movies_list);
@@ -55,8 +80,73 @@ namespace Videos2 {
             services_box.hexpand = false;
             services_box.add (categories_box);
 
+            movies_pane.pack1 (movie_grid, false, false);
+            movies_pane.pack2 (scrolled_window, true, false);
+
             pack1 (services_box, false, false);
-            pack2 (scrolled_window, true, false);
+            pack2 (movies_pane, true, false);
+
+            GLib.Idle.add (() => {
+                on_row_selected (null);
+
+                return false;
+            });
+        }
+
+        private void on_row_selected (Gtk.ListBoxRow? item) {
+            movie_grid.set_poster (null);
+            exist_poster = true;
+            poster_path = "";
+
+            if (item == null) {
+                movie_grid.hide ();
+                return;
+            }
+
+            var selected_file = GLib.File.new_for_uri (item.name);
+
+            try {
+                var file_info = selected_file.query_info (
+                    "standard::*," + GLib.FileAttribute.STANDARD_CONTENT_TYPE + "," + GLib.FileAttribute.STANDARD_SIZE,
+                    GLib.FileQueryInfoFlags.NONE
+                );
+
+                movie_grid.set_info (file_info.get_name (),
+                                     Utils.format_bytes (file_info.get_size ()));
+
+                var uri = selected_file.get_uri ();
+                var discoverer_info = Utils.get_discoverer_info (uri);
+                if (discoverer_info != null) {
+                    var media_info = "";
+
+                    media_info += Utils.prepare_video_info (discoverer_info);
+                    media_info += Utils.prepare_audio_info (discoverer_info);
+                    media_info += Utils.prepare_sub_info (discoverer_info);
+
+                    movie_grid.show_media_info (media_info);
+                }
+
+                var poster_hash = GLib.Checksum.compute_for_string (ChecksumType.MD5, uri, uri.length);
+                poster_path = Path.build_filename (GLib.Environment.get_user_cache_dir (),
+                                                   "thumbnails",
+                                                   "large",
+                                                   poster_hash + ".png");
+
+                if (!set_poster ()) {
+                    Gee.ArrayList<string> uris = new Gee.ArrayList<string> ();
+                    Gee.ArrayList<string> mimes = new Gee.ArrayList<string> ();
+
+                    uris.add (selected_file.get_uri ());
+                    mimes.add (file_info.get_content_type ());
+
+                    instand (uris, mimes, "large");
+                    exist_poster = false;
+                }
+
+                movie_grid.show_all ();
+            } catch (Error e) {
+                warning (e.message);
+            }
         }
 
         public void add_item (Enums.ItemType i_type, string title, string uri) {
@@ -93,6 +183,31 @@ namespace Videos2 {
             }
 
             categories_box.hide ();
+        }
+
+
+        private bool set_poster () {
+            if (!GLib.FileUtils.test (poster_path, GLib.FileTest.EXISTS)) {
+                return false;
+            }
+
+            exist_poster = true;
+
+            var poster = Utils.get_poster_from_file (poster_path);
+
+            if (poster != null) {
+                movie_grid.set_poster (poster);
+            }
+
+            return true;
+        }
+
+        public void instand (Gee.ArrayList<string> uris, Gee.ArrayList<string> mimes, string size) {
+            if (thumbnail == null) {
+                return;
+            }
+
+            thumbnail.queue.begin (uris.to_array (), mimes.to_array (), size, "default", 0);
         }
     }
 }
