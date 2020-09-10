@@ -134,6 +134,14 @@ namespace Videos2.Utils {
         return cache_dir;
     }
 
+    public inline int64 nano_to_sec (int64 nanoseconds) {
+        if (nanoseconds == 0) {
+            return 0;
+        }
+
+        return nanoseconds * Constants.SEC_INV / Constants.NANO_INV;
+    }
+
     public inline int64 sec_to_nano (int64 seconds) {
         return (int64) (seconds * Constants.NANO_INV / Constants.SEC_INV);
     }

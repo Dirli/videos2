@@ -56,6 +56,7 @@ namespace Videos2 {
             movies_list.row_activated.connect ((item) => {
                 select_media (item.name);
             });
+            movies_list.set_sort_func (list_sort_func);
 
             scrolled_window.add (movies_list);
 
@@ -111,8 +112,8 @@ namespace Videos2 {
                     GLib.FileQueryInfoFlags.NONE
                 );
 
-                movie_grid.set_info (file_info.get_name (),
-                                     Utils.format_bytes (file_info.get_size ()));
+                movie_grid.movie_label = file_info.get_name ();
+                movie_grid.movie_size = Utils.format_bytes (file_info.get_size ());
 
                 var uri = selected_file.get_uri ();
                 var discoverer_info = Utils.get_discoverer_info (uri);
@@ -123,7 +124,18 @@ namespace Videos2 {
                     media_info += Utils.prepare_audio_info (discoverer_info);
                     media_info += Utils.prepare_sub_info (discoverer_info);
 
-                    movie_grid.show_media_info (media_info);
+                    uint64 duration = discoverer_info.get_duration ();
+                    if (duration == 0) {
+                        var tags = discoverer_info.get_tags ();
+                        if (tags != null && !tags.get_uint64 (Gst.Tags.DURATION, out duration)) {
+                            duration = 0;
+                        }
+                    }
+
+                    var m_length = Utils.nano_to_sec ((int64) duration);
+
+                    movie_grid.movie_length = Granite.DateTime.seconds_to_time ((int) m_length);
+                    movie_grid.movie_info = media_info;
                 }
 
                 var poster_hash = GLib.Checksum.compute_for_string (ChecksumType.MD5, uri, uri.length);
@@ -185,6 +197,9 @@ namespace Videos2 {
             categories_box.hide ();
         }
 
+        private int list_sort_func (Gtk.ListBoxRow row1, Gtk.ListBoxRow row2) {
+            return strcmp (row1.name, row2.name);
+        }
 
         private bool set_poster () {
             if (!GLib.FileUtils.test (poster_path, GLib.FileTest.EXISTS)) {

@@ -2,9 +2,32 @@ namespace Videos2 {
     public class Widgets.MovieGrid : Gtk.Box {
         private Gtk.Image poster;
 
-        private Gtk.Label movie_label;
-        private Gtk.Label movie_size;
-        private Gtk.Label movie_info;
+        private Gtk.Label _movie_label;
+        public string movie_label {
+            set {
+                _movie_label.label = value;
+            }
+        }
+        private Gtk.Label _movie_size;
+        public string movie_size {
+            set {
+                _movie_size.label = "Size: " + value;
+            }
+        }
+
+        private Gtk.Label _movie_length;
+        public string movie_length {
+            set {
+                _movie_length.label = "Length: " + value;
+            }
+        }
+
+        private Gtk.Label _movie_info;
+        public string movie_info {
+            set {
+                _movie_info.set_markup (value);
+            }
+        }
 
         private string _movie_uri;
         public string movie_uri {
@@ -25,18 +48,19 @@ namespace Videos2 {
         }
 
         construct {
-            movie_label = new Gtk.Label ("");
-            movie_label.ellipsize = Pango.EllipsizeMode.MIDDLE;
-            movie_size = new Gtk.Label ("");
-            movie_size.halign = Gtk.Align.START;
+            _movie_label = new Gtk.Label ("");
+            _movie_label.ellipsize = Pango.EllipsizeMode.MIDDLE;
+            _movie_label.get_style_context ().add_class (Granite.STYLE_CLASS_H4_LABEL);
 
-            movie_info = new Gtk.Label ("");
-            movie_info.halign = Gtk.Align.START;
+            _movie_size = new Gtk.Label ("");
+            _movie_length = new Gtk.Label ("");
+
+            _movie_info = new Gtk.Label ("");
+            _movie_info.halign = Gtk.Align.START;
 
             var scrolled_window = new Gtk.ScrolledWindow (null, null);
             scrolled_window.expand = true;
-            // scrolled_window.margin_start = 6;
-            scrolled_window.add (movie_info);
+            scrolled_window.add (_movie_info);
 
             poster = new Gtk.Image ();
             poster.height_request = 256;
@@ -46,10 +70,16 @@ namespace Videos2 {
             style_context.add_class (Granite.STYLE_CLASS_CARD);
             style_context.add_class ("default-thumbnail");
 
+            var info_box = new Gtk.Box (Gtk.Orientation.HORIZONTAL, 24);
+            info_box.halign = Gtk.Align.CENTER;
+
+            info_box.add (_movie_length);
+            info_box.add (_movie_size);
+
             var info_wrap = new Gtk.Box (Gtk.Orientation.VERTICAL, 6);
 
-            info_wrap.add (movie_label);
-            info_wrap.add (movie_size);
+            info_wrap.add (_movie_label);
+            info_wrap.add (info_box);
             info_wrap.add (scrolled_window);
 
             add (poster);
@@ -58,15 +88,6 @@ namespace Videos2 {
 
         public void set_poster (Gdk.Pixbuf? new_poster) {
             poster.set_from_pixbuf (new_poster);
-        }
-
-        public void set_info (string lbl, string size) {
-            movie_label.label = lbl;
-            movie_size.label = "Size: " + size;
-        }
-
-        public void show_media_info (string info) {
-            movie_info.set_markup (info);
         }
     }
 }
