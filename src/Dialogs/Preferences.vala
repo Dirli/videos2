@@ -91,6 +91,11 @@ namespace Videos2 {
             sleep_mode_switch.halign = Gtk.Align.START;
             main_win.settings.bind ("block-sleep-mode", sleep_mode_switch, "active", GLib.SettingsBindFlags.DEFAULT);
 
+            var categories_btn = new Gtk.SpinButton.with_range (0, 10, 1);
+            categories_btn.halign = Gtk.Align.END;
+            categories_btn.set_width_chars (4);
+            main_win.settings.bind ("categories-count", categories_btn, "value", SettingsBindFlags.DEFAULT);
+
             var layout = new Gtk.Grid ();
             layout.column_spacing = 12;
             layout.margin = 6;
@@ -116,6 +121,8 @@ namespace Videos2 {
             layout.attach (library_switch, 1, top++);
             layout.attach (library_filechooser, 0, top++, 2, 1);
 
+            layout.attach (new SettingsLabel (_("Categories count")), 0, top);
+            layout.attach (categories_btn, 1, top++);
 
             var content = get_content_area () as Gtk.Box;
             content.add (layout);

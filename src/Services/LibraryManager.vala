@@ -3,7 +3,10 @@ namespace Videos2 {
         public signal void item_found (Enums.ItemType i_type, string title, string uri);
         public signal void parents_found (GLib.Array<GLib.File> paths);
 
-        private string current_uri;
+        public string current_uri {
+            get;
+            private set;
+        }
 
         private string root_uri;
         public string root_path {
@@ -13,17 +16,25 @@ namespace Videos2 {
             }
         }
 
+        private int _categories_count;
         public int categories_count {
-            get; set;
+            get {
+                return _categories_count;
+            }
+            set {
+                _categories_count = value;
+                current_uri = "";
+            }
         }
 
         public int cat_count = 0;
 
-        public LibraryManager () {
+        public LibraryManager (int c_count) {
+            _categories_count = c_count;
             current_uri = "";
         }
 
-        public void init (string uri = "") {
+        public void init (string uri) {
             if (root_uri == "") {
                 return;
             }
@@ -111,9 +122,11 @@ namespace Videos2 {
                     } else {
                         string mime_type = file_info.get_content_type ();
                         if (!file_info.get_is_hidden () && mime_type.contains ("video")) {
+                            var f_name = file_info.get_name ();
+                            var f_uri = directory.get_uri () + "/" + file_info.get_name ().replace ("#", "%23").replace ("%", "%25");
                             item_found (Enums.ItemType.MEDIA,
-                                        file_info.get_name (),
-                                        directory.get_uri () + "/" + file_info.get_name ().replace ("#", "%23").replace ("%", "%25"));
+                                        f_name,
+                                        f_uri);
                         }
                     }
                 }

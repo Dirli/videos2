@@ -129,20 +129,20 @@ namespace Videos2 {
             changed_remember_time ();
             inhibitor = new Services.Inhibitor (this);
             disk_manager = new Services.DiskManager ();
-            library_manager = new Services.LibraryManager ();
+            library_manager = new Services.LibraryManager (settings.get_int ("categories-count"));
 
             playlist = new Objects.Playlist ();
 
             build_ui ();
 
             settings.bind ("block-sleep-mode", inhibitor, "allow-block", GLib.SettingsBindFlags.DEFAULT);
-            settings.bind ("categories-count", library_manager, "categories-count", GLib.SettingsBindFlags.DEFAULT);
             settings.bind ("library-path", library_manager, "root-path", GLib.SettingsBindFlags.GET);
 
             changed_library_path ();
 
             settings.changed["remember-time"].connect (changed_remember_time);
             settings.changed["library-path"].connect (changed_library_path);
+            settings.changed["categories-count"].connect (changed_categories_count);
 
             playlist.play_media.connect ((uri, index) => {
                 play_uri (Enums.MediaType.VIDEO, uri);
@@ -180,6 +180,7 @@ namespace Videos2 {
 
             library_manager.item_found.connect (library_page.add_item);
             library_manager.parents_found.connect (header_bar.add_lib_path);
+            library_manager.notify["current-uri"].connect (changed_current_catagory);
 
             window_state_event.connect ((e) => {
                 if (Gdk.WindowState.FULLSCREEN in e.changed_mask) {
@@ -236,8 +237,6 @@ namespace Videos2 {
                         }
                         break;
                     case 3:
-                        library_page.clear_box ();
-                        library_manager.init ();
                         main_stack.set_visible_child_name ("library");
                         break;
 
@@ -296,7 +295,6 @@ namespace Videos2 {
                         fullscreen ();
                     }
                 } else {
-                    title = _("Videos");
                     if (fullscreened) {
                         unfullscreen ();
                     }
@@ -328,7 +326,7 @@ namespace Videos2 {
                     }
                 } else {
                     header_bar.clear_meta ();
-                    title = _("Videos");
+                    // title = _("Videos");
                 }
             });
             player.audio_changed.connect (header_bar.set_active_audio);
@@ -504,12 +502,16 @@ namespace Videos2 {
             switch (view_name) {
                 case "welcome":
                     resize (960, 540);
+                    title = _("Videos");
                     break;
                 case "player":
                     //
                     break;
                 case "library":
+                    resize (960, 540);
                     header_bar.navigation_label = Constants.NAV_BUTTON_WELCOME;
+                    changed_current_catagory ();
+                    on_select_category ("");
                     break;
             }
         }
@@ -533,6 +535,7 @@ namespace Videos2 {
 
         private void on_select_category (string uri) {
             library_page.clear_box ();
+            // TODO there must be something here that doesn't block the flow
             library_manager.init (uri);
         }
 
@@ -559,6 +562,33 @@ namespace Videos2 {
             } else {
                 welcome_page.update_library_button (true);
             }
+        }
+
+        private void changed_current_catagory () {
+            if (main_stack.get_visible_child_name () != "library") {
+                return;
+            }
+
+            var uri = library_manager.current_uri;
+            if (uri != "") {
+                var cat_name = GLib.File.new_for_uri (uri).get_basename ();
+                if (cat_name != null) {
+                    title = cat_name;
+                    return;
+                }
+            }
+
+            title = _("Videos");
+        }
+
+        private void changed_categories_count () {
+            library_manager.categories_count = settings.get_int ("categories-count");
+
+            if (main_stack.get_visible_child_name () != "library") {
+                return;
+            }
+
+            on_select_category ("");
         }
 
         private bool run_open_dvd () {
