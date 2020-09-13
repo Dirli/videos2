@@ -90,7 +90,7 @@ namespace Videos2 {
 
             cache[uri.hash ()] = position;
 
-            new GLib.Thread<void*> ("save_cache", () => {
+            new GLib.Thread<void*> ("push_async", () => {
                 save_cache ();
                 return null;
             });
@@ -121,6 +121,11 @@ namespace Videos2 {
 
             restore_position = pos;
             cache.unset (uri_hash);
+
+            new GLib.Thread<void*> ("pull_cache", () => {
+                save_cache ();
+                return null;
+            });
 
             return true;
         }
