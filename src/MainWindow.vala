@@ -156,9 +156,6 @@ namespace Videos2 {
             });
             playlist.cleared_playlist.connect (() => {
                 player.stop ();
-                bottom_bar.clear_playlist_box ();
-                welcome_page.update_replay_button ("");
-                settings.set_string ("current-uri", "");
             });
             playlist.added_item.connect (bottom_bar.add_playlist_item);
             playlist.changed_nav.connect ((first, last) => {
@@ -500,11 +497,13 @@ namespace Videos2 {
         }
 
         private void action_clear () {
-            if (media_type <= Enums.MediaType.LIBRARY) {
-                media_type = Enums.MediaType.NONE;
+            media_type = Enums.MediaType.NONE;
 
-                playlist.clear_media (-1);
-            }
+            playlist.clear_media (-1);
+
+            bottom_bar.clear_playlist_box ();
+            welcome_page.update_replay_button ("");
+            settings.set_string ("current-uri", "");
         }
 
         private void on_changed_child () {
