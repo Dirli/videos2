@@ -64,12 +64,13 @@ namespace Videos2 {
                     }
                 }
 
-                header_bar.navigation_label = value > 0 ? Constants.NAV_BUTTON_BACK :
+                header_bar.navigation_label = value > 0 ? Constants.NAV_BUTTON_BACK : media_type == Enums.MediaType.LIBRARY
+                                                        ? Constants.NAV_BUTTON_LIBRARY :
                                                           Constants.NAV_BUTTON_WELCOME;
             }
         }
 
-        private Enums.MediaType _media_type;
+        private Enums.MediaType _media_type = Enums.MediaType.NONE;
         public Enums.MediaType media_type {
             get {
                 return _media_type;
@@ -78,7 +79,7 @@ namespace Videos2 {
                 if (_media_type != value) {
                     _media_type = value;
 
-                    bottom_bar.playlist_visible = value == Enums.MediaType.VIDEO;
+                    bottom_bar.playlist_visible = value <= Enums.MediaType.LIBRARY;
                 }
             }
         }
@@ -145,7 +146,10 @@ namespace Videos2 {
             settings.changed["categories-count"].connect (changed_categories_count);
 
             playlist.play_media.connect ((uri, index) => {
-                play_uri (Enums.MediaType.VIDEO, uri);
+                if (media_type == Enums.MediaType.NONE) {
+                    media_type = Enums.MediaType.VIDEO;
+                }
+                play_uri (uri);
                 welcome_page.update_replay_button (uri);
                 bottom_bar.playlist_current_item (index);
                 settings.set_string ("current-uri", uri);
@@ -289,6 +293,10 @@ namespace Videos2 {
             player.playbin_state_changed.connect ((state) => {
                 inhibitor.playback_state = state;
                 if (state == Gst.State.PLAYING || state == Gst.State.PAUSED) {
+                    if (main_stack.get_visible_child_name () != "player") {
+                        main_stack.set_visible_child_name ("player");
+                    }
+
                     bottom_bar.playing = (state == Gst.State.PLAYING);
 
                     if (is_maximized) {
@@ -377,6 +385,9 @@ namespace Videos2 {
 
             library_page.select_media.connect ((uri) => {
                 action_clear ();
+
+                media_type = Enums.MediaType.LIBRARY;
+
                 header_bar.navigation_label = Constants.NAV_BUTTON_LIBRARY;
                 playlist.add_media (GLib.File.new_for_uri (uri), true);
             });
@@ -469,7 +480,7 @@ namespace Videos2 {
         }
 
         private void action_mediainfo () {
-            if (main_stack.get_visible_child_name () == "player" && media_type == Enums.MediaType.VIDEO) {
+            if (main_stack.get_visible_child_name () == "player" && media_type <= Enums.MediaType.LIBRARY) {
                 var uri = playlist.get_uri ();
                 if (uri == "") {
                     return;
@@ -489,7 +500,9 @@ namespace Videos2 {
         }
 
         private void action_clear () {
-            if (media_type == Enums.MediaType.VIDEO) {
+            if (media_type <= Enums.MediaType.LIBRARY) {
+                media_type = Enums.MediaType.NONE;
+
                 playlist.clear_media (-1);
             }
         }
@@ -523,7 +536,7 @@ namespace Videos2 {
                 var pos = restore_manager.restore_position;
                 restore_id = 0;
 
-                if (media_type != Enums.MediaType.VIDEO) {
+                if (media_type > Enums.MediaType.LIBRARY) {
                     return;
                 }
 
@@ -597,7 +610,9 @@ namespace Videos2 {
                 return false;
             }
 
-            play_uri (Enums.MediaType.DVD, root_uri.replace ("file:///", "dvd:///"));
+            media_type = Enums.MediaType.DVD;
+
+            play_uri (root_uri.replace ("file:///", "dvd:///"));
             return true;
         }
 
@@ -605,6 +620,8 @@ namespace Videos2 {
             if (clear) {
                 action_clear ();
             }
+
+            media_type = Enums.MediaType.VIDEO;
 
             header_bar.navigation_label = Constants.NAV_BUTTON_WELCOME;
 
@@ -631,16 +648,12 @@ namespace Videos2 {
             }
         }
 
-        private void play_uri (Enums.MediaType m_type, string uri) {
+        private void play_uri (string uri) {
             Utils.get_video_size (uri, out current_w, out current_h);
-
-            media_type = m_type;
 
             if (current_h > 0 && current_w > 0) {
                 resize ((int) current_w, (int) current_h);
             }
-
-            main_stack.set_visible_child_name ("player");
 
             player.set_uri (uri);
             player.play ();
@@ -649,7 +662,7 @@ namespace Videos2 {
                 restore_id = 0;
             }
 
-            if (media_type == Enums.MediaType.VIDEO) {
+            if (media_type <= Enums.MediaType.LIBRARY) {
                 if (restore_manager != null && restore_manager.pull (uri)) {
                     restore_id = GLib.Timeout.add (10000, () => {
                         _restore_id = 0;
@@ -763,7 +776,7 @@ namespace Videos2 {
         }
 
         private void save_current_position (bool synchronously) {
-            if (media_type == Enums.MediaType.VIDEO && restore_manager != null) {
+            if (media_type <= Enums.MediaType.LIBRARY && restore_manager != null) {
                 int64 current_position = player.position;
                 if (synchronously) {
                     restore_manager.push (settings.get_string ("current-uri"), current_position);
