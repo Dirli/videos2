@@ -30,6 +30,7 @@ executable (
     'src/Constants.vala',
     'src/Enums.vala',
     'src/MainWindow.vala',
+    'src/Structs.vala',
     'src/Dialogs/About.vala',
     'src/Dialogs/Preferences.vala',
     'src/Dialogs/UnsupportedFile.vala',

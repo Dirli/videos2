@@ -2,16 +2,19 @@ namespace Videos2 {
     public class Services.RestoreManager : GLib.Object {
         public int64 restore_position = 0;
 
-        private Gee.HashMap<uint, int64?> cache;
+        private Gee.HashMap<uint, Structs.RestoreStruct?> cache;
 
         public RestoreManager () {
-            cache = new Gee.HashMap<uint, int64?> ();
+            cache = new Gee.HashMap<uint, Structs.RestoreStruct?> ();
 
             load_cache ();
         }
 
         private void load_cache () {
             GLib.File file = Utils.get_cache_directory ().get_child ("p_cache");
+
+            var now_time = new GLib.DateTime.now_local();
+            var now_sec = now_time.to_unix();
 
             try {
                 if (file.query_exists ()) {
@@ -20,19 +23,31 @@ namespace Videos2 {
 
                     while ((line = dis.read_line ()) != null) {
                         var entry_arr = line.split ("=");
-                        if (entry_arr.length == 2) {
-                            var uri_hash = uint.parse (entry_arr[0]);
-                            if (uri_hash == 0 || cache.has_key (uri_hash)) {
-                                continue;
-                            }
-
-                            var uri_position = int64.parse (entry_arr[1]);
-                            if (uri_position <= 0) {
-                                continue;
-                            }
-
-                            cache.@set (uri_hash, uri_position);
+                        if (entry_arr.length < 3) {
+                            continue;
                         }
+
+                        var uri_hash = uint.parse (entry_arr[0]);
+                        if (uri_hash == 0 || cache.has_key (uri_hash)) {
+                            continue;
+                        }
+
+
+                        var uri_position = int64.parse (entry_arr[1]);
+                        if (uri_position <= 0) {
+                            continue;
+                        }
+
+                        int64 rec_time = int64.parse (entry_arr[2]);
+                        if (rec_time == 0 || (now_sec - rec_time) / 86400 > 90) {
+                            continue;
+                        }
+
+                        Structs.RestoreStruct cache_struct = {};
+                        cache_struct.rec_time = rec_time;
+                        cache_struct.position = uri_position;
+
+                        cache.@set (uri_hash, cache_struct);
                     }
                 }
             } catch (Error e) {
@@ -56,7 +71,7 @@ namespace Videos2 {
 
                 cache.foreach ((entry) => {
                     try {
-                        dos.put_string (@"$(entry.key)=$(entry.value)\n");
+                        dos.put_string (@"$(entry.key)=$(entry.value.position)=$(entry.value.rec_time)\n");
                     } catch (Error e) {
                         warning (e.message);
                     }
@@ -83,12 +98,23 @@ namespace Videos2 {
             }
         }
 
+        private Structs.RestoreStruct get_cache_struct (int64 position) {
+            var now = new GLib.DateTime.now_local();
+            var now_sec = now.to_unix();
+
+            Structs.RestoreStruct cache_struct = {};
+            cache_struct.rec_time = now_sec;
+            cache_struct.position = position;
+
+            return cache_struct;
+        }
+
         public void push_async (string uri, int64 position) {
             if (uri == "" || position == 0) {
                 return;
             }
 
-            cache[uri.hash ()] = position;
+            cache[uri.hash ()] = get_cache_struct (position);
 
             new GLib.Thread<void*> ("push_async", () => {
                 save_cache ();
@@ -101,7 +127,7 @@ namespace Videos2 {
                 return;
             }
 
-            cache[uri.hash ()] = position;
+            cache[uri.hash ()] = get_cache_struct (position);
 
             save_cache ();
         }
@@ -114,7 +140,7 @@ namespace Videos2 {
                 return false;
             }
 
-            var pos = cache.@get (uri_hash);
+            var pos = cache.@get (uri_hash).position;
             if (pos == 0) {
                 return false;
             }
