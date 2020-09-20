@@ -1,0 +1,11 @@
+pantheon-videos2 (0.9.1-1) testing; urgency=medium
+
+  * fixed launching videos from the file Manager
+
+ -- dirli <litandrej85@gmail.com>  Mon, 14 Sep 2020 01:15:15 +0300
+
+ pantheon-videos2 (0.9.0-1) testing; urgency=medium
+
+   * New upstream release
+
+  -- dirli <litandrej85@gmail.com>  Sun, 13 Sep 2020 16:00:10 +0300
