@@ -3,6 +3,9 @@ namespace Videos2.Constants {
     public const string PULSE_CLASS = "pulse";
     public const string PULSE_TYPE = "attention";
 
+    public const string MPRIS_NAME = "org.mpris.MediaPlayer2.Videos2";
+    public const string MPRIS_PATH = "/org/mpris/MediaPlayer2";
+
     public const string SCREENSAVER_IFACE = "org.freedesktop.ScreenSaver";
     public const string SCREENSAVER_PATH = "/ScreenSaver";
 

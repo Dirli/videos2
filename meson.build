@@ -22,6 +22,8 @@ config_header = configure_file (
     configuration : conf_data
 )
 
+dep_dbus = dependency ('dbus-1')
+
 subdir ('data')
 
 executable (
@@ -35,10 +37,13 @@ executable (
     'src/Dialogs/Preferences.vala',
     'src/Dialogs/UnsupportedFile.vala',
     'src/Interfaces/Client.vala',
+    'src/Objects/MprisPlayer.vala',
+    'src/Objects/MprisRoot.vala',
     'src/Objects/Playlist.vala',
     'src/Services/DiskManager.vala',
     'src/Services/Inhibitor.vala',
     'src/Services/LibraryManager.vala',
+    'src/Services/MprisProxy.vala',
     'src/Services/RestoreManager.vala',
     'src/Services/Utils.vala',
     'src/Views/LibraryPage.vala',

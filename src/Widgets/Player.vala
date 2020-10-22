@@ -288,6 +288,7 @@ namespace Videos2 {
                     string debug;
                     message.parse_error (out err, out debug);
                     warning ("Error: %s\n%s\n", err.message, debug);
+                    // warning ("Error code: %d", err.code);
 
                     // Error: Decoding error
                     // this is an abstract number. I still don't understand what

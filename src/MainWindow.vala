@@ -15,6 +15,9 @@ namespace Videos2 {
         private Views.WelcomePage welcome_page;
         private Views.LibraryPage library_page;
 
+        private uint owner_id = 0;
+        public Services.MprisProxy? mpris_proxy = null;
+
         private uint current_h = 0;
         private uint current_w = 0;
         private uint cursor_timer = 0;
@@ -133,8 +136,21 @@ namespace Videos2 {
             library_manager = new Services.LibraryManager (settings.get_int ("categories-count"));
 
             playlist = new Objects.Playlist ();
+            mpris_proxy = new Services.MprisProxy ();
 
             build_ui ();
+
+            try {
+                owner_id = GLib.Bus.own_name (GLib.BusType.SESSION,
+                                              Constants.MPRIS_NAME,
+                                              GLib.BusNameOwnerFlags.NONE,
+                                              on_bus_acquired,
+                                              null,
+                                              null);
+            } catch (Error e) {
+                warning ("could not create MPRIS player: %s\n", e.message);
+                mpris_proxy = null;
+            }
 
             settings.bind ("block-sleep-mode", inhibitor, "allow-block", GLib.SettingsBindFlags.DEFAULT);
             settings.bind ("library-path", library_manager, "root-path", GLib.SettingsBindFlags.GET);
@@ -160,6 +176,10 @@ namespace Videos2 {
             playlist.added_item.connect (bottom_bar.add_playlist_item);
             playlist.changed_nav.connect ((first, last) => {
                 bottom_bar.change_nav (!first, !last);
+                if (mpris_proxy != null) {
+                    mpris_proxy.can_next = !last;
+                    mpris_proxy.can_previous = !first;
+                }
             });
             playlist.restore_medias (settings.get_strv ("last-played-videos"), settings.get_string ("current-uri"));
 
@@ -310,6 +330,10 @@ namespace Videos2 {
                         main_stack.set_visible_child_name ("library");
                     }
                 }
+
+                if (mpris_proxy != null) {
+                    mpris_proxy.state = state;
+                }
             });
             player.motion_notify_event.connect ((event) => {
                 bottom_bar.reveal_control ();
@@ -331,8 +355,9 @@ namespace Videos2 {
                     }
                 } else {
                     header_bar.clear_meta ();
-                    // title = _("Videos");
                 }
+
+                mpris_proxy.title = uri != "" ? title : _("Videos2");
             });
             player.audio_changed.connect (header_bar.set_active_audio);
             player.ended_stream.connect (() => {
@@ -504,6 +529,22 @@ namespace Videos2 {
             bottom_bar.clear_playlist_box ();
             welcome_page.update_replay_button ("");
             settings.set_string ("current-uri", "");
+        }
+
+        private void on_bus_acquired (DBusConnection connection, string name) {
+            try {
+                mpris_proxy.play.connect (player.play);
+                mpris_proxy.stop.connect (player.stop);
+                mpris_proxy.pause.connect (player.pause);
+                mpris_proxy.next.connect (playlist.next);
+                mpris_proxy.prev.connect (playlist.previous);
+                mpris_proxy.toggle_playing.connect (player.toggle_playing);
+
+                connection.register_object (Constants.MPRIS_PATH, new Objects.MprisRoot ());
+                connection.register_object (Constants.MPRIS_PATH, new Objects.MprisPlayer (connection, mpris_proxy));
+            } catch (IOError e) {
+                warning ("could not create MPRIS player: %s\n", e.message);
+            }
         }
 
         private void on_changed_child () {
@@ -798,6 +839,10 @@ namespace Videos2 {
 
         public override bool delete_event (Gdk.EventAny event) {
             bool privacy = save_playlist ();
+
+            if (owner_id > 0) {
+                GLib.Bus.unown_name (owner_id);
+            }
 
             if (player.get_playbin_state () == Gst.State.PLAYING || player.get_playbin_state () == Gst.State.PAUSED) {
                 if (!privacy) {
