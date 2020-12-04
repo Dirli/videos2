@@ -1,7 +1,6 @@
 namespace Videos2 {
     public class MainWindow : Gtk.Window {
         private bool show_volume_info = false;
-        private bool has_vaapi;
 
         private Objects.Playlist playlist;
 
@@ -14,6 +13,8 @@ namespace Videos2 {
         private Gtk.Stack main_stack;
         private Views.WelcomePage welcome_page;
         private Views.LibraryPage library_page;
+
+        private Gtk.DrawingArea video_area;
 
         private uint owner_id = 0;
         public Services.MprisProxy? mpris_proxy = null;
@@ -226,7 +227,6 @@ namespace Videos2 {
 
                 return false;
             });
-
             Gtk.TargetEntry uris = {"text/uri-list", 0, 0};
             Gtk.drag_dest_set (this, Gtk.DestDefaults.ALL, {uris}, Gdk.DragAction.MOVE);
             drag_data_received.connect ((ctx, x, y, sel, info, time) => {
@@ -271,22 +271,7 @@ namespace Videos2 {
                 preferences.run ();
             });
 
-            set_titlebar (header_bar);
-
-            unowned Gst.Registry registry = Gst.Registry.@get ();
-
-            var find_vaapi = registry.find_plugin ("vaapi");
-            if (!settings.get_boolean ("use-vaapi")) {
-                if (find_vaapi != null) {
-                    registry.remove_plugin (find_vaapi);
-                }
-
-                has_vaapi = false;
-            } else {
-                has_vaapi = find_vaapi != null;
-            }
-
-            player = new Widgets.Player (has_vaapi);
+            player = new Widgets.Player ();
             header_bar.audio_selected.connect (player.set_active_audio);
             header_bar.subtitle_selected.connect (player.set_active_subtitle);
 
@@ -295,7 +280,7 @@ namespace Videos2 {
                 unfullscreen ();
             });
 
-            info_bar = new Widgets.InfoBar (has_vaapi);
+            info_bar = new Widgets.InfoBar (false);
 
             bottom_bar = new Widgets.BottomBar ();
             bottom_bar.notify["reveal-child"].connect (() => {
@@ -305,8 +290,6 @@ namespace Videos2 {
                     top_bar.reveal_child = false;
                 }
             });
-
-
             player.playbin_state_changed.connect ((state) => {
                 inhibitor.playback_state = state;
                 if (state == Gst.State.PLAYING || state == Gst.State.PAUSED) {
@@ -335,13 +318,7 @@ namespace Videos2 {
                     mpris_proxy.state = state;
                 }
             });
-            player.motion_notify_event.connect ((event) => {
-                bottom_bar.reveal_control ();
-                if (fullscreened && cursor_timer == 0) {
-                    show_mouse_cursor ();
-                }
-                return false;
-            });
+
             player.duration_changed.connect (bottom_bar.change_duration);
             player.progress_changed.connect (bottom_bar.change_progress);
             player.uri_changed.connect ((uri) => {
@@ -365,13 +342,6 @@ namespace Videos2 {
                     player.stop ();
                 }
             });
-            player.toggled_fullscreen.connect (() => {
-                if (fullscreened) {
-                    unfullscreen ();
-                } else {
-                    fullscreen ();
-                }
-            });
 
             bottom_bar.play_toggled.connect (player.toggle_playing);
             bottom_bar.seeked.connect ((pos) => {
@@ -385,19 +355,46 @@ namespace Videos2 {
             bottom_bar.dnd_media.connect (playlist.change_media_position);
             bottom_bar.play_next.connect (playlist.next);
             bottom_bar.play_prev.connect (playlist.previous);
-            bottom_bar.volume_changed.connect ((val) => {
-                player.volume = val;
-                settings.set_double ("volume", val);
-                if (show_volume_info) {
-                    info_bar.show_volume (val);
-                }
+            bottom_bar.volume_changed.connect (on_volume_changed);
 
-                show_volume_info = false;
-            });
             bottom_bar.volume_value = settings.get_double ("volume");
 
+            video_area = new Gtk.DrawingArea ();
+            video_area.events |= Gdk.EventMask.POINTER_MOTION_MASK;
+            video_area.realize.connect (on_realize_video);
+            video_area.draw.connect (on_draw_video);
+
+            var video_box = new Gtk.EventBox ();
+            video_box.add (video_area);
+            video_box.motion_notify_event.connect ((event) => {
+                bottom_bar.reveal_control ();
+                if (fullscreened && cursor_timer == 0) {
+                    show_mouse_cursor ();
+                }
+                return false;
+            });
+            video_box.button_press_event.connect ((event) => {
+                if (event.button == Gdk.BUTTON_SECONDARY) {
+                    player.toggle_playing ();
+                    return true;
+                }
+
+                if (event.button == Gdk.BUTTON_PRIMARY && event.type == Gdk.EventType.2BUTTON_PRESS) {
+                    if (fullscreened) {
+                        unfullscreen ();
+                    } else {
+                        fullscreen ();
+                    }
+
+                    return true;
+                }
+
+                return base.button_press_event (event);
+            });
+
+
             var player_page = new Gtk.Overlay ();
-            player_page.add (player);
+            player_page.add (video_box);
             player_page.add_overlay (bottom_bar);
             player_page.add_overlay (top_bar);
             player_page.add_overlay (info_bar);
@@ -417,18 +414,14 @@ namespace Videos2 {
             header_bar.select_category.connect (on_select_category);
 
             main_stack = new Gtk.Stack ();
-            main_stack.transition_type = Gtk.StackTransitionType.SLIDE_LEFT_RIGHT;
-            main_stack.expand = true;
 
             main_stack.add_named (welcome_page, "welcome");
             main_stack.add_named (player_page, "player");
             main_stack.add_named (library_page, "library");
-
-            main_stack.show_all ();
-            main_stack.notify["visible-child-name"].connect (on_changed_child);
-
             add (main_stack);
+            show_all ();
 
+            main_stack.notify["visible-child-name"].connect (on_changed_child);
             main_stack.set_visible_child_name ("welcome");
             welcome_page.update_replay_button (settings.get_string ("current-uri"));
             welcome_page.update_media_button (disk_manager.has_media_mounts);
@@ -440,14 +433,12 @@ namespace Videos2 {
                 open_files (files, true);
             }
         }
-
         private void action_add () {
             var files = Utils.run_file_chooser (this);
             if (files.length > 0) {
                 open_files (files, player.get_playbin_state () == Gst.State.PLAYING ? false : true);
             }
         }
-
         private void action_quit (GLib.SimpleAction action, GLib.Variant? pars) {
             bool save_current_state;
             pars.@get ("b", out save_current_state);
@@ -470,7 +461,6 @@ namespace Videos2 {
 
             destroy ();
         }
-
         private void action_back () {
             var v_child = main_stack.get_visible_child_name ();
 
@@ -485,13 +475,11 @@ namespace Videos2 {
                 main_stack.set_visible_child_name ("welcome");
             }
         }
-
         private void action_playlist_visible () {
             if (main_stack.get_visible_child_name () == "player") {
                 bottom_bar.toggle_playlist ();
             }
         }
-
         private void action_volume (GLib.SimpleAction action, GLib.Variant? pars) {
             if (main_stack.get_visible_child_name () == "player") {
                 show_volume_info = true;
@@ -500,7 +488,6 @@ namespace Videos2 {
                 bottom_bar.volume_value = vol_value ? 0.05 : -0.05;
             }
         }
-
         private void action_mediainfo () {
             if (main_stack.get_visible_child_name () == "player" && media_type <= Enums.MediaType.LIBRARY) {
                 var uri = playlist.get_uri ();
@@ -520,7 +507,6 @@ namespace Videos2 {
                 }
             }
         }
-
         private void action_clear () {
             media_type = Enums.MediaType.NONE;
 
@@ -547,8 +533,41 @@ namespace Videos2 {
             }
         }
 
+        private void on_realize_video () {
+            var win = video_area.get_window ();
+            if (!win.ensure_native ()) {
+                return;
+            }
+
+            player.set_win_xid (((Gdk.X11.Window) win).get_xid ());
+        }
+
+        private bool on_draw_video (Cairo.Context ctx) {
+            if (player.get_playbin_state () < Gst.State.PAUSED) {
+                Gtk.Allocation allocation;
+                video_area.get_allocation (out allocation);
+
+                ctx.set_source_rgb (0, 0, 0);
+                ctx.rectangle (0, 0, allocation.width, allocation.height);
+                ctx.fill ();
+            }
+
+            return false;
+        }
+
+        private void on_volume_changed (double val) {
+            player.volume = val;
+            settings.set_double ("volume", val);
+            if (show_volume_info) {
+                info_bar.show_volume (val);
+            }
+
+            show_volume_info = false;
+        }
+
         private void on_changed_child () {
             var view_name = main_stack.get_visible_child_name ();
+
             header_bar.navigation_visible = (view_name != "welcome");
             header_bar.library_button_visible = view_name == "library";
 
@@ -793,7 +812,6 @@ namespace Videos2 {
             var cursor = new Gdk.Cursor.for_display (get_window ().get_display (), Gdk.CursorType.BLANK_CURSOR);
             get_window ().set_cursor (cursor);
         }
-
         private void show_mouse_cursor () {
             if (cursor_timer != 0) {
                 GLib.Source.remove (cursor_timer);

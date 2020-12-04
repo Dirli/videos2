@@ -1,9 +1,8 @@
 namespace Videos2 {
-    public class Widgets.Player : Gtk.EventBox {
+    public class Widgets.Player : GLib.Object {
         public signal void playbin_state_changed (Gst.State playbin_state);
         public signal void duration_changed (int64 d);
         public signal void progress_changed (int64 p);
-        public signal void toggled_fullscreen ();
         public signal void uri_changed (string u);
         public signal void audio_changed (int index);
         public signal void ended_stream ();
@@ -11,9 +10,9 @@ namespace Videos2 {
         private uint progress_timer = 0;
         private int err_count = 0;
 
-        private int64 duration_cache = -1;
+        public uint* win_xid;
 
-        Gtk.Widget video_area;
+        private int64 duration_cache = -1;
 
         private Gst.Format fmt = Gst.Format.TIME;
         private dynamic Gst.Element playbin;
@@ -56,71 +55,20 @@ namespace Videos2 {
             }
         }
 
-        public Player (bool has_vaapi) {
+        public Player () {
             playbin = Gst.ElementFactory.make ("playbin", "bin");
             playbin.notify["uri"].connect (() => {
                 uri_changed (playbin.uri);
             });
             playbin.set_property ("subtitle-font-desc", "Sans 16");
 
-            if (has_vaapi) {
-                video_area = new Gtk.DrawingArea ();
-                video_area.realize.connect (on_realize);
-                video_area.draw.connect (on_draw);
-                video_area.events |= Gdk.EventMask.POINTER_MOTION_MASK;
-
-                video_area.motion_notify_event.connect ((event) => {
-                    return false;
-                });
-            } else {
-                var gtksink = Gst.ElementFactory.make ("gtksink", null);
-                gtksink.get ("widget", out video_area);
-
-                playbin["video-sink"] = gtksink;
-            }
-
-            add (video_area);
-
             bus = playbin.get_bus ();
             bus.add_watch (0, bus_callback);
             bus.enable_sync_message_emission ();
-
-            button_press_event.connect ((event) => {
-                if (event.button == Gdk.BUTTON_SECONDARY) {
-                    toggle_playing ();
-                    return true;
-                }
-
-                if (event.button == Gdk.BUTTON_PRIMARY && event.type == Gdk.EventType.2BUTTON_PRESS) {
-                    toggled_fullscreen ();
-                    return true;
-                }
-
-                return base.button_press_event (event);
-            });
         }
 
-        private bool on_draw (Cairo.Context ctx) {
-            if (get_playbin_state () < Gst.State.PAUSED) {
-                Gtk.Allocation allocation;
-                video_area.get_allocation (out allocation);
-
-                ctx.set_source_rgb (0, 0, 0);
-                ctx.rectangle (0, 0, allocation.width, allocation.height);
-                ctx.fill ();
-            }
-
-            return false;
-        }
-
-        public void on_realize () {
-            var win = video_area.get_window ();
-            if (!win.ensure_native ()) {
-                return;
-            }
-
-            var win_xid  = (uint*) ((Gdk.X11.Window) win).get_xid ();
-            ((Gst.Video.Overlay) playbin).set_window_handle (win_xid);
+        public void set_win_xid (X.Window w) {
+            win_xid = (uint*) w;
         }
 
         public void set_uri (string uri) {
@@ -282,6 +230,13 @@ namespace Videos2 {
         }
 
         private bool bus_callback (Gst.Bus bus, Gst.Message message) {
+            if (Gst.Video.is_video_overlay_prepare_window_handle_message (message)) {
+                Gst.Video.Overlay overlay = message.src as Gst.Video.Overlay;
+                if (overlay != null) {
+                    overlay.set_window_handle (win_xid);
+                }
+            }
+
             switch (message.type) {
                 case Gst.MessageType.ERROR:
                     GLib.Error err;

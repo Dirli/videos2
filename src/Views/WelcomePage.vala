@@ -13,7 +13,7 @@ namespace Videos2 {
             append ("document-open", _("Open file"), _("Open a saved file."));
             append ("media-playlist-repeat", _("Replay last video"), "");
             append ("media-cdrom", _("Play from Disc"), _("Watch a DVD or open a file from disc"));
-            append ("folder-videos", _("Browse Library"), _("Watch a movie from your library"));
+            // append ("folder-videos", _("Browse Library"), _("Watch a movie from your library"));
 
             replay_button = get_button_from_index (1);
         }
