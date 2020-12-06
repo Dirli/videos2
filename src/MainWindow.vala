@@ -324,6 +324,7 @@ namespace Videos2 {
             bottom_bar.dnd_media.connect (playlist.change_media_position);
             bottom_bar.play_next.connect (playlist.next);
             bottom_bar.play_prev.connect (playlist.previous);
+            bottom_bar.stop_playback.connect (action_back);
             bottom_bar.volume_changed.connect (on_volume_changed);
             bottom_bar.notify["reveal-child"].connect (() => {
                 if (bottom_bar.reveal_child == true && fullscreened == true) {
@@ -570,7 +571,6 @@ namespace Videos2 {
         private void on_changed_child () {
             var view_name = main_stack.get_visible_child_name ();
 
-            header_bar.navigation_visible = (view_name != "welcome");
             header_bar.library_button_visible = view_name == "library";
 
             switch (view_name) {
@@ -583,7 +583,6 @@ namespace Videos2 {
                     break;
                 case "library":
                     resize (960, 540);
-                    header_bar.navigation_label = Constants.NAV_BUTTON_WELCOME;
                     changed_current_catagory ();
                     on_select_category ("");
                     break;
@@ -591,9 +590,7 @@ namespace Videos2 {
         }
 
         private void on_navigation_clicked () {
-            if (header_bar.navigation_label == Constants.NAV_BUTTON_WELCOME || header_bar.navigation_label == Constants.NAV_BUTTON_LIBRARY) {
-                action_back ();
-            } else if (header_bar.navigation_label == Constants.NAV_BUTTON_BACK) {
+            if (header_bar.navigation_label == Constants.NAV_BUTTON_BACK) {
                 var pos = restore_manager.restore_position;
                 restore_id = 0;
 

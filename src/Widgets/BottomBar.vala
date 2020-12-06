@@ -3,6 +3,7 @@ namespace Videos2 {
         public signal void play_toggled ();
         public signal bool play_next ();
         public signal bool play_prev ();
+        public signal void stop_playback ();
         public signal void seeked (int64 val);
         public signal void select_media (string uri);
         public signal bool clear_media (int index);
@@ -19,6 +20,7 @@ namespace Videos2 {
         public Gtk.ToggleButton repeat_button;
 
         private Gtk.Button prev_button;
+        private Gtk.Button stop_button;
         private Gtk.Button play_button;
         private Gtk.Button next_button;
         private Gtk.VolumeButton volume_button;
@@ -147,12 +149,16 @@ namespace Videos2 {
             var main_actionbar = new Gtk.ActionBar ();
 
             main_actionbar.pack_start (prev_button);
-            main_actionbar.pack_start (play_button);
+            main_actionbar.pack_start (stop_button);
             main_actionbar.pack_start (next_button);
+            main_actionbar.pack_start (new Gtk.Separator (Gtk.Orientation.VERTICAL));
+            main_actionbar.pack_start (play_button);
+            main_actionbar.pack_start (new Gtk.Separator (Gtk.Orientation.VERTICAL));
             main_actionbar.set_center_widget (time_bar);
             main_actionbar.pack_end (menu_button);
             main_actionbar.pack_end (playlist_button);
             main_actionbar.pack_end (volume_button);
+            main_actionbar.pack_end (new Gtk.Separator (Gtk.Orientation.VERTICAL));
 
             add (main_actionbar);
         }
@@ -164,6 +170,12 @@ namespace Videos2 {
                 if (!play_prev ()) {
                     prev_button.sensitive = false;
                 }
+            });
+
+            stop_button = new Gtk.Button.from_icon_name ("media-playback-stop-symbolic", Gtk.IconSize.BUTTON);
+            stop_button.tooltip_text = _("Stop");
+            stop_button.clicked.connect (() => {
+                stop_playback ();
             });
 
             play_button = new Gtk.Button.from_icon_name ("media-playback-start-symbolic", Gtk.IconSize.BUTTON);
