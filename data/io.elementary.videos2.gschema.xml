@@ -25,11 +25,6 @@
             <summary>Block sleep mode</summary>
             <description>Allows you to block sleep mode</description>
         </key>
-        <key type="b" name="use-vaapi">
-            <default>false</default>
-            <summary>Manual management of vaapi support</summary>
-            <description>Manual management of vaapi support</description>
-        </key>
         <key type="b" name="enable-library">
             <default>false</default>
             <summary>Adds a video library as a source</summary>

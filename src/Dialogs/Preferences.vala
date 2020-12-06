@@ -31,10 +31,6 @@ namespace Videos2 {
 
             set_default_response (Gtk.ResponseType.CLOSE);
 
-            var vaapi_switch = new Gtk.Switch ();
-            vaapi_switch.halign = Gtk.Align.START;
-            main_win.settings.bind ("use-vaapi", vaapi_switch, "active", GLib.SettingsBindFlags.DEFAULT);
-
             var remember_switch = new Gtk.Switch ();
             remember_switch.halign = Gtk.Align.START;
             main_win.settings.bind ("remember-time", remember_switch, "active", GLib.SettingsBindFlags.DEFAULT);
@@ -83,10 +79,6 @@ namespace Videos2 {
                 library_filechooser.sensitive = library_switch.active;
             });
 
-            vaapi_switch.tooltip_text = vaapi_switch.active ?
-                                        _("if plugin found, vaapi supports enabled") :
-                                        _("Vaapi supports disabled");
-
             var sleep_mode_switch = new Gtk.Switch ();
             sleep_mode_switch.halign = Gtk.Align.START;
             main_win.settings.bind ("block-sleep-mode", sleep_mode_switch, "active", GLib.SettingsBindFlags.DEFAULT);
@@ -106,9 +98,6 @@ namespace Videos2 {
 
             layout.attach (new SettingsLabel (_("Remember stopped time:")), 0, top);
             layout.attach (remember_switch, 1, top++);
-
-            layout.attach (new SettingsLabel (_("Use vaapi (need restart):")), 0, top);
-            layout.attach (vaapi_switch, 1, top++);
 
             layout.attach (new Gtk.Separator (Gtk.Orientation.HORIZONTAL), 0, top++, 2, 1);
 
@@ -131,12 +120,6 @@ namespace Videos2 {
 
             response.connect (() => {destroy ();});
             show_all ();
-
-            vaapi_switch.notify["active"].connect (() => {
-                vaapi_switch.tooltip_text = vaapi_switch.active ?
-                                            _("if plugin found, vaapi supports enabled") :
-                                            _("Vaapi supports disabled");
-            });
         }
 
         private class SettingsLabel : Gtk.Label {
