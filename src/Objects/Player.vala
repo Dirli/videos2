@@ -1,5 +1,5 @@
 namespace Videos2 {
-    public class Widgets.Player : GLib.Object {
+    public class Objects.Player : GLib.Object {
         public signal void playbin_state_changed (Gst.State playbin_state);
         public signal void duration_changed (int64 d);
         public signal void progress_changed (int64 p);

@@ -7,6 +7,9 @@ namespace Videos2 {
         public signal void select_media (string uri);
         public signal bool clear_media (int index);
         public signal void volume_changed (double val);
+        public signal void show_preferences ();
+        public signal void audio_selected (int i);
+        public signal void subtitle_selected (int i);
         public signal int dnd_media (int old_position, int new_position);
 
         private uint hiding_timer = 0;
@@ -20,9 +23,15 @@ namespace Videos2 {
         private Gtk.Button next_button;
         private Gtk.VolumeButton volume_button;
         private Gtk.MenuButton playlist_button;
+        private Gtk.MenuButton menu_button;
+
         private Gtk.Popover playlist_popover;
+        private Gtk.Popover menu_popover;
+
         private Granite.SeekBar time_bar;
 
+        private Gtk.ComboBoxText audio_streams;
+        private Gtk.ComboBoxText sub_streams;
 
         private bool playlist_glowing = false;
 
@@ -86,7 +95,10 @@ namespace Videos2 {
 
         public BottomBar () {
             Object (valign: Gtk.Align.END);
+        }
 
+
+        construct {
             events |= Gdk.EventMask.POINTER_MOTION_MASK;
             events |= Gdk.EventMask.LEAVE_NOTIFY_MASK;
             events |= Gdk.EventMask.ENTER_NOTIFY_MASK;
@@ -116,7 +128,36 @@ namespace Videos2 {
         }
 
         private void build_ui () {
-            // control button
+            create_controls ();
+
+            // time bar
+            time_bar = new Granite.SeekBar (0.0);
+            time_bar.scale.vexpand = true;
+            time_bar.scale.change_value.connect (on_change_value);
+            // volume
+            volume_button = new Gtk.VolumeButton ();
+            volume_button.value_changed.connect ((val) => {
+                volume_changed (val);
+            });
+
+            create_playlist ();
+
+            create_menu ();
+
+            var main_actionbar = new Gtk.ActionBar ();
+
+            main_actionbar.pack_start (prev_button);
+            main_actionbar.pack_start (play_button);
+            main_actionbar.pack_start (next_button);
+            main_actionbar.set_center_widget (time_bar);
+            main_actionbar.pack_end (menu_button);
+            main_actionbar.pack_end (playlist_button);
+            main_actionbar.pack_end (volume_button);
+
+            add (main_actionbar);
+        }
+
+        private void create_controls () {
             prev_button = new Gtk.Button.from_icon_name ("media-skip-backward-symbolic", Gtk.IconSize.BUTTON);
             prev_button.tooltip_text = _("Previous");
             prev_button.clicked.connect (() => {
@@ -138,17 +179,9 @@ namespace Videos2 {
                     next_button.sensitive = false;
                 }
             });
+        }
 
-            // time bar
-            time_bar = new Granite.SeekBar (0.0);
-            time_bar.scale.vexpand = true;
-            time_bar.scale.change_value.connect (on_change_value);
-            // volume
-            volume_button = new Gtk.VolumeButton ();
-            volume_button.value_changed.connect ((val) => {
-                volume_changed (val);
-            });
-            // playlist
+        private void create_playlist () {
             var add_button = new Gtk.Button.from_icon_name ("document-open-symbolic", Gtk.IconSize.BUTTON);
             add_button.set_action_name (Constants.ACTION_PREFIX + Constants.ACTION_ADD);
             add_button.tooltip_markup = Granite.markup_accel_tooltip ({"<Control><Shift>o"}, _("Open file"));
@@ -214,17 +247,77 @@ namespace Videos2 {
             playlist_button.tooltip_markup = Granite.markup_accel_tooltip ({"<Control>l"}, _("Playlist"));
             playlist_button.valign = Gtk.Align.CENTER;
             playlist_button.popover = playlist_popover;
+        }
 
-            var main_actionbar = new Gtk.ActionBar ();
+        private void create_menu () {
+            var audio_label = new Gtk.Label (_("Audio:"));
+            audio_label.halign = Gtk.Align.END;
 
-            main_actionbar.pack_start (prev_button);
-            main_actionbar.pack_start (play_button);
-            main_actionbar.pack_start (next_button);
-            main_actionbar.set_center_widget (time_bar);
-            main_actionbar.pack_end (playlist_button);
-            main_actionbar.pack_end (volume_button);
+            audio_streams = new Gtk.ComboBoxText ();
+            audio_streams.append ("none", _("None"));
+            audio_streams.sensitive = false;
 
-            add (main_actionbar);
+            var sub_label = new Gtk.Label (_("Subtitles:"));
+            sub_label.halign = Gtk.Align.END;
+
+            sub_streams = new Gtk.ComboBoxText ();
+            sub_streams.append ("none", _("None"));
+            sub_streams.sensitive = false;
+
+            int top = 0;
+            var menu_grid = new Gtk.Grid ();
+            menu_grid.column_spacing = 12;
+            menu_grid.row_spacing = 6;
+            menu_grid.margin = 6;
+            menu_grid.attach (audio_label, 0, top, 1, 1);
+            menu_grid.attach (audio_streams, 1, top++, 1, 1);
+            menu_grid.attach (sub_label, 0, top, 1, 1);
+            menu_grid.attach (sub_streams, 1, top++, 1, 1);
+
+            var pref_button = new Gtk.ModelButton ();
+            pref_button.text = _("Preferences");
+            pref_button.clicked.connect (() => {
+                show_preferences ();
+            });
+
+            var about_button = new Gtk.ModelButton ();
+            about_button.text = _("About");
+            about_button.clicked.connect (() => {
+                var about = new Dialogs.About ();
+                about.run ();
+            });
+
+            menu_grid.attach (new Gtk.Separator (Gtk.Orientation.HORIZONTAL), 0, top++, 2, 1);
+            menu_grid.attach (pref_button, 0, top++, 2, 1);
+            menu_grid.attach (about_button, 0, top++, 2, 1);
+            menu_grid.show_all ();
+
+            menu_popover = new Gtk.Popover (null);
+            menu_popover.add (menu_grid);
+
+            menu_button = new Gtk.MenuButton ();
+            menu_button.image = new Gtk.Image.from_icon_name ("open-menu-symbolic", Gtk.IconSize.SMALL_TOOLBAR);
+            menu_button.popover = menu_popover;
+            menu_button.valign = Gtk.Align.CENTER;
+
+            audio_streams.changed.connect (on_audio_changed);
+            sub_streams.changed.connect (on_subtitles_changed);
+        }
+
+        private void on_audio_changed () {
+            if (audio_streams.active < 0 || audio_streams.active_id == "def" || audio_streams.active_id == "none") {
+                return;
+            }
+
+            audio_selected (audio_streams.active);
+        }
+
+        private void on_subtitles_changed () {
+            if (sub_streams.active < 0) {
+                return;
+            }
+
+            subtitle_selected (sub_streams.active_id == "none" ? -1 : sub_streams.active);
         }
 
         private void on_drag_data_received (Gdk.DragContext context, int x, int y, Gtk.SelectionData selection_data, uint target_type, uint time) {
@@ -252,6 +345,125 @@ namespace Videos2 {
             seeked (new_position);
 
             return false;
+        }
+
+        public void set_active_audio (int active_index) {
+            if (active_index == audio_streams.active || active_index == -1) {
+                return;
+            }
+
+            audio_streams.changed.disconnect (on_audio_changed);
+            audio_streams.active = active_index;
+            audio_streams.changed.connect (on_audio_changed);
+        }
+
+        public void clear_meta () {
+            audio_streams.changed.disconnect (on_audio_changed);
+            if (audio_streams.model.iter_n_children (null) > 0) {
+                audio_streams.remove_all ();
+            }
+
+            audio_streams.sensitive = false;
+            audio_streams.changed.connect (on_audio_changed);
+
+            sub_streams.changed.disconnect (on_subtitles_changed);
+            if (sub_streams.model.iter_n_children (null) > 0) {
+                sub_streams.remove_all ();
+            }
+
+            sub_streams.sensitive = false;
+            sub_streams.changed.connect (on_subtitles_changed);
+        }
+
+        public void setup_uri_meta (string uri) {
+            var discoverer_info = Utils.get_discoverer_info (uri);
+            if (discoverer_info != null) {
+                audio_streams.changed.disconnect (on_audio_changed);
+                if (audio_streams.model.iter_n_children (null) > 0) {
+                    audio_streams.remove_all ();
+                }
+
+                setup_audio (discoverer_info);
+
+                audio_streams.changed.connect (on_audio_changed);
+
+                sub_streams.changed.disconnect (on_subtitles_changed);
+
+                if (sub_streams.model.iter_n_children (null) > 0) {
+                    sub_streams.remove_all ();
+                }
+
+                int none_index = setup_subtitles (discoverer_info);
+
+                sub_streams.changed.connect (on_subtitles_changed);
+                sub_streams.active = none_index;
+            }
+        }
+
+        private void setup_audio (Gst.PbUtils.DiscovererInfo discoverer_info) {
+            var a_streams = discoverer_info.get_audio_streams ();
+
+            if (a_streams.length () > 1) {
+                int track = 1;
+                foreach (var stream_info in a_streams) {
+                    var audio_stream = stream_info as Gst.PbUtils.DiscovererAudioInfo;
+                    if (audio_stream != null) {
+                        unowned string language_code = audio_stream.get_language ();
+
+                        if (language_code != null) {
+                            unowned string language_name = Gst.Tag.get_language_name (language_code);
+                            audio_streams.prepend ("", language_name);
+                        } else {
+                            audio_streams.prepend ("", _("Track '%u'").printf (track));
+                        }
+                    }
+
+                    track++;
+                }
+            } else {
+                audio_streams.append ("def", _("Default"));
+                audio_streams.active = 0;
+            }
+
+            audio_streams.sensitive = a_streams.length () > 1;
+        }
+
+        private int setup_subtitles (Gst.PbUtils.DiscovererInfo discoverer_info) {
+            var s_streams = discoverer_info.get_subtitle_streams ();
+            int track = 1;
+            foreach (var stream_info in s_streams) {
+                var sub_stream = stream_info as Gst.PbUtils.DiscovererSubtitleInfo;
+                if (sub_stream != null) {
+                    unowned string language_code = sub_stream.get_language ();
+                    if (language_code != null) {
+                        unowned string language_name = Gst.Tag.get_language_name (language_code);
+                        sub_streams.prepend ("", language_name);
+                    } else {
+                        sub_streams.prepend ("", _("Track '%u'").printf (track));
+                    }
+                }
+
+                track++;
+            }
+
+            sub_streams.append ("none", _("None"));
+            sub_streams.sensitive = s_streams.length () > 0;
+
+            return (int) s_streams.length ();
+        }
+
+        public void next_audio () {
+            int count = audio_streams.model.iter_n_children (null);
+            if (count > 0) {
+                audio_streams.active = (audio_streams.active + 1) % count;
+            }
+        }
+
+        public void next_subtitles () {
+            int count = sub_streams.model.iter_n_children (null);
+            if (count > 0) {
+                sub_streams.active = (sub_streams.active + 1) % count;
+            }
         }
 
         public void toggle_playlist () {
@@ -320,7 +532,12 @@ namespace Videos2 {
             }
 
             hiding_timer = GLib.Timeout.add (2000, () => {
-                if (hovered || playlist_popover.visible || volume_button.get_popup ().visible || !playing) {
+                if (hovered ||
+                    playlist_popover.visible ||
+                    menu_popover.visible ||
+                    volume_button.get_popup ().visible ||
+                    !playing) {
+
                     hiding_timer = 0;
 
                     return false;

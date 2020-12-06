@@ -2,6 +2,7 @@ namespace Videos2 {
     public class MainWindow : Gtk.Window {
         private bool show_volume_info = false;
 
+        private Objects.Player player;
         private Objects.Playlist playlist;
 
         public GLib.Settings settings;
@@ -23,7 +24,6 @@ namespace Videos2 {
         private uint current_w = 0;
         private uint cursor_timer = 0;
 
-        private Widgets.Player player;
         private Widgets.HeadBar header_bar;
         private Widgets.TopBar top_bar;
         private Widgets.InfoBar info_bar;
@@ -132,12 +132,14 @@ namespace Videos2 {
 
             settings = new GLib.Settings (Constants.APP_NAME);
             changed_remember_time ();
+
             inhibitor = new Services.Inhibitor (this);
+            mpris_proxy = new Services.MprisProxy ();
             disk_manager = new Services.DiskManager ();
             library_manager = new Services.LibraryManager (settings.get_int ("categories-count"));
 
+            player = new Objects.Player ();
             playlist = new Objects.Playlist ();
-            mpris_proxy = new Services.MprisProxy ();
 
             build_ui ();
 
@@ -161,6 +163,44 @@ namespace Videos2 {
             settings.changed["remember-time"].connect (changed_remember_time);
             settings.changed["library-path"].connect (changed_library_path);
             settings.changed["categories-count"].connect (changed_categories_count);
+
+            player.duration_changed.connect (bottom_bar.change_duration);
+            player.progress_changed.connect (bottom_bar.change_progress);
+            player.audio_changed.connect (bottom_bar.set_active_audio);
+            player.playbin_state_changed.connect ((state) => {
+                inhibitor.playback_state = state;
+                if (state == Gst.State.PLAYING || state == Gst.State.PAUSED) {
+                    if (main_stack.get_visible_child_name () != "player") {
+                        main_stack.set_visible_child_name ("player");
+                    }
+
+                    bottom_bar.playing = (state == Gst.State.PLAYING);
+
+                    if (is_maximized) {
+                        fullscreen ();
+                    }
+                } else {
+                    if (fullscreened) {
+                        unfullscreen ();
+                    }
+
+                    if (header_bar.navigation_label == Constants.NAV_BUTTON_WELCOME) {
+                        main_stack.set_visible_child_name ("welcome");
+                    } else if (header_bar.navigation_label == Constants.NAV_BUTTON_LIBRARY) {
+                        main_stack.set_visible_child_name ("library");
+                    }
+                }
+
+                if (mpris_proxy != null) {
+                    mpris_proxy.state = state;
+                }
+            });
+            player.uri_changed.connect (on_uri_changed);
+            player.ended_stream.connect (() => {
+                if (!playlist.next ()) {
+                    player.stop ();
+                }
+            });
 
             playlist.play_media.connect ((uri, index) => {
                 if (media_type == Enums.MediaType.NONE) {
@@ -266,14 +306,7 @@ namespace Videos2 {
 
             header_bar = new Widgets.HeadBar ();
             header_bar.navigation_clicked.connect (on_navigation_clicked);
-            header_bar.show_preferences.connect (() => {
-                var preferences = new Dialogs.Preferences (this);
-                preferences.run ();
-            });
 
-            player = new Widgets.Player ();
-            header_bar.audio_selected.connect (player.set_active_audio);
-            header_bar.subtitle_selected.connect (player.set_active_subtitle);
 
             top_bar = new Widgets.TopBar ();
             top_bar.unfullscreen.connect (() => {
@@ -283,6 +316,15 @@ namespace Videos2 {
             info_bar = new Widgets.InfoBar (false);
 
             bottom_bar = new Widgets.BottomBar ();
+            bottom_bar.audio_selected.connect (player.set_active_audio);
+            bottom_bar.subtitle_selected.connect (player.set_active_subtitle);
+            bottom_bar.play_toggled.connect (player.toggle_playing);
+            bottom_bar.select_media.connect (playlist.select_media);
+            bottom_bar.clear_media.connect (playlist.clear_media);
+            bottom_bar.dnd_media.connect (playlist.change_media_position);
+            bottom_bar.play_next.connect (playlist.next);
+            bottom_bar.play_prev.connect (playlist.previous);
+            bottom_bar.volume_changed.connect (on_volume_changed);
             bottom_bar.notify["reveal-child"].connect (() => {
                 if (bottom_bar.reveal_child == true && fullscreened == true) {
                     top_bar.reveal_child = true;
@@ -290,72 +332,16 @@ namespace Videos2 {
                     top_bar.reveal_child = false;
                 }
             });
-            player.playbin_state_changed.connect ((state) => {
-                inhibitor.playback_state = state;
-                if (state == Gst.State.PLAYING || state == Gst.State.PAUSED) {
-                    if (main_stack.get_visible_child_name () != "player") {
-                        main_stack.set_visible_child_name ("player");
-                    }
-
-                    bottom_bar.playing = (state == Gst.State.PLAYING);
-
-                    if (is_maximized) {
-                        fullscreen ();
-                    }
-                } else {
-                    if (fullscreened) {
-                        unfullscreen ();
-                    }
-
-                    if (header_bar.navigation_label == Constants.NAV_BUTTON_WELCOME) {
-                        main_stack.set_visible_child_name ("welcome");
-                    } else if (header_bar.navigation_label == Constants.NAV_BUTTON_LIBRARY) {
-                        main_stack.set_visible_child_name ("library");
-                    }
-                }
-
-                if (mpris_proxy != null) {
-                    mpris_proxy.state = state;
-                }
+            bottom_bar.show_preferences.connect (() => {
+                var preferences = new Dialogs.Preferences (this);
+                preferences.run ();
             });
-
-            player.duration_changed.connect (bottom_bar.change_duration);
-            player.progress_changed.connect (bottom_bar.change_progress);
-            player.uri_changed.connect ((uri) => {
-                if (uri != "") {
-                    if (media_type == Enums.MediaType.DVD) {
-                        title = "DVD";
-                        header_bar.clear_meta ();
-                    } else {
-                        title = Utils.get_title (uri);
-                        header_bar.setup_uri_meta (uri);
-                    }
-                } else {
-                    header_bar.clear_meta ();
-                }
-
-                mpris_proxy.title = uri != "" ? title : _("Videos2");
-            });
-            player.audio_changed.connect (header_bar.set_active_audio);
-            player.ended_stream.connect (() => {
-                if (!playlist.next ()) {
-                    player.stop ();
-                }
-            });
-
-            bottom_bar.play_toggled.connect (player.toggle_playing);
             bottom_bar.seeked.connect ((pos) => {
                 player.seek_jump_value (pos);
                 if (restore_id > 0) {
                     restore_id = 0;
                 }
             });
-            bottom_bar.select_media.connect (playlist.select_media);
-            bottom_bar.clear_media.connect (playlist.clear_media);
-            bottom_bar.dnd_media.connect (playlist.change_media_position);
-            bottom_bar.play_next.connect (playlist.next);
-            bottom_bar.play_prev.connect (playlist.previous);
-            bottom_bar.volume_changed.connect (on_volume_changed);
 
             bottom_bar.volume_value = settings.get_double ("volume");
 
@@ -553,6 +539,22 @@ namespace Videos2 {
             }
 
             return false;
+        }
+
+        private void on_uri_changed (string uri) {
+            if (uri != "") {
+                if (media_type == Enums.MediaType.DVD) {
+                    title = "DVD";
+                    bottom_bar.clear_meta ();
+                } else {
+                    title = Utils.get_title (uri);
+                    bottom_bar.setup_uri_meta (uri);
+                }
+            } else {
+                bottom_bar.clear_meta ();
+            }
+
+            mpris_proxy.title = uri != "" ? title : _("Videos2");
         }
 
         private void on_volume_changed (double val) {
