@@ -24,6 +24,7 @@ namespace Videos2 {
         private uint current_w = 0;
         private uint cursor_timer = 0;
 
+        private Gtk.Button restore_button;
         private Widgets.HeadBar header_bar;
         private Widgets.TopBar top_bar;
         private Widgets.InfoBar info_bar;
@@ -36,11 +37,7 @@ namespace Videos2 {
             }
             set {
                 _fullscreened = value;
-                if (value && bottom_bar.child_revealed) {
-                    top_bar.reveal_child = true;
-                } else {
-                    top_bar.reveal_child = false;
-                }
+                top_bar.reveal_child = value && bottom_bar.child_revealed;
 
                 if (!value) {
                     show_mouse_cursor ();
@@ -68,9 +65,7 @@ namespace Videos2 {
                     }
                 }
 
-                header_bar.navigation_label = value > 0 ? Constants.NAV_BUTTON_BACK : media_type == Enums.MediaType.LIBRARY
-                                                        ? Constants.NAV_BUTTON_LIBRARY :
-                                                          Constants.NAV_BUTTON_WELCOME;
+                restore_button.visible = value > 0;
             }
         }
 
@@ -170,10 +165,6 @@ namespace Videos2 {
             player.playbin_state_changed.connect ((state) => {
                 inhibitor.playback_state = state;
                 if (state == Gst.State.PLAYING || state == Gst.State.PAUSED) {
-                    if (main_stack.get_visible_child_name () != "player") {
-                        main_stack.set_visible_child_name ("player");
-                    }
-
                     bottom_bar.playing = (state == Gst.State.PLAYING);
 
                     if (is_maximized) {
@@ -184,11 +175,11 @@ namespace Videos2 {
                         unfullscreen ();
                     }
 
-                    if (header_bar.navigation_label == Constants.NAV_BUTTON_WELCOME) {
+                    // if () {
                         main_stack.set_visible_child_name ("welcome");
-                    } else if (header_bar.navigation_label == Constants.NAV_BUTTON_LIBRARY) {
-                        main_stack.set_visible_child_name ("library");
-                    }
+                    // } else if () {
+                    //     main_stack.set_visible_child_name ("library");
+                    // }
                 }
 
                 if (mpris_proxy != null) {
@@ -305,8 +296,6 @@ namespace Videos2 {
             });
 
             header_bar = new Widgets.HeadBar ();
-            header_bar.navigation_clicked.connect (on_navigation_clicked);
-
 
             top_bar = new Widgets.TopBar ();
             top_bar.unfullscreen.connect (() => {
@@ -379,12 +368,19 @@ namespace Videos2 {
                 return base.button_press_event (event);
             });
 
+            restore_button = new Gtk.Button ();
+            restore_button.label = _("Continue");
+            restore_button.valign = Gtk.Align.START;
+            restore_button.halign = Gtk.Align.START;
+            restore_button.margin = 10;
+            restore_button.clicked.connect (on_restore_clicked);
 
             var player_page = new Gtk.Overlay ();
             player_page.add (video_box);
             player_page.add_overlay (bottom_bar);
             player_page.add_overlay (top_bar);
             player_page.add_overlay (info_bar);
+            player_page.add_overlay (restore_button);
 
             library_page = new Views.LibraryPage ();
             library_page.select_category.connect (on_select_category);
@@ -394,7 +390,6 @@ namespace Videos2 {
 
                 media_type = Enums.MediaType.LIBRARY;
 
-                header_bar.navigation_label = Constants.NAV_BUTTON_LIBRARY;
                 playlist.add_media (GLib.File.new_for_uri (uri), true);
             });
 
@@ -407,6 +402,8 @@ namespace Videos2 {
             main_stack.add_named (library_page, "library");
             add (main_stack);
             show_all ();
+
+            restore_button.visible = false;
 
             main_stack.notify["visible-child-name"].connect (on_changed_child);
             main_stack.set_visible_child_name ("welcome");
@@ -589,8 +586,8 @@ namespace Videos2 {
             }
         }
 
-        private void on_navigation_clicked () {
-            if (header_bar.navigation_label == Constants.NAV_BUTTON_BACK) {
+        private void on_restore_clicked () {
+            if (player.get_playbin_state () == Gst.State.PLAYING && restore_button.visible) {
                 var pos = restore_manager.restore_position;
                 restore_id = 0;
 
@@ -681,8 +678,6 @@ namespace Videos2 {
 
             media_type = Enums.MediaType.VIDEO;
 
-            header_bar.navigation_label = Constants.NAV_BUTTON_WELCOME;
-
             string filename;
             string content_type;
             foreach (GLib.File file in files) {
@@ -711,6 +706,10 @@ namespace Videos2 {
 
             if (current_h > 0 && current_w > 0) {
                 resize ((int) current_w, (int) current_h);
+            }
+
+            if (main_stack.get_visible_child_name () != "player") {
+                main_stack.set_visible_child_name ("player");
             }
 
             player.set_uri (uri);
@@ -789,7 +788,6 @@ namespace Videos2 {
         private bool resume_last_videos () {
             var last_played = playlist.current;
             if (last_played > -1) {
-                header_bar.navigation_label = Constants.NAV_BUTTON_WELCOME;
                 playlist.current = last_played;
                 return true;
             }
@@ -811,6 +809,7 @@ namespace Videos2 {
             var cursor = new Gdk.Cursor.for_display (get_window ().get_display (), Gdk.CursorType.BLANK_CURSOR);
             get_window ().set_cursor (cursor);
         }
+
         private void show_mouse_cursor () {
             if (cursor_timer != 0) {
                 GLib.Source.remove (cursor_timer);

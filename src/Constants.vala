@@ -12,10 +12,6 @@ namespace Videos2.Constants {
     public const string THUMBNAILER_IFACE = "org.freedesktop.thumbnails.Thumbnailer1";
     public const string THUMBNAILER_SERVICE = "/org/freedesktop/thumbnails/Thumbnailer1";
 
-    public const string NAV_BUTTON_WELCOME = _("Back");
-    public const string NAV_BUTTON_BACK = _("Continue");
-    public const string NAV_BUTTON_LIBRARY = _("Library");
-
     // actions
     public const string ACTION_PREFIX = "win.";
     public const string ACTION_ADD = "action-add";

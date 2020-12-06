@@ -1,24 +1,10 @@
 namespace Videos2 {
     public class Widgets.HeadBar : Gtk.HeaderBar {
-        public signal void navigation_clicked ();
         public signal void select_category (string uri);
 
-        private Gtk.Button nav_button;
         private Gtk.MenuButton lib_nav_button;
 
         private Gtk.Box lib_nav_box;
-
-        public bool navigation_visible {
-            set {
-                if (nav_button.visible != value) {
-                    if (value) {
-                        nav_button.show ();
-                    } else {
-                        nav_button.hide ();
-                    }
-                }
-            }
-        }
 
         public bool library_button_visible {
             set {
@@ -36,15 +22,6 @@ namespace Videos2 {
             }
         }
 
-        public string navigation_label {
-            get {
-                return nav_button.label;
-            }
-            set {
-                nav_button.label = value;
-            }
-        }
-
         public HeadBar () {
             Object (show_close_button: true);
 
@@ -54,15 +31,6 @@ namespace Videos2 {
             get_style_context ().add_class ("compact");
 
             show_all ();
-
-            nav_button = new Gtk.Button ();
-            nav_button.label = Constants.NAV_BUTTON_WELCOME;
-            nav_button.valign = Gtk.Align.CENTER;
-            nav_button.vexpand = false;
-            nav_button.get_style_context ().add_class ("back-button");
-            nav_button.clicked.connect (() => {
-                navigation_clicked ();
-            });
 
             lib_nav_box = new Gtk.Box (Gtk.Orientation.VERTICAL, 0);
             lib_nav_box.show_all ();
@@ -75,7 +43,6 @@ namespace Videos2 {
             lib_nav_button.popover = popover_lib_nav;
             lib_nav_button.valign = Gtk.Align.CENTER;
 
-            pack_start (nav_button);
             pack_start (lib_nav_button);
         }
 
