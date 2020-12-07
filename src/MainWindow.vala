@@ -8,12 +8,10 @@ namespace Videos2 {
         public GLib.Settings settings;
         private Services.Inhibitor inhibitor;
         private Services.DiskManager disk_manager;
-        private Services.LibraryManager library_manager;
         private Services.RestoreManager? restore_manager;
 
         private Gtk.Stack main_stack;
         private Views.WelcomePage welcome_page;
-        private Views.LibraryPage library_page;
 
         private Gtk.DrawingArea video_area;
 
@@ -25,7 +23,6 @@ namespace Videos2 {
         private uint cursor_timer = 0;
 
         private Gtk.Button restore_button;
-        private Widgets.HeadBar header_bar;
         private Widgets.TopBar top_bar;
         private Widgets.InfoBar info_bar;
         private Widgets.BottomBar bottom_bar;
@@ -78,7 +75,7 @@ namespace Videos2 {
                 if (_media_type != value) {
                     _media_type = value;
 
-                    bottom_bar.playlist_visible = value <= Enums.MediaType.LIBRARY;
+                    bottom_bar.playlist_visible = value == Enums.MediaType.VIDEO;
                 }
             }
         }
@@ -92,7 +89,6 @@ namespace Videos2 {
             { Constants.ACTION_MEDIAINFO, action_mediainfo },
             { Constants.ACTION_VOLUME, action_volume, "b" },
             { Constants.ACTION_PLAYLIST_VISIBLE, action_playlist_visible },
-            // { Constants.ACTION_SEARCH, action_search }
         };
 
         public MainWindow (Gtk.Application app) {
@@ -111,7 +107,6 @@ namespace Videos2 {
             application.set_accels_for_action (Constants.ACTION_PREFIX + Constants.ACTION_ADD, {"<Control><Shift>o"});
             application.set_accels_for_action (Constants.ACTION_PREFIX + Constants.ACTION_VOLUME + "(true)", {"<Release>KP_Add"});
             application.set_accels_for_action (Constants.ACTION_PREFIX + Constants.ACTION_VOLUME + "(false)", {"<Release>KP_Subtract"});
-            // application.set_accels_for_action (Constants.ACTION_PREFIX + Constants.ACTION_SEARCH, {"<Control>f"});
 
             var provider = new Gtk.CssProvider ();
             provider.load_from_resource ("/io/elementary/videos2/style/application.css");
@@ -131,7 +126,6 @@ namespace Videos2 {
             inhibitor = new Services.Inhibitor (this);
             mpris_proxy = new Services.MprisProxy ();
             disk_manager = new Services.DiskManager ();
-            library_manager = new Services.LibraryManager (settings.get_int ("categories-count"));
 
             player = new Objects.Player ();
             playlist = new Objects.Playlist ();
@@ -151,13 +145,8 @@ namespace Videos2 {
             }
 
             settings.bind ("block-sleep-mode", inhibitor, "allow-block", GLib.SettingsBindFlags.DEFAULT);
-            settings.bind ("library-path", library_manager, "root-path", GLib.SettingsBindFlags.GET);
-
-            changed_library_path ();
 
             settings.changed["remember-time"].connect (changed_remember_time);
-            settings.changed["library-path"].connect (changed_library_path);
-            settings.changed["categories-count"].connect (changed_categories_count);
 
             player.duration_changed.connect (bottom_bar.change_duration);
             player.progress_changed.connect (bottom_bar.change_progress);
@@ -175,11 +164,7 @@ namespace Videos2 {
                         unfullscreen ();
                     }
 
-                    // if () {
-                        main_stack.set_visible_child_name ("welcome");
-                    // } else if () {
-                    //     main_stack.set_visible_child_name ("library");
-                    // }
+                    main_stack.set_visible_child_name ("welcome");
                 }
 
                 if (mpris_proxy != null) {
@@ -231,14 +216,9 @@ namespace Videos2 {
                 }
             });
 
-            library_manager.item_found.connect (library_page.add_item);
-            library_manager.parents_found.connect (header_bar.add_lib_path);
-            library_manager.notify["current-uri"].connect (changed_current_catagory);
-
             window_state_event.connect ((e) => {
                 if (Gdk.WindowState.FULLSCREEN in e.changed_mask) {
                     fullscreened = Gdk.WindowState.FULLSCREEN in e.new_window_state;
-                    header_bar.visible = !fullscreened;
 
                     if (!fullscreened) {
                         unmaximize ();
@@ -288,14 +268,8 @@ namespace Videos2 {
                             welcome_page.update_media_button (false);
                         }
                         break;
-                    case 3:
-                        main_stack.set_visible_child_name ("library");
-                        break;
-
                 }
             });
-
-            header_bar = new Widgets.HeadBar ();
 
             top_bar = new Widgets.TopBar ();
             top_bar.unfullscreen.connect (() => {
@@ -382,24 +356,10 @@ namespace Videos2 {
             player_page.add_overlay (info_bar);
             player_page.add_overlay (restore_button);
 
-            library_page = new Views.LibraryPage ();
-            library_page.select_category.connect (on_select_category);
-
-            library_page.select_media.connect ((uri) => {
-                action_clear ();
-
-                media_type = Enums.MediaType.LIBRARY;
-
-                playlist.add_media (GLib.File.new_for_uri (uri), true);
-            });
-
-            header_bar.select_category.connect (on_select_category);
-
             main_stack = new Gtk.Stack ();
 
             main_stack.add_named (welcome_page, "welcome");
             main_stack.add_named (player_page, "player");
-            main_stack.add_named (library_page, "library");
             add (main_stack);
             show_all ();
 
@@ -417,12 +377,14 @@ namespace Videos2 {
                 open_files (files, true);
             }
         }
+
         private void action_add () {
             var files = Utils.run_file_chooser (this);
             if (files.length > 0) {
                 open_files (files, player.get_playbin_state () == Gst.State.PLAYING ? false : true);
             }
         }
+
         private void action_quit (GLib.SimpleAction action, GLib.Variant? pars) {
             bool save_current_state;
             pars.@get ("b", out save_current_state);
@@ -445,6 +407,7 @@ namespace Videos2 {
 
             destroy ();
         }
+
         private void action_back () {
             var v_child = main_stack.get_visible_child_name ();
 
@@ -455,15 +418,15 @@ namespace Videos2 {
 
                     player.stop ();
                 }
-            } else if (v_child == "library") {
-                main_stack.set_visible_child_name ("welcome");
             }
         }
+
         private void action_playlist_visible () {
             if (main_stack.get_visible_child_name () == "player") {
                 bottom_bar.toggle_playlist ();
             }
         }
+
         private void action_volume (GLib.SimpleAction action, GLib.Variant? pars) {
             if (main_stack.get_visible_child_name () == "player") {
                 show_volume_info = true;
@@ -473,7 +436,7 @@ namespace Videos2 {
             }
         }
         private void action_mediainfo () {
-            if (main_stack.get_visible_child_name () == "player" && media_type <= Enums.MediaType.LIBRARY) {
+            if (main_stack.get_visible_child_name () == "player" && media_type == Enums.MediaType.VIDEO) {
                 var uri = playlist.get_uri ();
                 if (uri == "") {
                     return;
@@ -566,22 +529,13 @@ namespace Videos2 {
         }
 
         private void on_changed_child () {
-            var view_name = main_stack.get_visible_child_name ();
-
-            header_bar.library_button_visible = view_name == "library";
-
-            switch (view_name) {
+            switch (main_stack.get_visible_child_name ()) {
                 case "welcome":
                     resize (960, 540);
                     title = _("Videos");
                     break;
                 case "player":
                     //
-                    break;
-                case "library":
-                    resize (960, 540);
-                    changed_current_catagory ();
-                    on_select_category ("");
                     break;
             }
         }
@@ -591,7 +545,7 @@ namespace Videos2 {
                 var pos = restore_manager.restore_position;
                 restore_id = 0;
 
-                if (media_type > Enums.MediaType.LIBRARY) {
+                if (media_type != Enums.MediaType.VIDEO) {
                     return;
                 }
 
@@ -599,12 +553,6 @@ namespace Videos2 {
                     player.seek_jump_value (pos);
                 }
             }
-        }
-
-        private void on_select_category (string uri) {
-            library_page.clear_box ();
-            // TODO there must be something here that doesn't block the flow
-            library_manager.init (uri);
         }
 
         private void changed_remember_time () {
@@ -618,45 +566,6 @@ namespace Videos2 {
                 }
                 restore_manager = null;
             }
-        }
-
-        private void changed_library_path () {
-            if (settings.get_string ("library-path") == "") {
-                if (main_stack.get_visible_child_name () == "library") {
-                    main_stack.set_visible_child_name ("welcome");
-                }
-
-                welcome_page.update_library_button (false);
-            } else {
-                welcome_page.update_library_button (true);
-            }
-        }
-
-        private void changed_current_catagory () {
-            if (main_stack.get_visible_child_name () != "library") {
-                return;
-            }
-
-            var uri = library_manager.current_uri;
-            if (uri != "") {
-                var cat_name = GLib.File.new_for_uri (uri).get_basename ();
-                if (cat_name != null) {
-                    title = cat_name;
-                    return;
-                }
-            }
-
-            title = _("Videos");
-        }
-
-        private void changed_categories_count () {
-            library_manager.categories_count = settings.get_int ("categories-count");
-
-            if (main_stack.get_visible_child_name () != "library") {
-                return;
-            }
-
-            on_select_category ("");
         }
 
         private bool run_open_dvd () {
@@ -719,7 +628,7 @@ namespace Videos2 {
                 restore_id = 0;
             }
 
-            if (media_type <= Enums.MediaType.LIBRARY) {
+            if (media_type == Enums.MediaType.VIDEO) {
                 if (restore_manager != null && restore_manager.pull (uri)) {
                     restore_id = GLib.Timeout.add (10000, () => {
                         _restore_id = 0;
@@ -832,7 +741,7 @@ namespace Videos2 {
         }
 
         private void save_current_position (bool synchronously) {
-            if (media_type <= Enums.MediaType.LIBRARY && restore_manager != null) {
+            if (media_type == Enums.MediaType.VIDEO && restore_manager != null) {
                 int64 current_position = player.position;
                 if (synchronously) {
                     restore_manager.push (settings.get_string ("current-uri"), current_position);
