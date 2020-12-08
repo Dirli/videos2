@@ -23,6 +23,7 @@ namespace Videos2.Constants {
     public const string ACTION_QUIT = "action-quit";
     public const string ACTION_SEARCH = "action-search";
     public const string ACTION_VOLUME = "action-volume";
+    public const string ACTION_SPEED = "action-speed";
 
     public const int POSTER_WIDTH = 256;
     public const int POSTER_HEIGHT = 256;
@@ -34,6 +35,17 @@ namespace Videos2.Constants {
 
     public const int64 SEC_INV = 1;
     public const int64 NANO_INV = 1000000000;
+
+    public const double[] speeds_array = {
+        0.5,
+        0.75,
+        1,
+        1.25,
+        1.5,
+        2,
+        3,
+        4
+    };
 
     public const Gtk.TargetEntry[] TARGET_ENTRIES = {
         {"PLAYLIST_ITEM", Gtk.TargetFlags.SAME_APP, 0}

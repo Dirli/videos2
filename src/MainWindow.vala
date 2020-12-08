@@ -88,6 +88,7 @@ namespace Videos2 {
             { Constants.ACTION_CLEAR, action_clear },
             { Constants.ACTION_MEDIAINFO, action_mediainfo },
             { Constants.ACTION_VOLUME, action_volume, "b" },
+            { Constants.ACTION_SPEED, action_speed, "b" },
             { Constants.ACTION_PLAYLIST_VISIBLE, action_playlist_visible },
         };
 
@@ -107,6 +108,9 @@ namespace Videos2 {
             application.set_accels_for_action (Constants.ACTION_PREFIX + Constants.ACTION_ADD, {"<Control><Shift>o"});
             application.set_accels_for_action (Constants.ACTION_PREFIX + Constants.ACTION_VOLUME + "(true)", {"<Release>KP_Add"});
             application.set_accels_for_action (Constants.ACTION_PREFIX + Constants.ACTION_VOLUME + "(false)", {"<Release>KP_Subtract"});
+
+            application.set_accels_for_action (Constants.ACTION_PREFIX + Constants.ACTION_SPEED + "(true)", {"<Control><Release>KP_Add"});
+            application.set_accels_for_action (Constants.ACTION_PREFIX + Constants.ACTION_SPEED + "(false)", {"<Control><Release>KP_Subtract"});
 
             var provider = new Gtk.CssProvider ();
             provider.load_from_resource ("/io/elementary/videos2/style/application.css");
@@ -435,6 +439,16 @@ namespace Videos2 {
                 bottom_bar.volume_value = vol_value ? 0.05 : -0.05;
             }
         }
+
+        private void action_speed (GLib.SimpleAction action, GLib.Variant? pars) {
+            if (player.get_playbin_state () == Gst.State.PLAYING) {
+                show_volume_info = true;
+                bool speed_direction;
+                pars.@get ("b", out speed_direction);
+                var speed_val = player.set_playback_rate (speed_direction);
+            }
+        }
+
         private void action_mediainfo () {
             if (main_stack.get_visible_child_name () == "player" && media_type == Enums.MediaType.VIDEO) {
                 var uri = playlist.get_uri ();
@@ -454,6 +468,7 @@ namespace Videos2 {
                 }
             }
         }
+
         private void action_clear () {
             media_type = Enums.MediaType.NONE;
 

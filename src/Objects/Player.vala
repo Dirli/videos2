@@ -26,6 +26,8 @@ namespace Videos2 {
             }
         }
 
+        private int playback_index = 2;
+
         public unowned int64 position {
             private set {
                 if (value >= 0) {
@@ -102,6 +104,42 @@ namespace Videos2 {
                     });
                 }
             }
+        }
+
+        public double set_playback_rate (bool up) {
+            int64 position = 0;
+            if (!playbin.query_position (fmt, out position)) {
+                return 0;
+            }
+
+            var old_index = playback_index;
+
+            if (up) {
+                ++playback_index;
+            } else {
+                --playback_index;
+            }
+
+
+            if (playback_index < 0 || playback_index >= Constants.speeds_array.length) {
+                playback_index = old_index;
+                return 0;
+            }
+
+            var playback_speed = Constants.speeds_array[playback_index];
+
+            var ev = new Gst.Event.seek (
+                playback_speed,
+                fmt,
+                Gst.SeekFlags.FLUSH | Gst.SeekFlags.ACCURATE,
+                Gst.SeekType.SET,
+                position,
+                Gst.SeekType.END,
+                0);
+
+            playbin.send_event (ev);
+
+            return playback_speed;
         }
 
         public void set_active_audio (int index) {
