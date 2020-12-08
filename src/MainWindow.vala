@@ -1,7 +1,5 @@
 namespace Videos2 {
     public class MainWindow : Gtk.Window {
-        private bool show_volume_info = false;
-
         private Objects.Player player;
         private Objects.Playlist playlist;
 
@@ -24,6 +22,7 @@ namespace Videos2 {
 
         private Gtk.Button restore_button;
         private Widgets.TopBar top_bar;
+        private Widgets.PropsBar props_bar;
         private Widgets.InfoBar info_bar;
         private Widgets.BottomBar bottom_bar;
 
@@ -114,7 +113,7 @@ namespace Videos2 {
 
             var provider = new Gtk.CssProvider ();
             provider.load_from_resource ("/io/elementary/videos2/style/application.css");
-            Gtk.StyleContext.add_provider_for_screen (Gdk.Screen.get_default (), provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION);
+            Gtk.StyleContext.add_provider_for_screen (Gdk.Screen.get_default (), provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION + 1);
         }
 
         construct {
@@ -280,7 +279,7 @@ namespace Videos2 {
                 unfullscreen ();
             });
 
-            info_bar = new Widgets.InfoBar (false);
+            info_bar = new Widgets.InfoBar ();
 
             bottom_bar = new Widgets.BottomBar ();
             bottom_bar.audio_selected.connect (player.set_active_audio);
@@ -353,11 +352,14 @@ namespace Videos2 {
             restore_button.margin = 10;
             restore_button.clicked.connect (on_restore_clicked);
 
+            props_bar = new Widgets.PropsBar ();
+
             var player_page = new Gtk.Overlay ();
             player_page.add (video_box);
             player_page.add_overlay (bottom_bar);
             player_page.add_overlay (top_bar);
             player_page.add_overlay (info_bar);
+            player_page.add_overlay (props_bar);
             player_page.add_overlay (restore_button);
 
             main_stack = new Gtk.Stack ();
@@ -368,6 +370,8 @@ namespace Videos2 {
             show_all ();
 
             restore_button.visible = false;
+            props_bar.visible = false;
+            info_bar.visible = false;
 
             main_stack.notify["visible-child-name"].connect (on_changed_child);
             main_stack.set_visible_child_name ("welcome");
@@ -433,7 +437,6 @@ namespace Videos2 {
 
         private void action_volume (GLib.SimpleAction action, GLib.Variant? pars) {
             if (main_stack.get_visible_child_name () == "player") {
-                show_volume_info = true;
                 bool vol_value;
                 pars.@get ("b", out vol_value);
                 bottom_bar.volume_value = vol_value ? 0.05 : -0.05;
@@ -442,10 +445,12 @@ namespace Videos2 {
 
         private void action_speed (GLib.SimpleAction action, GLib.Variant? pars) {
             if (player.get_playbin_state () == Gst.State.PLAYING) {
-                show_volume_info = true;
                 bool speed_direction;
                 pars.@get ("b", out speed_direction);
                 var speed_val = player.set_playback_rate (speed_direction);
+                if (speed_val > 0) {
+                    props_bar.set_label (@"Speed: x$(speed_val)");
+                }
             }
         }
 
@@ -464,7 +469,7 @@ namespace Videos2 {
                     media_info += Utils.prepare_audio_info (discoverer_info);
                     media_info += Utils.prepare_sub_info (discoverer_info);
 
-                    info_bar.show_media_info (media_info);
+                    info_bar.set_label (media_info);
                 }
             }
         }
@@ -535,12 +540,11 @@ namespace Videos2 {
 
         private void on_volume_changed (double val) {
             player.volume = val;
-            settings.set_double ("volume", val);
-            if (show_volume_info) {
-                info_bar.show_volume (val);
-            }
+            settings.set_double ("volume", player.volume);
 
-            show_volume_info = false;
+            if (player.get_playbin_state () == Gst.State.PLAYING) {
+                props_bar.set_label (@"Volume: %.0f %%".printf (val * 100));
+            }
         }
 
         private void on_changed_child () {

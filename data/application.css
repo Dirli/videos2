@@ -2,8 +2,9 @@
     font-size: 28px;
 }
 
-.dark-color {
-    background-color: rgba(0, 0, 0, 1);
+/* it doesn't work, unfortunately I don't know how to fix it yet */
+.info-wrapper.background {
+    background-color: transparent;
 }
 
 .default-thumbnail {

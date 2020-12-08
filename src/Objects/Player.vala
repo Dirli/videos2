@@ -7,6 +7,8 @@ namespace Videos2 {
         public signal void audio_changed (int index);
         public signal void ended_stream ();
 
+        private bool terminate = false;
+
         private uint progress_timer = 0;
         private int err_count = 0;
 
@@ -32,6 +34,10 @@ namespace Videos2 {
             private set {
                 if (value >= 0) {
                     playbin.seek_simple (fmt, Gst.SeekFlags.FLUSH, value);
+
+                    if (playback_index != 2) {
+                        set_playback_rate (null);
+                    }
                 }
             }
             get {
@@ -106,20 +112,26 @@ namespace Videos2 {
             }
         }
 
-        public double set_playback_rate (bool up) {
-            int64 position = 0;
-            if (!playbin.query_position (fmt, out position)) {
-                return 0;
-            }
+        public double set_playback_rate (bool? up) {
+            int64 p = 0;
+            terminate = false;
+
+            // I don't really like the loop solution, but it always occurs in the examples
+            do {
+                if (!playbin.query_position (fmt, out p)) {
+                    if (up != null) {
+                        return 0;
+                    }
+                } else {
+                    break;
+                }
+            } while (!terminate);
 
             var old_index = playback_index;
 
-            if (up) {
-                ++playback_index;
-            } else {
-                --playback_index;
+            if (up != null) {
+                up ? ++playback_index : --playback_index;
             }
-
 
             if (playback_index < 0 || playback_index >= Constants.speeds_array.length) {
                 playback_index = old_index;
@@ -133,7 +145,7 @@ namespace Videos2 {
                 fmt,
                 Gst.SeekFlags.FLUSH | Gst.SeekFlags.ACCURATE,
                 Gst.SeekType.SET,
-                position,
+                p,
                 Gst.SeekType.END,
                 0);
 
@@ -292,9 +304,12 @@ namespace Videos2 {
                         return true;
                     }
 
+                    terminate = true;
+
                     ended_stream ();
                     break;
                 case Gst.MessageType.EOS:
+                    terminate = true;
                     playbin_state_change (Gst.State.NULL, false);
                     ended_stream ();
                     break;
