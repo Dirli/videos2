@@ -13,8 +13,6 @@ namespace Videos2 {
         }
 
         construct {
-            get_style_context ().add_class ("info-wrapper");
-
             info_label = new Gtk.Label (null);
             info_label.margin = 6;
             info_label.get_style_context ().add_class ("info-volume");
@@ -22,7 +20,7 @@ namespace Videos2 {
             add (info_label);
         }
 
-        public new void set_label (string lbl) {
+        public void set_label (string lbl) {
             if (hiding_timer != 0) {
                 GLib.Source.remove (hiding_timer);
                 hiding_timer = 0;

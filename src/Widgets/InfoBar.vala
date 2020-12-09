@@ -28,7 +28,6 @@ namespace Videos2 {
             transition_type = Gtk.RevealerTransitionType.SLIDE_RIGHT;
 
             box_wrap = new Gtk.Box (Gtk.Orientation.VERTICAL, 0);
-            box_wrap.get_style_context ().add_class ("info-wrapper");
 
             info_label = new Gtk.Label (null);
             info_label.margin = 10;

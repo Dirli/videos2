@@ -110,10 +110,6 @@ namespace Videos2 {
 
             application.set_accels_for_action (Constants.ACTION_PREFIX + Constants.ACTION_SPEED + "(true)", {"<Control><Release>KP_Add"});
             application.set_accels_for_action (Constants.ACTION_PREFIX + Constants.ACTION_SPEED + "(false)", {"<Control><Release>KP_Subtract"});
-
-            var provider = new Gtk.CssProvider ();
-            provider.load_from_resource ("/io/elementary/videos2/style/application.css");
-            Gtk.StyleContext.add_provider_for_screen (Gdk.Screen.get_default (), provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION + 1);
         }
 
         construct {
@@ -122,6 +118,10 @@ namespace Videos2 {
             insert_action_group ("win", actions);
 
             set_default_size (960, 540);
+
+            var provider = new Gtk.CssProvider ();
+            provider.load_from_resource ("/io/elementary/videos2/style/application.css");
+            Gtk.StyleContext.add_provider_for_screen (Gdk.Screen.get_default (), provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION);
 
             settings = new GLib.Settings (Constants.APP_NAME);
             changed_remember_time ();
@@ -363,9 +363,11 @@ namespace Videos2 {
             player_page.add_overlay (restore_button);
 
             main_stack = new Gtk.Stack ();
-
             main_stack.add_named (welcome_page, "welcome");
             main_stack.add_named (player_page, "player");
+
+            get_style_context ().add_class ("transparent-window");
+
             add (main_stack);
             show_all ();
 
