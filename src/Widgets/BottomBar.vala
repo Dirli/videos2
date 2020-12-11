@@ -14,6 +14,7 @@ namespace Videos2 {
         public signal int dnd_media (int old_position, int new_position);
 
         private uint hiding_timer = 0;
+        private uint preview_timer = 0;
 
         public Widgets.PlaylistBox playlist_box;
 
@@ -29,6 +30,7 @@ namespace Videos2 {
 
         private Gtk.Popover playlist_popover;
         private Gtk.Popover menu_popover;
+        private Widgets.PreviewPopover? preview_popover;
 
         private Granite.SeekBar time_bar;
 
@@ -36,6 +38,24 @@ namespace Videos2 {
         private Gtk.ComboBoxText sub_streams;
 
         private bool playlist_glowing = false;
+
+        private string _uri;
+        public string uri {
+            get {
+                return _uri;
+            }
+            set {
+                _uri = value;
+                if (value != "") {
+                    setup_uri_meta (value);
+                } else {
+                    clear_meta ();
+                }
+
+                destroy_preview ();
+            }
+        }
+
 
         private bool _hovered = false;
         private bool hovered {
@@ -99,7 +119,6 @@ namespace Videos2 {
             Object (valign: Gtk.Align.END);
         }
 
-
         construct {
             events |= Gdk.EventMask.POINTER_MOTION_MASK;
             events |= Gdk.EventMask.LEAVE_NOTIFY_MASK;
@@ -136,6 +155,12 @@ namespace Videos2 {
             time_bar = new Granite.SeekBar (0.0);
             time_bar.scale.vexpand = true;
             time_bar.scale.change_value.connect (on_change_value);
+            time_bar.scale.motion_notify_event.connect (on_motion_notify_event);
+            time_bar.scale.leave_notify_event.connect ((event) => {
+                destroy_preview ();
+                return false;
+            });
+
             // volume
             volume_button = new Gtk.VolumeButton ();
             volume_button.value_changed.connect ((val) => {
@@ -332,6 +357,32 @@ namespace Videos2 {
             subtitle_selected (sub_streams.active_id == "none" ? -1 : sub_streams.active);
         }
 
+        private bool on_motion_notify_event (Gdk.EventMotion event) {
+            if (uri == "") {
+                return false;
+            }
+
+            if (preview_timer > 0) {
+                GLib.Source.remove (preview_timer);
+                preview_timer = 0;
+            }
+
+            preview_timer = GLib.Timeout.add (800, () => {
+                preview_timer = 0;
+
+                if (preview_popover == null) {
+                    preview_popover = new Widgets.PreviewPopover (uri);
+                    preview_popover.set_relative_to (time_bar.scale);
+                }
+
+                preview_popover.update_view (event.x, event.window.get_width ());
+
+                return false;
+            });
+
+            return false;
+        }
+
         private void on_drag_data_received (Gdk.DragContext context, int x, int y, Gtk.SelectionData selection_data, uint target_type, uint time) {
             Gtk.Widget row = ((Gtk.Widget[]) selection_data.get_data ())[0];
 
@@ -352,11 +403,24 @@ namespace Videos2 {
             }
         }
 
-        public virtual bool on_change_value (Gtk.ScrollType scroll, double val) {
+        public bool on_change_value (Gtk.ScrollType scroll, double val) {
             int64 new_position = Utils.sec_to_nano ((int64) (val * time_bar.playback_duration));
             seeked (new_position);
 
             return false;
+        }
+
+        private void destroy_preview () {
+            if (preview_timer > 0) {
+                GLib.Source.remove (preview_timer);
+                preview_timer = 0;
+            }
+
+            if (preview_popover != null) {
+                preview_popover.stop_watch ();
+                preview_popover.destroy ();
+                preview_popover = null;
+            }
         }
 
         public void set_active_audio (int active_index) {

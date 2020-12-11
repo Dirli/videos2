@@ -52,6 +52,7 @@ executable (
     'src/Widgets/MovieGrid.vala',
     'src/Widgets/PlaylistBox.vala',
     'src/Widgets/PlaylistItem.vala',
+    'src/Widgets/PreviewPopover.vala',
     'src/Widgets/PropsBar.vala',
     'src/Widgets/TopBar.vala',
     config_header,

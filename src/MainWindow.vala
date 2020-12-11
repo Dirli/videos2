@@ -525,18 +525,17 @@ namespace Videos2 {
         }
 
         private void on_uri_changed (string uri) {
+            string new_uri = "";
             if (uri != "") {
                 if (media_type == Enums.MediaType.DVD) {
                     title = "DVD";
-                    bottom_bar.clear_meta ();
                 } else {
                     title = Utils.get_title (uri);
-                    bottom_bar.setup_uri_meta (uri);
+                    new_uri = uri;
                 }
-            } else {
-                bottom_bar.clear_meta ();
             }
 
+            bottom_bar.uri = new_uri;
             mpris_proxy.title = uri != "" ? title : _("Videos2");
         }
 
