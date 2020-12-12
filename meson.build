@@ -35,6 +35,7 @@ executable (
     'src/Structs.vala',
     'src/Dialogs/About.vala',
     'src/Dialogs/Preferences.vala',
+    'src/Dialogs/Shortcuts.vala',
     'src/Dialogs/UnsupportedFile.vala',
     'src/Interfaces/Client.vala',
     'src/Objects/MprisPlayer.vala',

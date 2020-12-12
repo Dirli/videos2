@@ -324,8 +324,17 @@ namespace Videos2 {
                 about.run ();
             });
 
+            var shortcuts_button = new Gtk.ModelButton ();
+            shortcuts_button.text = _("Keyboard Shortcuts");
+            shortcuts_button.clicked.connect (() => {
+                var shortcuts = new Dialogs.Shortcuts ();
+                shortcuts.show_all ();
+                shortcuts.run ();
+            });
+
             menu_grid.attach (new Gtk.Separator (Gtk.Orientation.HORIZONTAL), 0, top++, 2, 1);
             menu_grid.attach (pref_button, 0, top++, 2, 1);
+            menu_grid.attach (shortcuts_button, 0, top++, 2, 1);
             menu_grid.attach (about_button, 0, top++, 2, 1);
             menu_grid.show_all ();
 
