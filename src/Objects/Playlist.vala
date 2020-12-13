@@ -7,6 +7,10 @@ namespace Videos2 {
 
         private Gee.ArrayList<string> uris_array;
 
+        public bool repeat_mode {
+            get; set;
+        }
+
         private int _current = -1;
         public int current {
             get {
@@ -29,6 +33,11 @@ namespace Videos2 {
             if (current > -1) {
                 if (current + 1 < uris_array.size) {
                     ++current;
+                    return true;
+                }
+
+                if (repeat_mode) {
+                    current = 0;
                     return true;
                 }
             }

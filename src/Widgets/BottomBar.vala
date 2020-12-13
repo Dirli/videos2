@@ -8,6 +8,7 @@ namespace Videos2 {
         public signal void select_media (string uri);
         public signal bool clear_media (int index);
         public signal void volume_changed (double val);
+        public signal void repeat_changed (bool repeate_node);
         public signal void show_preferences ();
         public signal void audio_selected (int i);
         public signal void subtitle_selected (int i);
@@ -55,7 +56,6 @@ namespace Videos2 {
                 destroy_preview ();
             }
         }
-
 
         private bool _hovered = false;
         private bool hovered {
@@ -237,11 +237,17 @@ namespace Videos2 {
             clear_button.drag_data_received.connect (on_drag_data_received);
 
             repeat_button = new Gtk.ToggleButton ();
-            repeat_button.set_image (new Gtk.Image.from_icon_name ("media-playlist-no-repeat-symbolic", Gtk.IconSize.BUTTON));
+            repeat_button.set_image (new Gtk.Image.from_icon_name ("media-playlist-no-repeat-symbolic",
+                                                                   Gtk.IconSize.BUTTON));
             repeat_button.tooltip_text = _("Enable Repeat");
             repeat_button.toggled.connect (() => {
                 repeat_button.set_tooltip_text (repeat_button.active ? _("Disable Repeat") : _("Enable Repeat"));
-                repeat_button.set_image (new Gtk.Image.from_icon_name (repeat_button.active ? "media-playlist-repeat-symbolic" : "media-playlist-no-repeat-symbolic", Gtk.IconSize.BUTTON));
+                repeat_button.set_image (new Gtk.Image.from_icon_name (repeat_button.active ?
+                                                                       "media-playlist-repeat-symbolic" :
+                                                                       "media-playlist-no-repeat-symbolic",
+                                                                       Gtk.IconSize.BUTTON));
+
+                repeat_changed (repeat_button.active);
             });
 
             playlist_box = new Widgets.PlaylistBox ();

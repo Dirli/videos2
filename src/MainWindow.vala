@@ -299,6 +299,9 @@ namespace Videos2 {
                     top_bar.reveal_child = false;
                 }
             });
+            bottom_bar.repeat_changed.connect ((val) => {
+                playlist.repeat_mode = val;
+            });
             bottom_bar.show_preferences.connect (() => {
                 var preferences = new Dialogs.Preferences (this);
                 preferences.run ();
