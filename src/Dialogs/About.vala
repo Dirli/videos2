@@ -4,6 +4,7 @@ namespace Videos2 {
             Object (modal: true,
                     deletable: false,
                     resizable: false,
+                    title: _("About"),
                     destroy_with_parent: true);
 
             set_default_response (Gtk.ResponseType.CANCEL);
@@ -35,6 +36,8 @@ namespace Videos2 {
                 set_string_from_string_array ("<span size=\"small\">" + _("Written by:") + "</span>\n", authors)
             );
 
+            var donate_label = new Gtk.LinkButton.with_label ("https://paypal.me/Dirli85", _("Donate"));
+
             var content_scrolled_grid = new Gtk.Grid ();
             content_scrolled_grid.orientation = Gtk.Orientation.VERTICAL;
             content_scrolled_grid.add (comments_label);
@@ -53,8 +56,9 @@ namespace Videos2 {
             grid.height_request = 136;
             grid.margin = 12;
             grid.attach (logo_image,       0, 0, 1, 2);
+            grid.attach (donate_label,     0, 2);
             grid.attach (name_label,       1, 0);
-            grid.attach (content_scrolled, 1, 1);
+            grid.attach (content_scrolled, 1, 1, 1, 2);
 
             var content_area = (Gtk.Box) get_content_area ();
             content_area.border_width = 5;
