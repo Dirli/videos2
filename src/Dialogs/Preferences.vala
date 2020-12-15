@@ -35,6 +35,10 @@ namespace Videos2 {
             remember_switch.halign = Gtk.Align.START;
             main_win.settings.bind ("remember-time", remember_switch, "active", GLib.SettingsBindFlags.DEFAULT);
 
+            var preview_switch = new Gtk.Switch ();
+            preview_switch.halign = Gtk.Align.START;
+            main_win.settings.bind ("show-preview", preview_switch, "active", GLib.SettingsBindFlags.DEFAULT);
+
             var sleep_mode_switch = new Gtk.Switch ();
             sleep_mode_switch.halign = Gtk.Align.START;
             main_win.settings.bind ("block-sleep-mode", sleep_mode_switch, "active", GLib.SettingsBindFlags.DEFAULT);
@@ -49,6 +53,9 @@ namespace Videos2 {
 
             layout.attach (new SettingsLabel (_("Remember stopped time:")), 0, top);
             layout.attach (remember_switch, 1, top++);
+
+            layout.attach (new SettingsLabel (_("Show preview in the timeline:")), 0, top);
+            layout.attach (preview_switch, 1, top++);
 
             layout.attach (new Gtk.Separator (Gtk.Orientation.HORIZONTAL), 0, top++, 2, 1);
 

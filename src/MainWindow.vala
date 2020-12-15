@@ -148,6 +148,7 @@ namespace Videos2 {
             }
 
             settings.bind ("block-sleep-mode", inhibitor, "allow-block", GLib.SettingsBindFlags.DEFAULT);
+            settings.bind ("show-preview", bottom_bar, "show-preview", GLib.SettingsBindFlags.GET);
 
             settings.changed["remember-time"].connect (changed_remember_time);
 

@@ -25,5 +25,10 @@
             <summary>Block sleep mode</summary>
             <description>Allows you to block sleep mode</description>
         </key>
+        <key type="b" name="show-preview">
+            <default>true</default>
+            <summary>Show preview in the timeline</summary>
+            <description>Show preview in the timeline</description>
+        </key>
     </schema>
 </schemalist>

@@ -84,6 +84,18 @@ namespace Videos2 {
             }
         }
 
+        public bool show_preview {
+            set {
+                if (value) {
+                    time_bar.scale.motion_notify_event.connect (on_motion_notify_event);
+                    time_bar.scale.leave_notify_event.connect (on_leave_notify_event);
+                } else {
+                    time_bar.scale.motion_notify_event.disconnect (on_motion_notify_event);
+                    time_bar.scale.leave_notify_event.disconnect (on_leave_notify_event);
+                }
+            }
+        }
+
         public bool volume_sensitive {
             set {
                 volume_button.sensitive = value;
@@ -155,11 +167,6 @@ namespace Videos2 {
             time_bar = new Granite.SeekBar (0.0);
             time_bar.scale.vexpand = true;
             time_bar.scale.change_value.connect (on_change_value);
-            time_bar.scale.motion_notify_event.connect (on_motion_notify_event);
-            time_bar.scale.leave_notify_event.connect ((event) => {
-                destroy_preview ();
-                return false;
-            });
 
             // volume
             volume_button = new Gtk.VolumeButton ();
@@ -370,6 +377,12 @@ namespace Videos2 {
             }
 
             subtitle_selected (sub_streams.active_id == "none" ? -1 : sub_streams.active);
+        }
+
+        private bool on_leave_notify_event (Gdk.EventCrossing e) {
+            destroy_preview ();
+
+            return false;
         }
 
         private bool on_motion_notify_event (Gdk.EventMotion event) {
