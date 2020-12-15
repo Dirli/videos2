@@ -9,7 +9,7 @@ namespace Videos2 {
         public signal bool clear_media (int index);
         public signal void volume_changed (double val);
         public signal void repeat_changed (bool repeate_node);
-        public signal void show_preferences ();
+        // public signal void show_preferences ();
         public signal void audio_selected (int i);
         public signal void subtitle_selected (int i);
         public signal int dnd_media (int old_position, int new_position);
@@ -326,9 +326,7 @@ namespace Videos2 {
 
             var pref_button = new Gtk.ModelButton ();
             pref_button.text = _("Preferences");
-            pref_button.clicked.connect (() => {
-                show_preferences ();
-            });
+            pref_button.set_action_name (Constants.ACTION_PREFIX + Constants.ACTION_PREFERENCES);
 
             var about_button = new Gtk.ModelButton ();
             about_button.text = _("About");
@@ -338,12 +336,8 @@ namespace Videos2 {
             });
 
             var shortcuts_button = new Gtk.ModelButton ();
-            shortcuts_button.text = _("Keyboard Shortcuts");
-            shortcuts_button.clicked.connect (() => {
-                var shortcuts = new Dialogs.Shortcuts ();
-                shortcuts.show_all ();
-                shortcuts.run ();
-            });
+            shortcuts_button.text = _("Keyboard shortcuts");
+            shortcuts_button.set_action_name (Constants.ACTION_PREFIX + Constants.ACTION_SHORTCUTS);
 
             menu_grid.attach (new Gtk.Separator (Gtk.Orientation.HORIZONTAL), 0, top++, 2, 1);
             menu_grid.attach (pref_button, 0, top++, 2, 1);

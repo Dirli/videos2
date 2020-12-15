@@ -13,6 +13,8 @@ namespace Videos2 {
 
             var common_box = new Gtk.Box (Gtk.Orientation.VERTICAL, 8);
             common_box.valign = Gtk.Align.CENTER;
+            common_box.add (new Granite.AccelLabel (_("Show me"), "<Control>s"));
+            common_box.add (new Granite.AccelLabel (_("Show preferences"), "<Control>p"));
             common_box.add (new Granite.AccelLabel (_("Open"), "<Control>o"));
             common_box.add (new Granite.AccelLabel (_("Add"), "<Control><Shift>o"));
             common_box.add (new Granite.AccelLabel (_("Clear"), "<Control>w"));

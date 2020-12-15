@@ -24,6 +24,8 @@ namespace Videos2.Constants {
     public const string ACTION_SEARCH = "action-search";
     public const string ACTION_VOLUME = "action-volume";
     public const string ACTION_SPEED = "action-speed";
+    public const string ACTION_SHORTCUTS = "action-shortcuts";
+    public const string ACTION_PREFERENCES = "action-preferences";
 
     public const int POSTER_WIDTH = 256;
     public const int POSTER_HEIGHT = 256;

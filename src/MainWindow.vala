@@ -89,6 +89,8 @@ namespace Videos2 {
             { Constants.ACTION_VOLUME, action_volume, "b" },
             { Constants.ACTION_SPEED, action_speed, "b" },
             { Constants.ACTION_PLAYLIST_VISIBLE, action_playlist_visible },
+            { Constants.ACTION_PREFERENCES, action_preferences },
+            { Constants.ACTION_SHORTCUTS, action_shortcuts },
         };
 
         public MainWindow (Gtk.Application app) {
@@ -107,9 +109,10 @@ namespace Videos2 {
             application.set_accels_for_action (Constants.ACTION_PREFIX + Constants.ACTION_ADD, {"<Control><Shift>o"});
             application.set_accels_for_action (Constants.ACTION_PREFIX + Constants.ACTION_VOLUME + "(true)", {"<Release>KP_Add"});
             application.set_accels_for_action (Constants.ACTION_PREFIX + Constants.ACTION_VOLUME + "(false)", {"<Release>KP_Subtract"});
-
             application.set_accels_for_action (Constants.ACTION_PREFIX + Constants.ACTION_SPEED + "(true)", {"<Control><Release>KP_Add"});
             application.set_accels_for_action (Constants.ACTION_PREFIX + Constants.ACTION_SPEED + "(false)", {"<Control><Release>KP_Subtract"});
+            application.set_accels_for_action (Constants.ACTION_PREFIX + Constants.ACTION_SHORTCUTS, {"<Control>s"});
+            application.set_accels_for_action (Constants.ACTION_PREFIX + Constants.ACTION_PREFERENCES, {"<Control>p"});
         }
 
         construct {
@@ -303,10 +306,6 @@ namespace Videos2 {
             bottom_bar.repeat_changed.connect ((val) => {
                 playlist.repeat_mode = val;
             });
-            bottom_bar.show_preferences.connect (() => {
-                var preferences = new Dialogs.Preferences (this);
-                preferences.run ();
-            });
             bottom_bar.seeked.connect ((pos) => {
                 player.seek_jump_value (pos);
                 if (restore_id > 0) {
@@ -488,6 +487,17 @@ namespace Videos2 {
             bottom_bar.clear_playlist_box ();
             welcome_page.update_replay_button ("");
             settings.set_string ("current-uri", "");
+        }
+
+        private void action_shortcuts () {
+            var shortcuts = new Dialogs.Shortcuts ();
+            shortcuts.show_all ();
+            shortcuts.run ();
+        }
+
+        private void action_preferences () {
+            var preferences = new Dialogs.Preferences (this);
+            preferences.run ();
         }
 
         private void on_bus_acquired (DBusConnection connection, string name) {
