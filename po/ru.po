@@ -7,29 +7,29 @@ msgid ""
 msgstr ""
 "Project-Id-Version: io.elementary.videos2\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-08-06 16:21+0300\n"
-"PO-Revision-Date: 2020-08-06 17:04+0300\n"
+"POT-Creation-Date: 2020-12-15 19:15+0300\n"
+"PO-Revision-Date: 2020-12-15 19:17+0300\n"
 "Last-Translator: Dirli <litandrej85@gmail.com>\n"
 "Language-Team: \n"
 "Language: ru\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: Poedit 2.3.1\n"
+"X-Generator: Poedit 2.4.2\n"
 "X-Poedit-Basepath: ../src\n"
 "Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n"
 "%10<=4 && (n%100<12 || n%100>14) ? 1 : 2);\n"
 "X-Poedit-SearchPath-0: .\n"
 
-#: Constants.vala:9
-msgid "Back"
-msgstr "Назад"
+#: Dialogs/About.vala:7 Widgets/BottomBar.vala:332
+msgid "About"
+msgstr "О программе"
 
-#: Dialogs/About.vala:18
+#: Dialogs/About.vala:19
 msgid "Simple video player designed for Pantheon DE"
 msgstr "Простой видеоплеер, созданнный для Pantheon DE"
 
-#: Dialogs/About.vala:23
+#: Dialogs/About.vala:24
 #, c-format
 msgid ""
 "This program is published under the terms of the '%s' license, it comes with "
@@ -38,13 +38,137 @@ msgstr ""
 "Данная программа публикуется на условиях '%s' лицензии, поставляется без "
 "каких-либо гарантий; для получения более подробной информации посетите '%s'"
 
-#: Dialogs/About.vala:35
+#: Dialogs/About.vala:36
 msgid "Written by:"
 msgstr "Автор:"
 
-#: Dialogs/About.vala:63
+#: Dialogs/About.vala:39
+msgid "Donate"
+msgstr "Пожертвовать"
+
+#: Dialogs/About.vala:67 Dialogs/Preferences.vala:70 Dialogs/Shortcuts.vala:58
 msgid "Close"
 msgstr "Закрыть"
+
+#: Dialogs/Preferences.vala:27 Widgets/BottomBar.vala:328
+msgid "Preferences"
+msgstr "Настройки"
+
+#: Dialogs/Preferences.vala:52
+msgid "Playback preferences"
+msgstr "Настройки воспроизведения"
+
+#: Dialogs/Preferences.vala:54
+msgid "Remember stopped time:"
+msgstr "Запоминать время остановки:"
+
+#: Dialogs/Preferences.vala:57
+msgid "Show preview in the timeline:"
+msgstr "Показывать превью на временной шкале:"
+
+#: Dialogs/Preferences.vala:62
+msgid "Desktop Integration"
+msgstr "Интеграция с рабочим окружением"
+
+#: Dialogs/Preferences.vala:64
+msgid "Block sleep mode"
+msgstr "Блокировать спящий режим"
+
+#: Dialogs/Shortcuts.vala:7
+msgid "Keyboard Shortcuts"
+msgstr "Сочетания клавиш"
+
+#: Dialogs/Shortcuts.vala:16
+msgid "Show me"
+msgstr "Показать меня"
+
+#: Dialogs/Shortcuts.vala:17
+msgid "Show preferences"
+msgstr "Показать настройки"
+
+#: Dialogs/Shortcuts.vala:18 Services/Utils.vala:96 Services/Utils.vala:99
+msgid "Open"
+msgstr "Открыть"
+
+#: Dialogs/Shortcuts.vala:19
+msgid "Add"
+msgstr "Добавить"
+
+#: Dialogs/Shortcuts.vala:20
+msgid "Clear"
+msgstr "Очистить"
+
+#: Dialogs/Shortcuts.vala:21
+msgid "Exit"
+msgstr "Выйти"
+
+#: Dialogs/Shortcuts.vala:22
+msgid "Save & Exit"
+msgstr "Сохранить и выйти"
+
+#: Dialogs/Shortcuts.vala:23
+msgid "Fullscreen"
+msgstr "Полноэкранный режим"
+
+#: Dialogs/Shortcuts.vala:24
+msgid "Show/Hide playlist"
+msgstr "Показать/Скрыть плейлист"
+
+#: Dialogs/Shortcuts.vala:25
+msgid "Show info"
+msgstr "Показать инфо о видео"
+
+#: Dialogs/Shortcuts.vala:29
+msgid "Play/Pause"
+msgstr "Воспроизвести/Приостановить"
+
+#: Dialogs/Shortcuts.vala:30 Widgets/BottomBar.vala:208
+msgid "Stop"
+msgstr "Остановить"
+
+#: Dialogs/Shortcuts.vala:31
+msgid "Forward 10 sec"
+msgstr "Вперед на 10 сек"
+
+#: Dialogs/Shortcuts.vala:32
+msgid "Forward 1 min"
+msgstr "Вперед на 1 мин"
+
+#: Dialogs/Shortcuts.vala:33
+msgid "Back 10 sec"
+msgstr "Назад на 10 сек"
+
+#: Dialogs/Shortcuts.vala:34
+msgid "Back 1 min"
+msgstr "Назад на 1 мин"
+
+#: Dialogs/Shortcuts.vala:35
+msgid "Mute"
+msgstr "Приглушить"
+
+#: Dialogs/Shortcuts.vala:36
+msgid "Volume up"
+msgstr "Громкость вверх"
+
+#: Dialogs/Shortcuts.vala:37
+msgid "Volume down"
+msgstr "Громкость вниз"
+
+#: Dialogs/Shortcuts.vala:38
+msgid "Speed up"
+msgstr "Ускорить"
+
+#: Dialogs/Shortcuts.vala:39
+msgid "Speed down"
+msgstr "Замедлить"
+
+#: Dialogs/Shortcuts.vala:47
+msgid "Common"
+msgstr "Общие"
+
+#: Dialogs/Shortcuts.vala:48
+msgid "Playback"
+msgstr "Воспроизведение"
 
 #: Dialogs/UnsupportedFile.vala:8
 msgid "Unrecognized file format"
@@ -68,115 +192,127 @@ msgstr ""
 "Невозможно воспроизвести файл:: '%s'\n"
 "Файл не является видео ('%s')."
 
-#: MainWindow.vala:69 MainWindow.vala:233 MainWindow.vala:259
+#: MainWindow.vala:100 MainWindow.vala:569
 msgid "Videos"
 msgstr "Видео"
 
-#: Services/Utils.vala:44
+#: MainWindow.vala:352
+msgid "Continue"
+msgstr "Продолжить"
+
+#: MainWindow.vala:553 Objects/MprisRoot.vala:14
+msgid "Videos2"
+msgstr "Видео2"
+
+#: Objects/MprisPlayer.vala:74
+msgid "video player"
+msgstr "Видеоплеер"
+
+#: Services/Utils.vala:89
 msgid "All files"
 msgstr "Все файлы"
 
-#: Services/Utils.vala:48
+#: Services/Utils.vala:93
 msgid "Video files"
 msgstr "Видеофайлы"
 
-#: Services/Utils.vala:51 Services/Utils.vala:54
-msgid "Open"
-msgstr "Открыть"
-
-#: Services/Utils.vala:55
+#: Services/Utils.vala:100
 msgid "Cancel"
 msgstr "Отменить"
 
-#: Views/WelcomePage.vala:8
+#: Views/WelcomePage.vala:7
 msgid "No Videos Open"
 msgstr "Нет открытых видеофайлов"
 
-#: Views/WelcomePage.vala:9
+#: Views/WelcomePage.vala:8
 msgid "Select a source to begin playing."
 msgstr "Выберите файл для воспроизведения."
 
-#: Views/WelcomePage.vala:14 Widgets/BottomBar.vala:154
+#: Views/WelcomePage.vala:13 Widgets/BottomBar.vala:231
 msgid "Open file"
 msgstr "Открыть файл"
 
-#: Views/WelcomePage.vala:14
+#: Views/WelcomePage.vala:13
 msgid "Open a saved file."
 msgstr "Открыть сохранённый файл."
 
-#: Views/WelcomePage.vala:15 Views/WelcomePage.vala:42
+#: Views/WelcomePage.vala:14 Views/WelcomePage.vala:40
 msgid "Replay last video"
 msgstr "Повторить последнюю видеозапись"
 
-#: Views/WelcomePage.vala:16
+#: Views/WelcomePage.vala:15
 msgid "Play from Disc"
 msgstr "Воспроизвести с диска"
 
-#: Views/WelcomePage.vala:16
+#: Views/WelcomePage.vala:15
 msgid "Watch a DVD or open a file from disc"
 msgstr "Воспроизвести DVD или открыть файл с диска"
 
-#: Views/WelcomePage.vala:42
+#: Views/WelcomePage.vala:40
 msgid "Resume last video"
 msgstr "Восстановить последнее видео"
 
-#: Widgets/BottomBar.vala:76
+#: Widgets/BottomBar.vala:119
 msgid "Pause"
 msgstr "Пауза"
 
-#: Widgets/BottomBar.vala:76 Widgets/BottomBar.vala:129
+#: Widgets/BottomBar.vala:119 Widgets/BottomBar.vala:214
 msgid "Play"
 msgstr "Воспроизвести"
 
-#: Widgets/BottomBar.vala:121
+#: Widgets/BottomBar.vala:200
 msgid "Previous"
 msgstr "Предыдущий"
 
-#: Widgets/BottomBar.vala:135
+#: Widgets/BottomBar.vala:220
 msgid "Next"
 msgstr "Следующий"
 
-#: Widgets/BottomBar.vala:161
+#: Widgets/BottomBar.vala:238
 msgid "Clear Playlist"
 msgstr "Очистить список воспроизведения"
 
-#: Widgets/BottomBar.vala:171 Widgets/BottomBar.vala:173
+#: Widgets/BottomBar.vala:249 Widgets/BottomBar.vala:251
 msgid "Enable Repeat"
 msgstr "Включить повтор"
 
-#: Widgets/BottomBar.vala:173
+#: Widgets/BottomBar.vala:251
 msgid "Disable Repeat"
 msgstr "Отключить повтор"
 
-#: Widgets/BottomBar.vala:214
+#: Widgets/BottomBar.vala:297
 msgid "Playlist"
 msgstr "Список воспроизведения"
 
-#: Widgets/HeadBar.vala:47
+#: Widgets/BottomBar.vala:303
 msgid "Audio:"
 msgstr "Аудиодорожка:"
 
-#: Widgets/HeadBar.vala:51 Widgets/HeadBar.vala:58 Widgets/HeadBar.vala:219
+#: Widgets/BottomBar.vala:307 Widgets/BottomBar.vala:314
+#: Widgets/BottomBar.vala:547
 msgid "None"
 msgstr "Нет"
 
-#: Widgets/HeadBar.vala:54
+#: Widgets/BottomBar.vala:310
 msgid "Subtitles:"
 msgstr "Субтитры:"
 
-#: Widgets/HeadBar.vala:67
-msgid "About"
-msgstr "О программе"
+#: Widgets/BottomBar.vala:339
+msgid "Keyboard shortcuts"
+msgstr "Сочетания клавиш"
 
-#: Widgets/HeadBar.vala:187 Widgets/HeadBar.vala:212
+#: Widgets/BottomBar.vala:515 Widgets/BottomBar.vala:540
 #, c-format
 msgid "Track '%u'"
 msgstr "Дорожка %u"
 
-#: Widgets/HeadBar.vala:194
+#: Widgets/BottomBar.vala:522
 msgid "Default"
 msgstr "По умолчанию"
 
 #: Widgets/TopBar.vala:14
 msgid "Unfullscreen"
 msgstr "Выйти из полноэкранного режима"
+
+#~ msgid "Back"
+#~ msgstr "Назад"

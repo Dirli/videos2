@@ -8,40 +8,165 @@ msgid ""
 msgstr ""
 "Project-Id-Version: io.elementary.videos2\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-08-06 16:30+0300\n"
+"POT-Creation-Date: 2020-12-15 19:15+0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: Poedit 2.3.1\n"
+"X-Generator: Poedit 2.4.2\n"
 "X-Poedit-Basepath: ../src\n"
 "Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n"
 "%10<=4 && (n%100<12 || n%100>14) ? 1 : 2);\n"
 "X-Poedit-SearchPath-0: .\n"
 
-#: Constants.vala:9
-msgid "Back"
+#: Dialogs/About.vala:7 Widgets/BottomBar.vala:332
+msgid "About"
 msgstr ""
 
-#: Dialogs/About.vala:18
+#: Dialogs/About.vala:19
 msgid "Simple video player designed for Pantheon DE"
 msgstr ""
 
-#: Dialogs/About.vala:23
+#: Dialogs/About.vala:24
 #, c-format
 msgid ""
 "This program is published under the terms of the '%s' license, it comes "
 "with ABSOLUTELY NO WARRANTY; for details, visit '%s'"
 msgstr ""
 
-#: Dialogs/About.vala:35
+#: Dialogs/About.vala:36
 msgid "Written by:"
 msgstr ""
 
-#: Dialogs/About.vala:63
+#: Dialogs/About.vala:39
+msgid "Donate"
+msgstr ""
+
+#: Dialogs/About.vala:67 Dialogs/Preferences.vala:70
+#: Dialogs/Shortcuts.vala:58
 msgid "Close"
+msgstr ""
+
+#: Dialogs/Preferences.vala:27 Widgets/BottomBar.vala:328
+msgid "Preferences"
+msgstr ""
+
+#: Dialogs/Preferences.vala:52
+msgid "Playback preferences"
+msgstr ""
+
+#: Dialogs/Preferences.vala:54
+msgid "Remember stopped time:"
+msgstr ""
+
+#: Dialogs/Preferences.vala:57
+msgid "Show preview in the timeline:"
+msgstr ""
+
+#: Dialogs/Preferences.vala:62
+msgid "Desktop Integration"
+msgstr ""
+
+#: Dialogs/Preferences.vala:64
+msgid "Block sleep mode"
+msgstr ""
+
+#: Dialogs/Shortcuts.vala:7
+msgid "Keyboard Shortcuts"
+msgstr ""
+
+#: Dialogs/Shortcuts.vala:16
+msgid "Show me"
+msgstr ""
+
+#: Dialogs/Shortcuts.vala:17
+msgid "Show preferences"
+msgstr ""
+
+#: Dialogs/Shortcuts.vala:18 Services/Utils.vala:96 Services/Utils.vala:99
+msgid "Open"
+msgstr ""
+
+#: Dialogs/Shortcuts.vala:19
+msgid "Add"
+msgstr ""
+
+#: Dialogs/Shortcuts.vala:20
+msgid "Clear"
+msgstr ""
+
+#: Dialogs/Shortcuts.vala:21
+msgid "Exit"
+msgstr ""
+
+#: Dialogs/Shortcuts.vala:22
+msgid "Save & Exit"
+msgstr ""
+
+#: Dialogs/Shortcuts.vala:23
+msgid "Fullscreen"
+msgstr ""
+
+#: Dialogs/Shortcuts.vala:24
+msgid "Show/Hide playlist"
+msgstr ""
+
+#: Dialogs/Shortcuts.vala:25
+msgid "Show info"
+msgstr ""
+
+#: Dialogs/Shortcuts.vala:29
+msgid "Play/Pause"
+msgstr ""
+
+#: Dialogs/Shortcuts.vala:30 Widgets/BottomBar.vala:208
+msgid "Stop"
+msgstr ""
+
+#: Dialogs/Shortcuts.vala:31
+msgid "Forward 10 sec"
+msgstr ""
+
+#: Dialogs/Shortcuts.vala:32
+msgid "Forward 1 min"
+msgstr ""
+
+#: Dialogs/Shortcuts.vala:33
+msgid "Back 10 sec"
+msgstr ""
+
+#: Dialogs/Shortcuts.vala:34
+msgid "Back 1 min"
+msgstr ""
+
+#: Dialogs/Shortcuts.vala:35
+msgid "Mute"
+msgstr ""
+
+#: Dialogs/Shortcuts.vala:36
+msgid "Volume up"
+msgstr ""
+
+#: Dialogs/Shortcuts.vala:37
+msgid "Volume down"
+msgstr ""
+
+#: Dialogs/Shortcuts.vala:38
+msgid "Speed up"
+msgstr ""
+
+#: Dialogs/Shortcuts.vala:39
+msgid "Speed down"
+msgstr ""
+
+#: Dialogs/Shortcuts.vala:47
+msgid "Common"
+msgstr ""
+
+#: Dialogs/Shortcuts.vala:48
+msgid "Playback"
 msgstr ""
 
 #: Dialogs/UnsupportedFile.vala:8
@@ -64,112 +189,121 @@ msgid ""
 "The file is not a video ('%s')."
 msgstr ""
 
-#: MainWindow.vala:69 MainWindow.vala:233 MainWindow.vala:259
+#: MainWindow.vala:100 MainWindow.vala:569
 msgid "Videos"
 msgstr ""
 
-#: Services/Utils.vala:44
+#: MainWindow.vala:352
+msgid "Continue"
+msgstr ""
+
+#: MainWindow.vala:553 Objects/MprisRoot.vala:14
+msgid "Videos2"
+msgstr ""
+
+#: Objects/MprisPlayer.vala:74
+msgid "video player"
+msgstr ""
+
+#: Services/Utils.vala:89
 msgid "All files"
 msgstr ""
 
-#: Services/Utils.vala:48
+#: Services/Utils.vala:93
 msgid "Video files"
 msgstr ""
 
-#: Services/Utils.vala:51 Services/Utils.vala:54
-msgid "Open"
-msgstr ""
-
-#: Services/Utils.vala:55
+#: Services/Utils.vala:100
 msgid "Cancel"
 msgstr ""
 
-#: Views/WelcomePage.vala:8
+#: Views/WelcomePage.vala:7
 msgid "No Videos Open"
 msgstr ""
 
-#: Views/WelcomePage.vala:9
+#: Views/WelcomePage.vala:8
 msgid "Select a source to begin playing."
 msgstr ""
 
-#: Views/WelcomePage.vala:14 Widgets/BottomBar.vala:154
+#: Views/WelcomePage.vala:13 Widgets/BottomBar.vala:231
 msgid "Open file"
 msgstr ""
 
-#: Views/WelcomePage.vala:14
+#: Views/WelcomePage.vala:13
 msgid "Open a saved file."
 msgstr ""
 
-#: Views/WelcomePage.vala:15 Views/WelcomePage.vala:42
+#: Views/WelcomePage.vala:14 Views/WelcomePage.vala:40
 msgid "Replay last video"
 msgstr ""
 
-#: Views/WelcomePage.vala:16
+#: Views/WelcomePage.vala:15
 msgid "Play from Disc"
 msgstr ""
 
-#: Views/WelcomePage.vala:16
+#: Views/WelcomePage.vala:15
 msgid "Watch a DVD or open a file from disc"
 msgstr ""
 
-#: Views/WelcomePage.vala:42
+#: Views/WelcomePage.vala:40
 msgid "Resume last video"
 msgstr ""
 
-#: Widgets/BottomBar.vala:76
+#: Widgets/BottomBar.vala:119
 msgid "Pause"
 msgstr ""
 
-#: Widgets/BottomBar.vala:76 Widgets/BottomBar.vala:129
+#: Widgets/BottomBar.vala:119 Widgets/BottomBar.vala:214
 msgid "Play"
 msgstr ""
 
-#: Widgets/BottomBar.vala:121
+#: Widgets/BottomBar.vala:200
 msgid "Previous"
 msgstr ""
 
-#: Widgets/BottomBar.vala:135
+#: Widgets/BottomBar.vala:220
 msgid "Next"
 msgstr ""
 
-#: Widgets/BottomBar.vala:161
+#: Widgets/BottomBar.vala:238
 msgid "Clear Playlist"
 msgstr ""
 
-#: Widgets/BottomBar.vala:171 Widgets/BottomBar.vala:173
+#: Widgets/BottomBar.vala:249 Widgets/BottomBar.vala:251
 msgid "Enable Repeat"
 msgstr ""
 
-#: Widgets/BottomBar.vala:173
+#: Widgets/BottomBar.vala:251
 msgid "Disable Repeat"
 msgstr ""
 
-#: Widgets/BottomBar.vala:214
+#: Widgets/BottomBar.vala:297
 msgid "Playlist"
 msgstr ""
 
-#: Widgets/HeadBar.vala:47
+#: Widgets/BottomBar.vala:303
 msgid "Audio:"
 msgstr ""
 
-#: Widgets/HeadBar.vala:51 Widgets/HeadBar.vala:58 Widgets/HeadBar.vala:219
+#: Widgets/BottomBar.vala:307 Widgets/BottomBar.vala:314
+#: Widgets/BottomBar.vala:547
 msgid "None"
 msgstr ""
 
-#: Widgets/HeadBar.vala:54
+#: Widgets/BottomBar.vala:310
 msgid "Subtitles:"
 msgstr ""
 
-#: Widgets/HeadBar.vala:67
-msgid "About"
+#: Widgets/BottomBar.vala:339
+msgid "Keyboard shortcuts"
 msgstr ""
 
-#: Widgets/HeadBar.vala:187 Widgets/HeadBar.vala:212
+#: Widgets/BottomBar.vala:515 Widgets/BottomBar.vala:540
 #, c-format
 msgid "Track '%u'"
 msgstr ""
 
-#: Widgets/HeadBar.vala:194
+#: Widgets/BottomBar.vala:522
 msgid "Default"
 msgstr ""
 
