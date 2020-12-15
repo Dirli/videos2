@@ -1,4 +1,4 @@
-project(
+project (
     'io.elementary.videos2',
     'vala', 'c',
     version: '0.9.1'
@@ -27,7 +27,7 @@ dep_dbus = dependency ('dbus-1')
 subdir ('data')
 
 executable (
-    meson.project_name(),
+    meson.project_name (),
     'src/Application.vala',
     'src/Constants.vala',
     'src/Enums.vala',
@@ -65,7 +65,7 @@ executable (
         dependency ('granite'),
         dependency ('gdk-x11-3.0'),
         dependency ('gtk+-3.0', version: '>=3.22'),
-        dependency ('gstreamer-1.0'),
+        dependency ('gstreamer-1.0', version: '>=1.16'),
         dependency ('gstreamer-tag-1.0'),
         dependency ('gstreamer-base-1.0'),
         dependency ('gstreamer-video-1.0'),
