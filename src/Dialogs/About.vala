@@ -11,7 +11,7 @@ namespace Videos2 {
 
             var logo_image = new Gtk.Image ();
             logo_image.pixel_size = 128;
-            logo_image.icon_name = "multimedia-video-player";
+            logo_image.icon_name = Constants.APP_NAME;
 
             var name_label = new AboutLabel ("Videos2 " + Constants.VERSION);
             name_label.get_style_context ().add_class (Granite.STYLE_CLASS_H2_LABEL);
