@@ -5,17 +5,23 @@ Maintainer: dirli <litandrej85@gmail.com>
 Build-Depends: debhelper-compat (= 13),
                libgranite-dev,
                libgstreamer-plugins-base1.0-dev,
-               libgstreamer1.0-dev,
+               libgstreamer1.0-dev (>= 1.16.0),
                libgtk-3-dev,
                libgee-0.8-dev,
                meson,
-               valac (>= 0.28.0)
+               valac (>= 0.42.0)
 Standards-Version: 4.5.0
 Homepage: https://github.com/Dirli/videos2
 Rules-Requires-Root: no
 
 Package: pantheon-videos2
 Architecture: any
-Depends: xdg-utils, gstreamer1.0-gtk3, gstreamer1.0-libav, gstreamer1.0-plugins-base, ${misc:Depends}, ${shlibs:Depends}
+Depends: xdg-utils,
+         gstreamer1.0-x (>= 1.16.0),
+         gstreamer1.0-gtk3,
+         gstreamer1.0-libav,
+         gstreamer1.0-plugins-base,
+         ${misc:Depends},
+         ${shlibs:Depends}
 Description: A modern media player
  Alternative vision of the default video player in the Pantheon DE
