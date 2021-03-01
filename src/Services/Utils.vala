@@ -171,9 +171,19 @@ namespace Videos2.Utils {
     public void get_video_size (string uri, out uint width, out uint height) {
         width = 0;
         height = 0;
+
         var info = get_discoverer_info (uri);
+        if (info == null) {
+            return;
+        }
+
         var video_streams = info.get_video_streams ();
+        if (video_streams.length () == 0) {
+            return;
+        }
+
         var stream = video_streams.nth_data (0);
+
         var video_stream = stream as Gst.PbUtils.DiscovererVideoInfo;
         if (video_stream != null) {
             width = video_stream.get_width ();
