@@ -205,7 +205,10 @@ namespace Videos2 {
                     mpris_proxy.can_previous = !first;
                 }
             });
-            playlist.restore_medias (settings.get_strv ("last-played-videos"), settings.get_string ("current-uri"));
+
+            if (playlist.restore_medias (settings.get_strv ("last-played-videos"), settings.get_string ("current-uri"))) {
+                welcome_page.update_replay_button (settings.get_string ("current-uri"));
+            }
 
             settings.set_strv ("last-played-videos", {""});
             settings.set_string ("current-uri", "");
@@ -380,7 +383,6 @@ namespace Videos2 {
 
             main_stack.notify["visible-child-name"].connect (on_changed_child);
             main_stack.set_visible_child_name ("welcome");
-            welcome_page.update_replay_button (settings.get_string ("current-uri"));
             welcome_page.update_media_button (disk_manager.has_media_mounts);
         }
 

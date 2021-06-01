@@ -114,14 +114,18 @@ namespace Videos2 {
             return medias;
         }
 
-        public void restore_medias (string[] uris, string current_uri) {
+        public bool restore_medias (string[] uris, string current_uri) {
+            bool current_valid = false;
             for (int i = 0; i < uris.length; i++) {
                 if (uris[i] == current_uri) {
                     _current = i;
+                    current_valid = true;
                 }
 
                 add_media (GLib.File.new_for_uri (uris[i]), false);
             }
+
+            return current_valid;
         }
 
         public bool clear_media (int index) {
