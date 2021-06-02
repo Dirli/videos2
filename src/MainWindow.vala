@@ -213,6 +213,8 @@ namespace Videos2 {
 
             if (playlist.restore_medias (settings.get_strv ("last-played-videos"), settings.get_string ("current-uri"))) {
                 welcome_page.update_replay_button (settings.get_string ("current-uri"));
+            } else {
+                welcome_page.update_replay_button ("");
             }
 
             settings.set_strv ("last-played-videos", {""});
