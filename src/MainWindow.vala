@@ -26,6 +26,7 @@ namespace Videos2 {
         private Widgets.InfoBar info_bar;
         private Widgets.BottomBar bottom_bar;
 
+        private bool forced_fullscreen = false;
         private bool _fullscreened = false;
         public bool fullscreened {
             get {
@@ -167,8 +168,12 @@ namespace Videos2 {
                         fullscreen ();
                     }
                 } else {
-                    if (fullscreened) {
-                        unfullscreen ();
+                    if (forced_fullscreen) {
+                        forced_fullscreen = false;
+                    } else {
+                        if (fullscreened) {
+                            unfullscreen ();
+                        }
                     }
 
                     main_stack.set_visible_child_name ("welcome");
@@ -618,6 +623,7 @@ namespace Videos2 {
 
         public void open_files (GLib.File[] files, bool clear) {
             if (clear) {
+                forced_fullscreen = true;
                 action_clear ();
             }
 

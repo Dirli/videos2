@@ -9,7 +9,6 @@ namespace Videos2 {
         public signal bool clear_media (int index);
         public signal void volume_changed (double val);
         public signal void repeat_changed (bool repeate_node);
-        // public signal void show_preferences ();
         public signal void audio_selected (int i);
         public signal void subtitle_selected (int i);
         public signal int dnd_media (int old_position, int new_position);
