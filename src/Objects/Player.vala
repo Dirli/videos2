@@ -8,11 +8,12 @@ namespace Videos2 {
         public signal void ended_stream ();
 
         private bool terminate = false;
+        private bool _waiting = false;
 
         private uint progress_timer = 0;
         private int err_count = 0;
 
-        public uint* win_xid;
+        // public uint* win_xid;
 
         private int64 duration_cache = -1;
 
@@ -76,7 +77,8 @@ namespace Videos2 {
         }
 
         public void set_win_xid (X.Window w) {
-            win_xid = (uint*) w;
+            // win_xid = (uint*) w;
+            ((Gst.Video.Overlay) playbin).set_window_handle ((uint*) w);
         }
 
         public void set_uri (string uri) {
@@ -222,7 +224,8 @@ namespace Videos2 {
 
         public void seek_jump_seconds (int seconds) {
             var cur_state = get_playbin_state ();
-            if (cur_state != Gst.State.PLAYING && cur_state != Gst.State.PAUSED) {
+
+            if (_waiting || (cur_state != Gst.State.PLAYING && cur_state != Gst.State.PAUSED)) {
                 return;
             }
 
@@ -233,6 +236,9 @@ namespace Videos2 {
             if (cur_state != Gst.State.PAUSED) {
                 playbin.set_state (Gst.State.PAUSED);
             }
+
+            _waiting = true;
+
             if (duration > position + offset && position + offset > 0) {
                 position = position + offset;
             }
@@ -280,12 +286,12 @@ namespace Videos2 {
         }
 
         private bool bus_callback (Gst.Bus bus, Gst.Message message) {
-            if (Gst.Video.is_video_overlay_prepare_window_handle_message (message)) {
-                Gst.Video.Overlay overlay = message.src as Gst.Video.Overlay;
-                if (overlay != null) {
-                    overlay.set_window_handle (win_xid);
-                }
-            }
+            // if (Gst.Video.is_video_overlay_prepare_window_handle_message (message)) {
+            //     Gst.Video.Overlay overlay = message.src as Gst.Video.Overlay;
+            //     if (overlay != null) {
+            //         overlay.set_window_handle (win_xid);
+            //     }
+            // }
 
             switch (message.type) {
                 case Gst.MessageType.ERROR:
@@ -318,6 +324,20 @@ namespace Videos2 {
                     if (duration > 0 && duration != duration_cache) {
                         duration_changed (duration);
                         duration_cache = duration;
+                    }
+
+                    break;
+                case Gst.MessageType.STATE_CHANGED:
+                    Gst.State old_state;
+                    Gst.State new_state;
+                    message.parse_state_changed (out old_state, out new_state, null);
+
+                    if (_waiting && old_state == Gst.State.PAUSED && new_state == Gst.State.PLAYING) {
+                        if (position > 0) {
+                            progress_changed (position);
+                        }
+
+                        _waiting = false;
                     }
 
                     break;
