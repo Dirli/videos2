@@ -174,6 +174,9 @@ namespace Videos2 {
 
             settings.changed["remember-time"].connect (changed_remember_time);
 
+            changed_speed_index ();
+
+            player.notify["playback-index"].connect (changed_speed_index);
             player.duration_changed.connect (bottom_bar.change_duration);
             player.progress_changed.connect (bottom_bar.change_progress);
             player.audio_changed.connect (bottom_bar.set_active_audio);
@@ -316,6 +319,7 @@ namespace Videos2 {
             bottom_bar = new Widgets.BottomBar ();
             bottom_bar.audio_selected.connect (player.set_active_audio);
             bottom_bar.subtitle_selected.connect (player.set_active_subtitle);
+            bottom_bar.speed_selected.connect (player.set_playback_rate);
             bottom_bar.play_toggled.connect (player.toggle_playing);
             bottom_bar.select_media.connect (playlist.select_media);
             bottom_bar.clear_media.connect (playlist.clear_media);
@@ -479,10 +483,15 @@ namespace Videos2 {
             if (player.get_playbin_state () == Gst.State.PLAYING) {
                 bool speed_direction;
                 pars.@get ("b", out speed_direction);
-                var speed_val = player.set_playback_rate (speed_direction);
-                if (speed_val > 0) {
-                    props_bar.set_label (@"Speed: x$(speed_val)");
+
+                var cur_index = player.playback_index;
+                speed_direction ? ++cur_index : --cur_index;
+
+                if (cur_index < 0 || cur_index >= Constants.speeds_array.length) {
+                    return;
                 }
+
+                player.set_playback_rate (cur_index);
             }
         }
 
@@ -612,6 +621,17 @@ namespace Videos2 {
 
                 if (pos > 0) {
                     player.seek_jump_value (pos);
+                }
+            }
+        }
+
+        private void changed_speed_index () {
+            var speed_index = player.playback_index;
+            bottom_bar.set_active_speed (speed_index);
+
+            if (main_stack.get_visible_child_name () == "player" && media_type == Enums.MediaType.VIDEO) {
+                if (speed_index >= 0 && speed_index < Constants.speeds_array.length) {
+                    props_bar.set_label (@"Speed: $(Constants.speeds_array[speed_index])x");
                 }
             }
         }

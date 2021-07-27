@@ -47,7 +47,11 @@ namespace Videos2 {
             }
         }
 
-        private int playback_index = 2;
+        public int playback_index {
+            get;
+            private set;
+            default = 2;
+        }
 
         public unowned int64 position {
             private set {
@@ -55,7 +59,7 @@ namespace Videos2 {
                     playbin.seek_simple (fmt, Gst.SeekFlags.FLUSH, value);
 
                     if (playback_index != 2) {
-                        set_playback_rate (null);
+                        set_playback_rate (-1);
                     }
                 }
             }
@@ -132,36 +136,27 @@ namespace Videos2 {
             }
         }
 
-        public double set_playback_rate (bool? up) {
+        public void set_playback_rate (int new_index) {
             int64 p = 0;
             terminate = false;
 
             // I don't really like the loop solution, but it always occurs in the examples
             do {
                 if (!playbin.query_position (fmt, out p)) {
-                    if (up != null) {
-                        return 0;
+                    if (new_index >= 0) {
+                        return;
                     }
                 } else {
                     break;
                 }
             } while (!terminate);
 
-            var old_index = playback_index;
-
-            if (up != null) {
-                up ? ++playback_index : --playback_index;
+            if (new_index >= 0 && new_index < Constants.speeds_array.length) {
+                playback_index = new_index;
             }
-
-            if (playback_index < 0 || playback_index >= Constants.speeds_array.length) {
-                playback_index = old_index;
-                return 0;
-            }
-
-            var playback_speed = Constants.speeds_array[playback_index];
 
             var ev = new Gst.Event.seek (
-                playback_speed,
+                Constants.speeds_array[playback_index],
                 fmt,
                 Gst.SeekFlags.FLUSH | Gst.SeekFlags.ACCURATE,
                 Gst.SeekType.SET,
@@ -170,8 +165,6 @@ namespace Videos2 {
                 0);
 
             playbin.send_event (ev);
-
-            return playback_speed;
         }
 
         public void set_active_audio (int index) {

@@ -28,6 +28,7 @@ namespace Videos2 {
         public signal void volume_changed (double val);
         public signal void repeat_changed (bool repeate_node);
         public signal void audio_selected (int i);
+        public signal void speed_selected (int i);
         public signal void subtitle_selected (int i);
         public signal int dnd_media (int old_position, int new_position);
 
@@ -54,6 +55,7 @@ namespace Videos2 {
 
         private Gtk.ComboBoxText audio_streams;
         private Gtk.ComboBoxText sub_streams;
+        private Gtk.ComboBoxText speed_list;
 
         private bool playlist_glowing = false;
 
@@ -331,15 +333,25 @@ namespace Videos2 {
             sub_streams.append ("none", _("None"));
             sub_streams.sensitive = false;
 
+            var speed_label = new Gtk.Label (_("Speed:"));
+            speed_label.halign = Gtk.Align.END;
+
+            speed_list = new Gtk.ComboBoxText ();
+            for (var i = 0; i < Constants.speeds_array.length; i++) {
+                speed_list.append (@"$(i)", @"$(Constants.speeds_array[i])x");
+            }
+
             int top = 0;
             var menu_grid = new Gtk.Grid ();
             menu_grid.column_spacing = 12;
             menu_grid.row_spacing = 6;
             menu_grid.margin = 6;
-            menu_grid.attach (audio_label, 0, top, 1, 1);
-            menu_grid.attach (audio_streams, 1, top++, 1, 1);
-            menu_grid.attach (sub_label, 0, top, 1, 1);
-            menu_grid.attach (sub_streams, 1, top++, 1, 1);
+            menu_grid.attach (audio_label, 0, top);
+            menu_grid.attach (audio_streams, 1, top++);
+            menu_grid.attach (sub_label, 0, top);
+            menu_grid.attach (sub_streams, 1, top++);
+            menu_grid.attach (speed_label, 0, top);
+            menu_grid.attach (speed_list, 1, top++);
 
             var pref_button = new Gtk.ModelButton ();
             pref_button.text = _("Preferences");
@@ -372,6 +384,7 @@ namespace Videos2 {
 
             audio_streams.changed.connect (on_audio_changed);
             sub_streams.changed.connect (on_subtitles_changed);
+            speed_list.changed.connect (on_speed_changed);
         }
 
         private void on_audio_changed () {
@@ -380,6 +393,14 @@ namespace Videos2 {
             }
 
             audio_selected (audio_streams.active);
+        }
+
+        private void on_speed_changed () {
+            if (speed_list.active < 0) {
+                return;
+            }
+
+            speed_selected (speed_list.active);
         }
 
         private void on_subtitles_changed () {
@@ -460,6 +481,16 @@ namespace Videos2 {
                 preview_popover.destroy ();
                 preview_popover = null;
             }
+        }
+
+        public void set_active_speed (int active_speed) {
+            if (active_speed < 0 || active_speed == speed_list.active) {
+                return;
+            }
+
+            speed_list.changed.disconnect (on_speed_changed);
+            speed_list.active = active_speed;
+            speed_list.changed.connect (on_speed_changed);
         }
 
         public void set_active_audio (int active_index) {
