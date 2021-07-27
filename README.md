@@ -6,6 +6,8 @@
     </a>
 </p>
 
+----
+
 <img src="data/screenshot.png" title="Videos2 screenshot" width="720"> </img>
 
 A new vision for the EOS video player. I don't want to position this app as new or unique. This is an attempt to rid the native video player of existing bugs and add in demand functionality
@@ -19,7 +21,7 @@ A new vision for the EOS video player. I don't want to position this app as new 
 
 ## Building and Installation
 
-You'll need the following dependencies:
+### You'll need the following dependencies:
 * libgtk-3-dev
 * libgee-0.8-dev
 * libgranite-dev
@@ -31,13 +33,12 @@ You'll need the following dependencies:
 * meson
 * valac
 
-How to build
-
+### How to build
     meson build --prefix=/usr
     ninja -C build
     sudo ninja -C build install
 
-## TODO
+### TODO
 
 * failed to achieve transparency of auxiliary windows
 * custom HeaderBar breaks video output

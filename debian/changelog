@@ -1,3 +1,12 @@
+pantheon-videos2 (1.0.1-1) bullseye; urgency=medium
+
+  * added an explicit change in the playback speed
+  * improved seek hotkeys
+  * fixed the display of the play button
+  * fixed arbitrary switching of full-screen mode when opening a new video
+
+  -- dirli <litandrej85@gmail.com>  Wed, 28 Jul 2021 02:03:02 +0300
+
 pantheon-videos2 (1.0.0-1) testing; urgency=medium
 
   * added app icon
