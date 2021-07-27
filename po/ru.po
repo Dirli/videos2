@@ -2,14 +2,14 @@
 # This file is distributed under the same license as the io.elementary.videos2 package.
 #
 # Translators:
-# Dirli <litandrej85@gmail.com>, 2020
+# Dirli <litandrej85@gmail.com>, 2021
 msgid ""
 msgstr ""
 "Project-Id-Version: io.elementary.videos2\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-12-15 19:15+0300\n"
-"PO-Revision-Date: 2020-12-15 19:17+0300\n"
-"Last-Translator: Dirli <litandrej85@gmail.com>\n"
+"POT-Creation-Date: 2021-07-28 01:24+0300\n"
+"PO-Revision-Date: 2021-07-28 01:25+0300\n"
+"Last-Translator: dirli <litandrej85@gmail.com>\n"
 "Language-Team: \n"
 "Language: ru\n"
 "MIME-Version: 1.0\n"
@@ -21,15 +21,15 @@ msgstr ""
 "%10<=4 && (n%100<12 || n%100>14) ? 1 : 2);\n"
 "X-Poedit-SearchPath-0: .\n"
 
-#: Dialogs/About.vala:7 Widgets/BottomBar.vala:332
+#: Dialogs/About.vala:25 Widgets/BottomBar.vala:361
 msgid "About"
 msgstr "О программе"
 
-#: Dialogs/About.vala:19
+#: Dialogs/About.vala:37
 msgid "Simple video player designed for Pantheon DE"
 msgstr "Простой видеоплеер, созданнный для Pantheon DE"
 
-#: Dialogs/About.vala:24
+#: Dialogs/About.vala:42
 #, c-format
 msgid ""
 "This program is published under the terms of the '%s' license, it comes with "
@@ -38,19 +38,19 @@ msgstr ""
 "Данная программа публикуется на условиях '%s' лицензии, поставляется без "
 "каких-либо гарантий; для получения более подробной информации посетите '%s'"
 
-#: Dialogs/About.vala:36
+#: Dialogs/About.vala:54
 msgid "Written by:"
 msgstr "Автор:"
 
-#: Dialogs/About.vala:39
+#: Dialogs/About.vala:57
 msgid "Donate"
 msgstr "Пожертвовать"
 
-#: Dialogs/About.vala:67 Dialogs/Preferences.vala:70 Dialogs/Shortcuts.vala:58
+#: Dialogs/About.vala:85 Dialogs/Preferences.vala:70 Dialogs/Shortcuts.vala:76
 msgid "Close"
 msgstr "Закрыть"
 
-#: Dialogs/Preferences.vala:27 Widgets/BottomBar.vala:328
+#: Dialogs/Preferences.vala:27 Widgets/BottomBar.vala:357
 msgid "Preferences"
 msgstr "Настройки"
 
@@ -74,116 +74,116 @@ msgstr "Интеграция с рабочим окружением"
 msgid "Block sleep mode"
 msgstr "Блокировать спящий режим"
 
-#: Dialogs/Shortcuts.vala:7
+#: Dialogs/Shortcuts.vala:25
 msgid "Keyboard Shortcuts"
 msgstr "Сочетания клавиш"
 
-#: Dialogs/Shortcuts.vala:16
+#: Dialogs/Shortcuts.vala:34
 msgid "Show me"
 msgstr "Показать меня"
 
-#: Dialogs/Shortcuts.vala:17
+#: Dialogs/Shortcuts.vala:35
 msgid "Show preferences"
 msgstr "Показать настройки"
 
-#: Dialogs/Shortcuts.vala:18 Services/Utils.vala:96 Services/Utils.vala:99
+#: Dialogs/Shortcuts.vala:36 Services/Utils.vala:114 Services/Utils.vala:117
 msgid "Open"
 msgstr "Открыть"
 
-#: Dialogs/Shortcuts.vala:19
+#: Dialogs/Shortcuts.vala:37
 msgid "Add"
 msgstr "Добавить"
 
-#: Dialogs/Shortcuts.vala:20
+#: Dialogs/Shortcuts.vala:38
 msgid "Clear"
 msgstr "Очистить"
 
-#: Dialogs/Shortcuts.vala:21
+#: Dialogs/Shortcuts.vala:39
 msgid "Exit"
 msgstr "Выйти"
 
-#: Dialogs/Shortcuts.vala:22
+#: Dialogs/Shortcuts.vala:40
 msgid "Save & Exit"
 msgstr "Сохранить и выйти"
 
-#: Dialogs/Shortcuts.vala:23
+#: Dialogs/Shortcuts.vala:41
 msgid "Fullscreen"
 msgstr "Полноэкранный режим"
 
-#: Dialogs/Shortcuts.vala:24
+#: Dialogs/Shortcuts.vala:42
 msgid "Show/Hide playlist"
 msgstr "Показать/Скрыть плейлист"
 
-#: Dialogs/Shortcuts.vala:25
+#: Dialogs/Shortcuts.vala:43
 msgid "Show info"
 msgstr "Показать инфо о видео"
 
-#: Dialogs/Shortcuts.vala:29
+#: Dialogs/Shortcuts.vala:47
 msgid "Play/Pause"
 msgstr "Воспроизвести/Приостановить"
 
-#: Dialogs/Shortcuts.vala:30 Widgets/BottomBar.vala:208
+#: Dialogs/Shortcuts.vala:48 Widgets/BottomBar.vala:227
 msgid "Stop"
 msgstr "Остановить"
 
-#: Dialogs/Shortcuts.vala:31
+#: Dialogs/Shortcuts.vala:49
 msgid "Forward 10 sec"
 msgstr "Вперед на 10 сек"
 
-#: Dialogs/Shortcuts.vala:32
+#: Dialogs/Shortcuts.vala:50
 msgid "Forward 1 min"
 msgstr "Вперед на 1 мин"
 
-#: Dialogs/Shortcuts.vala:33
+#: Dialogs/Shortcuts.vala:51
 msgid "Back 10 sec"
 msgstr "Назад на 10 сек"
 
-#: Dialogs/Shortcuts.vala:34
+#: Dialogs/Shortcuts.vala:52
 msgid "Back 1 min"
 msgstr "Назад на 1 мин"
 
-#: Dialogs/Shortcuts.vala:35
+#: Dialogs/Shortcuts.vala:53
 msgid "Mute"
 msgstr "Приглушить"
 
-#: Dialogs/Shortcuts.vala:36
+#: Dialogs/Shortcuts.vala:54
 msgid "Volume up"
 msgstr "Громкость вверх"
 
-#: Dialogs/Shortcuts.vala:37
+#: Dialogs/Shortcuts.vala:55
 msgid "Volume down"
 msgstr "Громкость вниз"
 
-#: Dialogs/Shortcuts.vala:38
+#: Dialogs/Shortcuts.vala:56
 msgid "Speed up"
 msgstr "Ускорить"
 
-#: Dialogs/Shortcuts.vala:39
+#: Dialogs/Shortcuts.vala:57
 msgid "Speed down"
 msgstr "Замедлить"
 
-#: Dialogs/Shortcuts.vala:47
+#: Dialogs/Shortcuts.vala:65
 msgid "Common"
 msgstr "Общие"
 
-#: Dialogs/Shortcuts.vala:48
+#: Dialogs/Shortcuts.vala:66
 msgid "Playback"
 msgstr "Воспроизведение"
 
-#: Dialogs/UnsupportedFile.vala:8
+#: Dialogs/UnsupportedFile.vala:26
 msgid "Unrecognized file format"
 msgstr "Неизвестный формат файла"
 
-#: Dialogs/UnsupportedFile.vala:9
+#: Dialogs/UnsupportedFile.vala:27
 #, c-format
 msgid "Videos might not be able to play the file '%s'."
 msgstr "Плеер может быть не в состоянии воспроизвести файл  '%s'."
 
-#: Dialogs/UnsupportedFile.vala:19
+#: Dialogs/UnsupportedFile.vala:37
 msgid "Play Anyway"
 msgstr "Воспроизвести все равно"
 
-#: Dialogs/UnsupportedFile.vala:22
+#: Dialogs/UnsupportedFile.vala:40
 #, c-format
 msgid ""
 "Unable to play file at: '%s'\n"
@@ -192,125 +192,129 @@ msgstr ""
 "Невозможно воспроизвести файл:: '%s'\n"
 "Файл не является видео ('%s')."
 
-#: MainWindow.vala:100 MainWindow.vala:569
+#: MainWindow.vala:119 MainWindow.vala:605
 msgid "Videos"
 msgstr "Видео"
 
-#: MainWindow.vala:352
+#: MainWindow.vala:384
 msgid "Continue"
 msgstr "Продолжить"
 
-#: MainWindow.vala:553 Objects/MprisRoot.vala:14
+#: MainWindow.vala:589 Objects/MprisRoot.vala:32
 msgid "Videos2"
 msgstr "Видео2"
 
-#: Objects/MprisPlayer.vala:74
+#: Objects/MprisPlayer.vala:92
 msgid "video player"
 msgstr "Видеоплеер"
 
-#: Services/Utils.vala:89
+#: Services/Utils.vala:107
 msgid "All files"
 msgstr "Все файлы"
 
-#: Services/Utils.vala:93
+#: Services/Utils.vala:111
 msgid "Video files"
 msgstr "Видеофайлы"
 
-#: Services/Utils.vala:100
+#: Services/Utils.vala:118
 msgid "Cancel"
 msgstr "Отменить"
 
-#: Views/WelcomePage.vala:7
+#: Views/WelcomePage.vala:25
 msgid "No Videos Open"
 msgstr "Нет открытых видеофайлов"
 
-#: Views/WelcomePage.vala:8
+#: Views/WelcomePage.vala:26
 msgid "Select a source to begin playing."
 msgstr "Выберите файл для воспроизведения."
 
-#: Views/WelcomePage.vala:13 Widgets/BottomBar.vala:231
+#: Views/WelcomePage.vala:31 Widgets/BottomBar.vala:250
 msgid "Open file"
 msgstr "Открыть файл"
 
-#: Views/WelcomePage.vala:13
+#: Views/WelcomePage.vala:31
 msgid "Open a saved file."
 msgstr "Открыть сохранённый файл."
 
-#: Views/WelcomePage.vala:14 Views/WelcomePage.vala:40
+#: Views/WelcomePage.vala:32 Views/WelcomePage.vala:58
 msgid "Replay last video"
 msgstr "Повторить последнюю видеозапись"
 
-#: Views/WelcomePage.vala:15
+#: Views/WelcomePage.vala:33
 msgid "Play from Disc"
 msgstr "Воспроизвести с диска"
 
-#: Views/WelcomePage.vala:15
+#: Views/WelcomePage.vala:33
 msgid "Watch a DVD or open a file from disc"
 msgstr "Воспроизвести DVD или открыть файл с диска"
 
-#: Views/WelcomePage.vala:40
+#: Views/WelcomePage.vala:58
 msgid "Resume last video"
 msgstr "Восстановить последнее видео"
 
-#: Widgets/BottomBar.vala:119
+#: Widgets/BottomBar.vala:138
 msgid "Pause"
 msgstr "Пауза"
 
-#: Widgets/BottomBar.vala:119 Widgets/BottomBar.vala:214
+#: Widgets/BottomBar.vala:138 Widgets/BottomBar.vala:233
 msgid "Play"
 msgstr "Воспроизвести"
 
-#: Widgets/BottomBar.vala:200
+#: Widgets/BottomBar.vala:219
 msgid "Previous"
 msgstr "Предыдущий"
 
-#: Widgets/BottomBar.vala:220
+#: Widgets/BottomBar.vala:239
 msgid "Next"
 msgstr "Следующий"
 
-#: Widgets/BottomBar.vala:238
+#: Widgets/BottomBar.vala:257
 msgid "Clear Playlist"
 msgstr "Очистить список воспроизведения"
 
-#: Widgets/BottomBar.vala:249 Widgets/BottomBar.vala:251
+#: Widgets/BottomBar.vala:268 Widgets/BottomBar.vala:270
 msgid "Enable Repeat"
 msgstr "Включить повтор"
 
-#: Widgets/BottomBar.vala:251
+#: Widgets/BottomBar.vala:270
 msgid "Disable Repeat"
 msgstr "Отключить повтор"
 
-#: Widgets/BottomBar.vala:297
+#: Widgets/BottomBar.vala:316
 msgid "Playlist"
 msgstr "Список воспроизведения"
 
-#: Widgets/BottomBar.vala:303
+#: Widgets/BottomBar.vala:322
 msgid "Audio:"
 msgstr "Аудиодорожка:"
 
-#: Widgets/BottomBar.vala:307 Widgets/BottomBar.vala:314
-#: Widgets/BottomBar.vala:547
+#: Widgets/BottomBar.vala:326 Widgets/BottomBar.vala:333
+#: Widgets/BottomBar.vala:595
 msgid "None"
 msgstr "Нет"
 
-#: Widgets/BottomBar.vala:310
+#: Widgets/BottomBar.vala:329
 msgid "Subtitles:"
 msgstr "Субтитры:"
 
-#: Widgets/BottomBar.vala:339
+#: Widgets/BottomBar.vala:336
+msgid "Speed:"
+msgstr "Скорость:"
+
+#: Widgets/BottomBar.vala:368
 msgid "Keyboard shortcuts"
 msgstr "Сочетания клавиш"
 
-#: Widgets/BottomBar.vala:515 Widgets/BottomBar.vala:540
+#: Widgets/BottomBar.vala:563 Widgets/BottomBar.vala:588
 #, c-format
 msgid "Track '%u'"
 msgstr "Дорожка %u"
 
-#: Widgets/BottomBar.vala:522
+#: Widgets/BottomBar.vala:570
 msgid "Default"
 msgstr "По умолчанию"
 
-#: Widgets/TopBar.vala:14
+#: Widgets/TopBar.vala:32
 msgid "Unfullscreen"
 msgstr "Выйти из полноэкранного режима"
 
