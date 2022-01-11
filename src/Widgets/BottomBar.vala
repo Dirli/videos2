@@ -58,6 +58,7 @@ namespace Videos2 {
         private Gtk.ComboBoxText speed_list;
 
         private bool playlist_glowing = false;
+        private bool playlist_need_close = false;
 
         private string _uri;
         public string uri {
@@ -614,8 +615,12 @@ namespace Videos2 {
 
         public void toggle_playlist () {
             if (playlist_popover.visible) {
+                playlist_need_close = false;
+
                 playlist_popover.popdown ();
             } else {
+                playlist_need_close = true;
+
                 reveal_control ();
                 playlist_popover.popup ();
             }
@@ -678,18 +683,26 @@ namespace Videos2 {
             }
 
             hiding_timer = GLib.Timeout.add (2000, () => {
+                hiding_timer = 0;
+
+                if (playlist_need_close) {
+                    playlist_need_close = false;
+
+                    playlist_popover.popdown ();
+
+                    return false;
+                }
+
                 if (hovered ||
                     playlist_popover.visible ||
                     menu_popover.visible ||
                     volume_button.get_popup ().visible ||
                     !playing) {
 
-                    hiding_timer = 0;
-
                     return false;
                 }
+
                 set_reveal_child (false);
-                hiding_timer = 0;
 
                 return false;
             });
