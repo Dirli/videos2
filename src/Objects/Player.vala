@@ -121,10 +121,11 @@ namespace Videos2 {
                             return false;
                         }
 
-                        if (duration > -1) {
-                            if (duration != duration_cache) {
-                                duration_changed (duration);
-                                duration_cache = duration;
+                        int64 d = duration;
+                        if (d > -1) {
+                            if (d != duration_cache) {
+                                duration_changed (d);
+                                duration_cache = d;
                             }
                             audio_changed (playbin.current_audio);
                             return false;
@@ -242,17 +243,16 @@ namespace Videos2 {
 
             err_count = 0;
 
-            var offset = Utils.sec_to_nano ((int64) seconds);
-
             if (cur_state != Gst.State.PAUSED) {
                 playbin.set_state (Gst.State.PAUSED);
             }
 
             _waiting = true;
 
-            if (duration > position + offset && position + offset > 0) {
-                position = position + offset;
-            }
+            int64 new_position = position + Utils.sec_to_nano ((int64) seconds);
+            position = new_position < 0 ? 0 :
+                       duration_cache < new_position ? duration_cache - 1 :
+                       new_position;
 
             playbin.set_state (cur_state);
         }
@@ -332,9 +332,10 @@ namespace Videos2 {
                     break;
                 case Gst.MessageType.DURATION_CHANGED:
                     // works correctly with DVDs, but not with regular videos
-                    if (duration > 0 && duration != duration_cache) {
-                        duration_changed (duration);
-                        duration_cache = duration;
+                    var d = duration;
+                    if (d > 0 && d != duration_cache) {
+                        duration_changed (d);
+                        duration_cache = d;
                     }
 
                     break;
