@@ -629,6 +629,14 @@ namespace Videos2 {
         public void change_nav (bool can_prev, bool can_next) {
             prev_button.sensitive = can_prev;
             next_button.sensitive = can_next;
+
+            if (!can_next && !can_prev) {
+                prev_button.visible = false;
+                next_button.visible = false;
+            } else {
+                prev_button.visible = true;
+                next_button.visible = true;
+            }
         }
 
         public void change_duration (int64 dur) {
