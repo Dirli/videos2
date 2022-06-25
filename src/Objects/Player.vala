@@ -218,8 +218,8 @@ namespace Videos2 {
             }
         }
 
-        public void stop () {
-            playbin_state_change (Gst.State.READY, true);
+        public void stop (bool force = false) {
+            playbin_state_change (force ? Gst.State.NULL : Gst.State.READY, true);
         }
 
         public void seek_jump_value (int64 val) {

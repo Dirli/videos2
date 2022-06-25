@@ -539,7 +539,9 @@ namespace Videos2 {
         private void on_bus_acquired (DBusConnection connection, string name) {
             try {
                 mpris_proxy.play.connect (player.play);
-                mpris_proxy.stop.connect (player.stop);
+                mpris_proxy.stop.connect (() => {
+                    player.stop ();
+                });
                 mpris_proxy.pause.connect (player.pause);
                 mpris_proxy.next.connect (playlist.next);
                 mpris_proxy.prev.connect (playlist.previous);
@@ -851,12 +853,14 @@ namespace Videos2 {
                 GLib.Bus.unown_name (owner_id);
             }
 
+
             if (player.get_playbin_state () == Gst.State.PLAYING || player.get_playbin_state () == Gst.State.PAUSED) {
                 if (!privacy) {
                     save_current_position (true);
                 }
 
-                player.stop ();
+                inhibitor.playback_state = Gst.State.NULL;
+                player.stop (true);
             }
 
             return false;
