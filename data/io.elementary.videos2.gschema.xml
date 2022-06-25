@@ -25,6 +25,11 @@
             <summary>Block sleep mode</summary>
             <description>Allows you to block sleep mode</description>
         </key>
+        <key type="b" name="close-when-finished">
+            <default>false</default>
+            <summary>Close when finished</summary>
+            <description>Close player when finished playing</description>
+        </key>
         <key type="b" name="show-preview">
             <default>true</default>
             <summary>Show preview in the timeline</summary>

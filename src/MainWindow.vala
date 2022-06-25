@@ -207,7 +207,12 @@ namespace Videos2 {
             player.uri_changed.connect (on_uri_changed);
             player.ended_stream.connect (() => {
                 if (!playlist.next ()) {
-                    player.stop ();
+                    if (settings.get_boolean ("close-when-finished")) {
+                        close_player ();
+                        destroy ();
+                    } else {
+                        player.stop ();
+                    }
                 }
             });
 
@@ -433,21 +438,7 @@ namespace Videos2 {
             bool save_current_state;
             pars.@get ("b", out save_current_state);
 
-            save_current_state = save_current_state && !is_privacy_mode_enabled ();
-
-            if (player.get_playbin_state () == Gst.State.PLAYING || player.get_playbin_state () == Gst.State.PAUSED) {
-                if (save_current_state) {
-                    save_current_position (true);
-                }
-
-                player.stop ();
-            }
-
-            if (!save_current_state) {
-                settings.set_string ("current-uri", "");
-            } else {
-                save_playlist ();
-            }
+            close_player (save_current_state);
 
             destroy ();
         }
@@ -846,22 +837,34 @@ namespace Videos2 {
             return false;
         }
 
-        public override bool delete_event (Gdk.EventAny event) {
-            bool privacy = save_playlist ();
-
+        private void close_player (bool need_save = true) {
             if (owner_id > 0) {
                 GLib.Bus.unown_name (owner_id);
             }
 
+            if (fullscreened) {
+                unfullscreen ();
+            }
+
+            bool privacy = true;
+            if (need_save) {
+                privacy = save_playlist ();
+            } else {
+                settings.set_string ("current-uri", "");
+            }
 
             if (player.get_playbin_state () == Gst.State.PLAYING || player.get_playbin_state () == Gst.State.PAUSED) {
-                if (!privacy) {
+                if (!privacy && need_save) {
                     save_current_position (true);
                 }
 
                 inhibitor.playback_state = Gst.State.NULL;
                 player.stop (true);
             }
+        }
+
+        public override bool delete_event (Gdk.EventAny event) {
+            close_player ();
 
             return false;
         }

@@ -31,6 +31,10 @@ namespace Videos2 {
 
             set_default_response (Gtk.ResponseType.CLOSE);
 
+            var cwf_switch = new Gtk.Switch ();
+            cwf_switch.halign = Gtk.Align.START;
+            main_win.settings.bind ("close-when-finished", cwf_switch, "active", GLib.SettingsBindFlags.DEFAULT);
+
             var remember_switch = new Gtk.Switch ();
             remember_switch.halign = Gtk.Align.START;
             main_win.settings.bind ("remember-time", remember_switch, "active", GLib.SettingsBindFlags.DEFAULT);
@@ -50,6 +54,9 @@ namespace Videos2 {
 
             int top = 0;
             layout.attach (new Granite.HeaderLabel (_("Playback preferences")), 0, top++, 2, 1);
+
+            layout.attach (new SettingsLabel (_("Close when finished:")), 0, top);
+            layout.attach (cwf_switch, 1, top++);
 
             layout.attach (new SettingsLabel (_("Remember stopped time:")), 0, top);
             layout.attach (remember_switch, 1, top++);
