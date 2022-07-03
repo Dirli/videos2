@@ -23,7 +23,7 @@ namespace Videos2 {
         public signal void progress_changed (int64 p);
         public signal void uri_changed (string u);
         public signal void audio_changed (int index);
-        public signal void ended_stream ();
+        public signal void ended_stream (string e = "", string d = "");
 
         private bool terminate = false;
         private bool _waiting = false;
@@ -309,7 +309,7 @@ namespace Videos2 {
                     GLib.Error err;
                     string debug;
                     message.parse_error (out err, out debug);
-                    warning ("Error: %s\n%s\n", err.message, debug);
+                    // warning ("Error: %s\n%s\n", err.message, debug);
                     // warning ("Error code: %d", err.code);
 
                     // Error: Decoding error
@@ -323,7 +323,9 @@ namespace Videos2 {
 
                     terminate = true;
 
-                    ended_stream ();
+                    playbin.set_state (Gst.State.NULL);
+                    ended_stream (@"$(err.message) ($(err.code))", debug);
+
                     break;
                 case Gst.MessageType.EOS:
                     terminate = true;

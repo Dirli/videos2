@@ -28,6 +28,7 @@ namespace Videos2 {
 
         private Gtk.Stack main_stack;
         private Views.WelcomePage welcome_page;
+        private Granite.Widgets.AlertView alert_page;
 
         private Gtk.DrawingArea video_area;
 
@@ -205,7 +206,14 @@ namespace Videos2 {
                 }
             });
             player.uri_changed.connect (on_uri_changed);
-            player.ended_stream.connect (() => {
+            player.ended_stream.connect ((err, debug) => {
+                if (err != "") {
+                    alert_page.title = err;
+                    alert_page.description = debug;
+                    main_stack.set_visible_child_name ("alert");
+                    alert_page.is_focus = true;
+                    return;
+                }
                 if (!playlist.next ()) {
                     if (settings.get_boolean ("close-when-finished")) {
                         close_player ();
@@ -402,9 +410,20 @@ namespace Videos2 {
             player_page.add_overlay (props_bar);
             player_page.add_overlay (restore_button);
 
+            alert_page = new Granite.Widgets.AlertView ("", "", "dialog-warning");
+            alert_page.show_action ("Go back");
+            alert_page.action_activated.connect (() => {
+                alert_page.title = "";
+                alert_page.description = "";
+                if (!playlist.next ()) {
+                    player.stop ();
+                }
+            });
+
             main_stack = new Gtk.Stack ();
             main_stack.add_named (welcome_page, "welcome");
             main_stack.add_named (player_page, "player");
+            main_stack.add_named (alert_page, "alert");
 
             get_style_context ().add_class ("transparent-window");
 
