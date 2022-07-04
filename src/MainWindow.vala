@@ -106,7 +106,6 @@ namespace Videos2 {
             { Constants.ACTION_BACK, action_back },
             { Constants.ACTION_CLEAR, action_clear },
             { Constants.ACTION_MEDIAINFO, action_mediainfo },
-            { Constants.ACTION_VOLUME, action_volume, "b" },
             { Constants.ACTION_SPEED, action_speed, "b" },
             { Constants.ACTION_PLAYLIST_VISIBLE, action_playlist_visible },
             { Constants.ACTION_PREFERENCES, action_preferences },
@@ -127,8 +126,6 @@ namespace Videos2 {
             application.set_accels_for_action (Constants.ACTION_PREFIX + Constants.ACTION_OPEN, {"<Control>o"});
             application.set_accels_for_action (Constants.ACTION_PREFIX + Constants.ACTION_MEDIAINFO, {"<Control>i"});
             application.set_accels_for_action (Constants.ACTION_PREFIX + Constants.ACTION_ADD, {"<Control><Shift>o"});
-            application.set_accels_for_action (Constants.ACTION_PREFIX + Constants.ACTION_VOLUME + "(true)", {"<Release>KP_Add"});
-            application.set_accels_for_action (Constants.ACTION_PREFIX + Constants.ACTION_VOLUME + "(false)", {"<Release>KP_Subtract"});
             application.set_accels_for_action (Constants.ACTION_PREFIX + Constants.ACTION_SPEED + "(true)", {"<Control><Release>KP_Add"});
             application.set_accels_for_action (Constants.ACTION_PREFIX + Constants.ACTION_SPEED + "(false)", {"<Control><Release>KP_Subtract"});
             application.set_accels_for_action (Constants.ACTION_PREFIX + Constants.ACTION_SHORTCUTS, {"<Control>s"});
@@ -481,14 +478,6 @@ namespace Videos2 {
             }
         }
 
-        private void action_volume (GLib.SimpleAction action, GLib.Variant? pars) {
-            if (main_stack.get_visible_child_name () == "player") {
-                bool vol_value;
-                pars.@get ("b", out vol_value);
-                bottom_bar.volume_value = vol_value ? 0.05 : -0.05;
-            }
-        }
-
         private void action_speed (GLib.SimpleAction action, GLib.Variant? pars) {
             if (player.get_playbin_state () == Gst.State.PLAYING) {
                 bool speed_direction;
@@ -742,6 +731,23 @@ namespace Videos2 {
                         return true;
                     }
                     break;
+                case Gdk.Key.Page_Up:
+                    if (main_stack.get_visible_child_name () == "player") {
+                        playlist.next ();
+                        return true;
+                    }
+                    break;
+                case Gdk.Key.Page_Down:
+                    if (main_stack.get_visible_child_name () == "player") {
+                        if (Utils.nano_to_sec (player.position) < 10) {
+                            playlist.previous ();
+                        } else {
+                            player.seek_jump_value (0);
+                        }
+
+                        return true;
+                    }
+                    break;
                 case Gdk.Key.space:
                     if (main_stack.get_visible_child_name () == "player") {
                         player.toggle_playing ();
@@ -770,13 +776,19 @@ namespace Videos2 {
                     break;
                 case Gdk.Key.Up:
                 case Gdk.Key.Down:
+                    if (main_stack.get_visible_child_name () == "player") {
+                        bottom_bar.volume_value = e.keyval == Gdk.Key.Up ? 0.05 : -0.05;
+                    }
+                    break;
                 case Gdk.Key.Left:
                 case Gdk.Key.Right:
                     if (main_stack.get_visible_child_name () == "player" && (e.state & Gdk.ModifierType.MOD1_MASK) == 0) {
-                        player.seek_jump_seconds (e.keyval == Gdk.Key.Up ? 60 :
-                                                  e.keyval == Gdk.Key.Down ? -60 :
-                                                  e.keyval == Gdk.Key.Left ? -10 :
-                                                  10);
+                        int jump_val = e.keyval == Gdk.Key.Left ? -10 : 10;
+                        if ((e.state & Gdk.ModifierType.CONTROL_MASK) != 0) {
+                            jump_val *= 6;
+                        }
+
+                        player.seek_jump_seconds (jump_val);
 
                         bottom_bar.reveal_control ();
                         return true;

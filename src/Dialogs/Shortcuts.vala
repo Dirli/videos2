@@ -47,12 +47,14 @@ namespace Videos2 {
             playback_box.add (new Granite.AccelLabel (_("Play/Pause"), "space"));
             playback_box.add (new Granite.AccelLabel (_("Stop"), "<Alt>Left"));
             playback_box.add (new Granite.AccelLabel (_("Forward 10 sec"), "Right"));
-            playback_box.add (new Granite.AccelLabel (_("Forward 1 min"), "Up"));
+            playback_box.add (new Granite.AccelLabel (_("Forward 1 min"), "<Control>Right"));
             playback_box.add (new Granite.AccelLabel (_("Back 10 sec"), "Left"));
-            playback_box.add (new Granite.AccelLabel (_("Back 1 min"), "Down"));
+            playback_box.add (new Granite.AccelLabel (_("Back 1 min"), "<Control>Left"));
+            playback_box.add (new Granite.AccelLabel (_("Next"), "Page_Up"));
+            playback_box.add (new Granite.AccelLabel (_("Previous/Start"), "Page_Down"));
             playback_box.add (new Granite.AccelLabel (_("Mute"), "m"));
-            playback_box.add (new Granite.AccelLabel (_("Volume up"), "<Release>KP_Add"));
-            playback_box.add (new Granite.AccelLabel (_("Volume down"), "<Release>KP_Subtract"));
+            playback_box.add (new Granite.AccelLabel (_("Volume up"), "Up"));
+            playback_box.add (new Granite.AccelLabel (_("Volume down"), "Down"));
             playback_box.add (new Granite.AccelLabel (_("Speed up"), "<Control><Release>KP_Add"));
             playback_box.add (new Granite.AccelLabel (_("Speed down"), "<Control><Release>KP_Subtract"));
 
