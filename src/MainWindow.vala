@@ -178,39 +178,9 @@ namespace Videos2 {
             player.duration_changed.connect (bottom_bar.change_duration);
             player.progress_changed.connect (bottom_bar.change_progress);
             player.audio_changed.connect (bottom_bar.set_active_audio);
-            player.playbin_state_changed.connect ((state) => {
-                inhibitor.playback_state = state;
-                if (state == Gst.State.PLAYING || state == Gst.State.PAUSED) {
-                    bottom_bar.playing = (state == Gst.State.PLAYING);
-
-                    if (is_maximized) {
-                        fullscreen ();
-                    }
-                } else {
-                    if (forced_fullscreen) {
-                        forced_fullscreen = false;
-                    } else {
-                        if (fullscreened) {
-                            unfullscreen ();
-                        }
-                    }
-
-                    main_stack.set_visible_child_name ("welcome");
-                }
-
-                if (mpris_proxy != null) {
-                    mpris_proxy.state = state;
-                }
-            });
+            player.playbin_state_changed.connect (on_playbin_state_changed);
             player.uri_changed.connect (on_uri_changed);
-            player.ended_stream.connect ((err, debug) => {
-                if (err != "") {
-                    alert_page.title = err;
-                    alert_page.description = debug;
-                    main_stack.set_visible_child_name ("alert");
-                    alert_page.is_focus = true;
-                    return;
-                }
+            player.ended_stream.connect (() => {
                 if (!playlist.next ()) {
                     if (settings.get_boolean ("close-when-finished")) {
                         close_player ();
@@ -573,6 +543,39 @@ namespace Videos2 {
             }
 
             return false;
+        }
+
+        private void on_playbin_state_changed (Gst.State state, string err, string debug) {
+            inhibitor.playback_state = state;
+
+            if (state == Gst.State.PLAYING || state == Gst.State.PAUSED) {
+                bottom_bar.playing = (state == Gst.State.PLAYING);
+
+                if (is_maximized) {
+                    fullscreen ();
+                }
+            } else {
+                if (forced_fullscreen) {
+                    forced_fullscreen = false;
+                } else {
+                    if (fullscreened) {
+                        unfullscreen ();
+                    }
+                }
+
+                if (err != "") {
+                    alert_page.title = err;
+                    alert_page.description = debug;
+                    main_stack.set_visible_child_name ("alert");
+                    alert_page.is_focus = true;
+                } else {
+                    main_stack.set_visible_child_name ("welcome");
+                }
+            }
+
+            if (mpris_proxy != null) {
+                mpris_proxy.state = state;
+            }
         }
 
         private void on_uri_changed (string uri) {

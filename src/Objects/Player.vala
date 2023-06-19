@@ -18,12 +18,12 @@
 
 namespace Videos2 {
     public class Objects.Player : GLib.Object {
-        public signal void playbin_state_changed (Gst.State playbin_state);
+        public signal void playbin_state_changed (Gst.State playbin_state, string e, string d);
         public signal void duration_changed (int64 d);
         public signal void progress_changed (int64 p);
         public signal void uri_changed (string u);
         public signal void audio_changed (int index);
-        public signal void ended_stream (string e = "", string d = "");
+        public signal void ended_stream ();
 
         private bool terminate = false;
         private bool _waiting = false;
@@ -219,7 +219,7 @@ namespace Videos2 {
         }
 
         public void stop (bool force = false) {
-            playbin_state_change (force ? Gst.State.NULL : Gst.State.READY, true);
+            playbin_state_change (force ? Gst.State.NULL : Gst.State.READY, !force);
         }
 
         public void seek_jump_value (int64 val) {
@@ -257,7 +257,7 @@ namespace Videos2 {
             playbin.set_state (cur_state);
         }
 
-        private void playbin_state_change (Gst.State state, bool emit) {
+        private void playbin_state_change (Gst.State state, bool emit, string err = "", string d = "") {
             playbin.set_state (state);
 
             if (state == Gst.State.PLAYING) {
@@ -266,8 +266,8 @@ namespace Videos2 {
                 stop_timer ();
             }
 
-            if (state != Gst.State.NULL && emit) {
-                playbin_state_changed (state);
+            if (emit) {
+                playbin_state_changed (state, err, d);
             }
         }
 
@@ -309,8 +309,8 @@ namespace Videos2 {
                     GLib.Error err;
                     string debug;
                     message.parse_error (out err, out debug);
-                    // warning ("Error: %s\n%s\n", err.message, debug);
-                    // warning ("Error code: %d", err.code);
+                    warning ("Error: %s\n%s\n", err.message, debug);
+                    warning ("Error code: %d", err.code);
 
                     // Error: Decoding error
                     // this is an abstract number. I still don't understand what
@@ -323,8 +323,7 @@ namespace Videos2 {
 
                     terminate = true;
 
-                    playbin.set_state (Gst.State.NULL);
-                    ended_stream (@"$(err.message) ($(err.code))", debug);
+                    playbin_state_change (Gst.State.NULL, true, @"$(err.message) ($(err.code))", debug);
 
                     break;
                 case Gst.MessageType.EOS:
