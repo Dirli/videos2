@@ -31,13 +31,13 @@ namespace Videos2 {
         private uint progress_timer = 0;
         private int err_count = 0;
 
-        // public uint* win_xid;
-
         private int64 duration_cache = -1;
 
         private Gst.Format fmt = Gst.Format.TIME;
         private dynamic Gst.Element playbin;
         private Gst.Bus bus;
+
+        public Gtk.Widget video_area;
 
         public unowned int64 duration {
             get {
@@ -93,14 +93,41 @@ namespace Videos2 {
             });
             playbin.set_property ("subtitle-font-desc", "Sans 16");
 
+            var videosink = Gst.ElementFactory.make ("glsinkbin", "glsinkbin");
+            var gtkglsink = Gst.ElementFactory.make ("gtkglsink", "gtkglsink");
+
+            if (gtkglsink != null && videosink != null) {
+                // warning ("Successfully created GTK GL Sink");
+                videosink.set ("sink", gtkglsink, null);
+
+                /* The gtkglsink creates the gtk widget for us. This is accessible through a property.
+                 * So we get it and use it later to add it to our gui. */
+                gtkglsink.get ("widget", out video_area);
+            } else {
+                 // warning ("Could not create gtkglsink, falling back to gtksink.\n");
+                videosink = Gst.ElementFactory.make ("gtksink", "gtksink");
+                videosink.get ("widget", out video_area);
+            }
+
+            video_area.draw.connect (on_draw_video);
+            playbin["video-sink"] = videosink;
+
             bus = playbin.get_bus ();
             bus.add_watch (0, bus_callback);
             bus.enable_sync_message_emission ();
         }
 
-        public void set_win_xid (X.Window w) {
-            // win_xid = (uint*) w;
-            ((Gst.Video.Overlay) playbin).set_window_handle ((uint*) w);
+        private bool on_draw_video (Cairo.Context ctx) {
+            if (get_playbin_state () < Gst.State.PAUSED) {
+                Gtk.Allocation allocation;
+                video_area.get_allocation (out allocation);
+
+                ctx.set_source_rgb (0, 0, 0);
+                ctx.rectangle (0, 0, allocation.width, allocation.height);
+                ctx.fill ();
+            }
+
+            return false;
         }
 
         public void set_uri (string uri) {
@@ -297,13 +324,6 @@ namespace Videos2 {
         }
 
         private bool bus_callback (Gst.Bus bus, Gst.Message message) {
-            // if (Gst.Video.is_video_overlay_prepare_window_handle_message (message)) {
-            //     Gst.Video.Overlay overlay = message.src as Gst.Video.Overlay;
-            //     if (overlay != null) {
-            //         overlay.set_window_handle (win_xid);
-            //     }
-            // }
-
             switch (message.type) {
                 case Gst.MessageType.ERROR:
                     GLib.Error err;

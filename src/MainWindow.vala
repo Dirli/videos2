@@ -30,8 +30,6 @@ namespace Videos2 {
         private Views.WelcomePage welcome_page;
         private Granite.Widgets.AlertView alert_page;
 
-        private Gtk.DrawingArea video_area;
-
         private uint owner_id = 0;
         public Services.MprisProxy? mpris_proxy = null;
 
@@ -270,6 +268,12 @@ namespace Videos2 {
         }
 
         private void build_ui () {
+            var header_bar = new Gtk.HeaderBar ();
+            header_bar.get_style_context ().add_class (Granite.STYLE_CLASS_DEFAULT_DECORATION);
+            header_bar.show_close_button = true;
+
+            set_titlebar (header_bar);
+
             welcome_page = new Views.WelcomePage ();
             welcome_page.activated.connect ((index) => {
                 switch (index) {
@@ -327,13 +331,8 @@ namespace Videos2 {
 
             bottom_bar.volume_value = settings.get_double ("volume");
 
-            video_area = new Gtk.DrawingArea ();
-            video_area.events |= Gdk.EventMask.POINTER_MOTION_MASK;
-            video_area.realize.connect (on_realize_video);
-            video_area.draw.connect (on_draw_video);
-
             var video_box = new Gtk.EventBox ();
-            video_box.add (video_area);
+            video_box.add (player.video_area);
             video_box.motion_notify_event.connect ((event) => {
                 bottom_bar.reveal_control ();
                 if (fullscreened && cursor_timer == 0) {
@@ -393,6 +392,7 @@ namespace Videos2 {
             main_stack.add_named (alert_page, "alert");
 
             get_style_context ().add_class ("transparent-window");
+
 
             add (main_stack);
             show_all ();
@@ -521,28 +521,6 @@ namespace Videos2 {
             } catch (IOError e) {
                 warning ("could not create MPRIS player: %s\n", e.message);
             }
-        }
-
-        private void on_realize_video () {
-            var win = video_area.get_window ();
-            if (!win.ensure_native ()) {
-                return;
-            }
-
-            player.set_win_xid (((Gdk.X11.Window) win).get_xid ());
-        }
-
-        private bool on_draw_video (Cairo.Context ctx) {
-            if (player.get_playbin_state () < Gst.State.PAUSED) {
-                Gtk.Allocation allocation;
-                video_area.get_allocation (out allocation);
-
-                ctx.set_source_rgb (0, 0, 0);
-                ctx.rectangle (0, 0, allocation.width, allocation.height);
-                ctx.fill ();
-            }
-
-            return false;
         }
 
         private void on_playbin_state_changed (Gst.State state, string err, string debug) {
