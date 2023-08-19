@@ -1,5 +1,5 @@
 project (
-  'io.elementary.videos2',
+  'org.pantheon.videos2',
   'vala', 'c',
   version: '1.0.1'
 )

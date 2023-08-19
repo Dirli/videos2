@@ -138,7 +138,7 @@ namespace Videos2 {
             set_default_size (960, 540);
 
             var provider = new Gtk.CssProvider ();
-            provider.load_from_resource ("/io/elementary/videos2/style/application.css");
+            provider.load_from_resource ("/org/pantheon/videos2/style/application.css");
             Gtk.StyleContext.add_provider_for_screen (Gdk.Screen.get_default (), provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION);
 
             settings = new GLib.Settings (Constants.APP_NAME);

@@ -17,7 +17,7 @@
  */
 
 namespace Videos2.Constants {
-    public const string APP_NAME = "io.elementary.videos2";
+    public const string APP_NAME = "org.pantheon.videos2";
     public const string PULSE_CLASS = "pulse";
     public const string PULSE_TYPE = "attention";
 

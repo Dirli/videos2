@@ -1,5 +1,5 @@
 <schemalist>
-    <schema path="/io/elementary/videos2/" id="io.elementary.videos2">
+    <schema path="/org/pantheon/videos2/" id="org.pantheon.videos2">
         <key type="as" name="last-played-videos">
             <default>[]</default>
             <summary>List of last played videos</summary>
