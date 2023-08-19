@@ -1,11 +1,11 @@
 # Copyright (C) 2020
-# This file is distributed under the same license as the io.elementary.videos2 package.
+# This file is distributed under the same license as the org.pantheon.videos2 package.
 #
 # Translators:
 # Dirli <litandrej85@gmail.com>, 2021
 msgid ""
 msgstr ""
-"Project-Id-Version: io.elementary.videos2\n"
+"Project-Id-Version: org.pantheon.videos2\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2021-07-28 01:24+0300\n"
 "PO-Revision-Date: 2021-07-28 01:25+0300\n"
