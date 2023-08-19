@@ -1,10 +1,10 @@
 # Videos2
 
-<p align="left">
+<!-- <p align="left">
     <a href="https://paypal.me/Dirli85">
         <img src="https://img.shields.io/badge/Donate-PayPal-green.svg">
     </a>
-</p>
+</p> -->
 
 ----
 
@@ -38,7 +38,7 @@ A new vision for the EOS video player. I don't want to position this app as new 
     ninja -C build
     sudo ninja -C build install
 
-### TODO
+<!-- ### TODO
 
 * failed to achieve transparency of auxiliary windows
-* custom HeaderBar breaks video output
+* custom HeaderBar breaks video output -->

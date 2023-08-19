@@ -1,3 +1,19 @@
+pantheon-videos2 (1.1.0-1) testing; urgency=medium
+
+  * Changed prefix: io.elementary to org.pantheon
+  * PLayer: returned video output to the gtksink, today it looks more refined
+  * UnsupportedFile: added focus
+  * fixed hibernation lock on playback error
+  * fixed hiding playlist after hotkey selection
+  * added some new hotkeys (prev/ next)
+  * added error notification
+  * added the ability to close the application at the end of playback
+  * improved window close action
+  * improved display of navigation buttons
+  * Player: improved seeking by video stream
+
+ -- dirli <litandrej85@gmail.com>  Sat, 19 Aug 2023 13:55:08 +0300
+
 pantheon-videos2 (1.0.1-1) bullseye; urgency=medium
 
   * added an explicit change in the playback speed

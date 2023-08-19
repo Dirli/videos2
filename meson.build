@@ -1,7 +1,7 @@
 project (
   'org.pantheon.videos2',
   'vala', 'c',
-  version: '1.0.1'
+  version: '1.1.0'
 )
 
 gnome = import ('gnome')
