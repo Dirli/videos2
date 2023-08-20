@@ -42,8 +42,7 @@ namespace Videos2 {
         public unowned int64 duration {
             get {
                 int64 d = 0;
-                playbin.query_duration (fmt, out d);
-                return d;
+                return playbin.query_duration (fmt, out d) ? d : -1;
             }
         }
 
@@ -65,8 +64,7 @@ namespace Videos2 {
             }
             get {
                 int64 p = 0;
-                playbin.query_position (fmt, out p);
-                return p;
+                return playbin.query_position (fmt, out p) ? p : 0;
             }
         }
 
