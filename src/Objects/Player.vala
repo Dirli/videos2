@@ -95,14 +95,14 @@ namespace Videos2 {
             var gtkglsink = Gst.ElementFactory.make ("gtkglsink", "gtkglsink");
 
             if (gtkglsink != null && videosink != null) {
-                // warning ("Successfully created GTK GL Sink");
+                debug ("Successfully created GTK GL Sink");
                 videosink.set ("sink", gtkglsink, null);
 
                 /* The gtkglsink creates the gtk widget for us. This is accessible through a property.
                  * So we get it and use it later to add it to our gui. */
                 gtkglsink.get ("widget", out video_area);
             } else {
-                 // warning ("Could not create gtkglsink, falling back to gtksink.\n");
+                debug ("Could not create gtkglsink, falling back to gtksink.\n");
                 videosink = Gst.ElementFactory.make ("gtksink", "gtksink");
                 videosink.get ("widget", out video_area);
             }
@@ -113,6 +113,13 @@ namespace Videos2 {
             bus = playbin.get_bus ();
             bus.add_watch (0, bus_callback);
             bus.enable_sync_message_emission ();
+
+            unowned Gst.Registry registry = Gst.Registry.@get ();
+            var vaapi_plugin = registry.find_plugin ("vaapi");
+            if (vaapi_plugin != null && !vaapi_plugin.is_loaded ()) {
+                debug ("Vaapi plugin loaded");
+                vaapi_plugin.load ();
+            }
         }
 
         private bool on_draw_video (Cairo.Context ctx) {
