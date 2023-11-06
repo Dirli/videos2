@@ -393,7 +393,6 @@ namespace Videos2 {
 
             get_style_context ().add_class ("transparent-window");
 
-
             add (main_stack);
             show_all ();
 
@@ -686,7 +685,6 @@ namespace Videos2 {
             }
 
             player.set_uri (uri);
-            player.play ();
 
             if (restore_id > 0) {
                 restore_id = 0;

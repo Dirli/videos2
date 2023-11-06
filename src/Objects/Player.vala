@@ -42,7 +42,14 @@ namespace Videos2 {
         public unowned int64 duration {
             get {
                 int64 d = 0;
-                return playbin.query_duration (fmt, out d) ? d : -1;
+                bool t = false;
+                do {
+                    if (playbin.query_duration (fmt, out d)) {
+                        t = true;
+                    }
+                } while (!t);
+
+                return  d;
             }
         }
 
@@ -88,6 +95,9 @@ namespace Videos2 {
             playbin = Gst.ElementFactory.make ("playbin", "bin");
             playbin.notify["uri"].connect (() => {
                 uri_changed (playbin.uri);
+            });
+            playbin.notify["current-audio"].connect (() => {
+                audio_changed (playbin.current_audio);
             });
             playbin.set_property ("subtitle-font-desc", "Sans 16");
 
@@ -141,31 +151,12 @@ namespace Videos2 {
             duration_cache = -1;
             playbin_state_change (Gst.State.READY, false);
             playbin.uri = uri;
-
+            
             if (uri != "") {
                 playbin_state_change (Gst.State.PAUSED, false);
                 playbin.set_property ("volume", volume);
 
-                if (!uri.has_prefix ("dvd:///")) {
-                    int counter = 0;
-                    GLib.Timeout.add (500, () => {
-                        if (++counter > 10) {
-                            return false;
-                        }
-
-                        int64 d = duration;
-                        if (d > -1) {
-                            if (d != duration_cache) {
-                                duration_changed (d);
-                                duration_cache = d;
-                            }
-                            audio_changed (playbin.current_audio);
-                            return false;
-                        }
-
-                        return true;
-                    });
-                }
+                play ();
             }
         }
 
@@ -188,14 +179,13 @@ namespace Videos2 {
                 playback_index = new_index;
             }
 
-            var ev = new Gst.Event.seek (
-                Constants.speeds_array[playback_index],
-                fmt,
-                Gst.SeekFlags.FLUSH | Gst.SeekFlags.ACCURATE,
-                Gst.SeekType.SET,
-                p,
-                Gst.SeekType.END,
-                0);
+            var ev = new Gst.Event.seek (Constants.speeds_array[playback_index],
+                                         fmt,
+                                         Gst.SeekFlags.FLUSH | Gst.SeekFlags.ACCURATE,
+                                         Gst.SeekType.SET,
+                                         p,
+                                         Gst.SeekType.END,
+                                         0);
 
             playbin.send_event (ev);
         }
@@ -255,7 +245,7 @@ namespace Videos2 {
         }
 
         public void seek_jump_value (int64 val) {
-            if (val > duration) {
+            if (val > duration_cache) {
                 return;
             }
 
@@ -315,7 +305,7 @@ namespace Videos2 {
 
             progress_timer = GLib.Timeout.add (500, () => {
                 if (position > 0) {
-                    progress_changed (position);
+                    progress_changed (position / Gst.SECOND);
                 }
                 return true;
             });
@@ -357,10 +347,9 @@ namespace Videos2 {
                     ended_stream ();
                     break;
                 case Gst.MessageType.DURATION_CHANGED:
-                    // works correctly with DVDs, but not with regular videos
                     var d = duration;
                     if (d > 0 && d != duration_cache) {
-                        duration_changed (d);
+                        duration_changed (d / Gst.SECOND);
                         duration_cache = d;
                     }
 
@@ -372,7 +361,7 @@ namespace Videos2 {
 
                     if (_waiting && old_state == Gst.State.PAUSED && new_state == Gst.State.PLAYING) {
                         if (position > 0) {
-                            progress_changed (position);
+                            progress_changed (position / Gst.SECOND);
                         }
 
                         _waiting = false;
