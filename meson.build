@@ -55,6 +55,7 @@ executable (
   'src/Widgets/PlaylistItem.vala',
   'src/Widgets/PreviewPopover.vala',
   'src/Widgets/PropsBar.vala',
+  'src/Widgets/TimeBar.vala',
   'src/Widgets/TopBar.vala',
   config_header,
   gresource,

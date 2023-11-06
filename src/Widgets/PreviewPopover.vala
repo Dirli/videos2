@@ -74,12 +74,13 @@ namespace Videos2 {
             bus.remove_watch ();
         }
 
-        public void update_view (double x, int w) {
-            if (x > w || uri == null) {
+        public void update_view (int x, int64 pos) {
+            if (uri == null) {
                 return;
             }
 
             playbin.set_state (Gst.State.PLAYING);
+
             unowned int64 d = 0;
             do {
                 if (playbin.query_duration (fmt, out d)) {
@@ -92,7 +93,6 @@ namespace Videos2 {
             }
 
             // position
-            var pos = (int64) ((x / (double) w) * d);
             if (pos >= 0) {
                 playbin.seek_simple (fmt, Gst.SeekFlags.FLUSH, pos);
             }

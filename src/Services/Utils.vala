@@ -17,6 +17,24 @@
  */
 
 namespace Videos2.Utils {
+    public static string seconds_to_time (int seconds) {
+        int sign = 1;
+        if (seconds < 0) {
+            seconds = -seconds;
+            sign = -1;
+        }
+
+        int hours = seconds / 3600;
+        int min = (seconds % 3600) / 60;
+        int sec = (seconds % 60);
+
+        if (hours > 0) {
+            return ("%d:%02d:%02d".printf (sign * hours, min, sec));
+        } else {
+            return ("%02d:%02d".printf (sign * min, sec));
+        }
+    }
+
     public Gdk.Pixbuf? get_poster_from_file (string poster_path) {
         Gdk.Pixbuf? pixbuf = null;
 
