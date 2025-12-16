@@ -271,9 +271,7 @@ namespace Videos2.Utils {
     public string prepare_audio_info (Gst.PbUtils.DiscovererInfo d_info) {
         var audio_str = "<span size=\"large\"><b>Audio</b></span>\n";
 
-        var a_streams = d_info.get_audio_streams ();
-        a_streams.reverse ();
-        foreach (var audio_info in a_streams) {
+        foreach (var audio_info in d_info.get_audio_streams ()) {
             var audio_stream = audio_info as Gst.PbUtils.DiscovererAudioInfo;
             uint channels = 0;
             if (audio_stream != null) {

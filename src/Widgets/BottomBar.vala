@@ -552,9 +552,9 @@ namespace Videos2 {
 
                         if (language_code != null) {
                             unowned string language_name = Gst.Tag.get_language_name (language_code);
-                            audio_streams.prepend ("", language_name);
+                            audio_streams.append ("", language_name);
                         } else {
-                            audio_streams.prepend ("", _("Track '%u'").printf (track));
+                            audio_streams.append ("", _("Track '%u'").printf (track));
                         }
                     }
 
@@ -577,9 +577,9 @@ namespace Videos2 {
                     unowned string language_code = sub_stream.get_language ();
                     if (language_code != null) {
                         unowned string language_name = Gst.Tag.get_language_name (language_code);
-                        sub_streams.prepend ("", language_name);
+                        sub_streams.append ("", language_name);
                     } else {
-                        sub_streams.prepend ("", _("Track '%u'").printf (track));
+                        sub_streams.append ("", _("Track '%u'").printf (track));
                     }
                 }
 
