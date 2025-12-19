@@ -33,8 +33,8 @@ namespace Videos2 {
         private uint owner_id = 0;
         public Services.MprisProxy? mpris_proxy = null;
 
-        private uint current_h = 0;
-        private uint current_w = 0;
+        private int wa_height = 0;
+        private int wa_width = 0;
         private uint cursor_timer = 0;
 
         private Gtk.Button restore_button;
@@ -134,6 +134,16 @@ namespace Videos2 {
             var actions = new GLib.SimpleActionGroup ();
             actions.add_action_entries (ACTION_ENTRIES, this);
             insert_action_group ("win", actions);
+
+            var display = Gdk.Display.get_default ();
+            if (display != null) {
+                var p_monitor = display.get_primary_monitor ();
+                if (p_monitor != null) {
+                    var wa = p_monitor.get_workarea ();
+                    wa_width = wa.width;
+                    wa_height = wa.height;
+                }
+            }
 
             set_default_size (960, 540);
 
@@ -237,20 +247,19 @@ namespace Videos2 {
                     fullscreened = Gdk.WindowState.FULLSCREEN in e.new_window_state;
 
                     if (!fullscreened) {
-                        unmaximize ();
-                        if (current_h > 0 && current_w > 0) {
-                            resize ((int) current_w, (int) current_h);
+                        if (is_maximized) {
+                            maximize ();
+                        } else {
+                            unmaximize ();
                         }
                     }
                 }
 
-                if (Gdk.WindowState.MAXIMIZED in e.changed_mask) {
-                    bool currently_maximixed = Gdk.WindowState.MAXIMIZED in e.new_window_state;
-
-                    if (main_stack.visible_child_name == "player" && currently_maximixed) {
-                       fullscreen ();
-                    }
-                }
+                //  if (Gdk.WindowState.MAXIMIZED in e.changed_mask) {
+                //      if (main_stack.visible_child_name == "player" && currently_maximixed) {
+                //         fullscreen ();
+                //      }
+                //  }
 
                 return false;
             });
@@ -528,9 +537,10 @@ namespace Videos2 {
             if (state == Gst.State.PLAYING || state == Gst.State.PAUSED) {
                 bottom_bar.playing = (state == Gst.State.PLAYING);
 
-                if (is_maximized) {
-                    fullscreen ();
-                }
+                //  I might add an option to run in full screen mode.
+                //  if (is_maximized) {
+                //      fullscreen ();
+                //  }
             } else {
                 if (forced_fullscreen) {
                     forced_fullscreen = false;
@@ -674,16 +684,20 @@ namespace Videos2 {
         }
 
         private void play_uri (string uri) {
-            Utils.get_video_size (uri, out current_w, out current_h);
-
-            if (current_h > 0 && current_w > 0) {
-                resize ((int) current_w, (int) current_h);
-            }
+            uint v_w = 0, v_h = 0;
+            Utils.get_video_size (uri, out v_w, out v_h);
 
             if (main_stack.get_visible_child_name () != "player") {
                 main_stack.set_visible_child_name ("player");
             }
 
+            if (wa_width <= v_w || wa_height <= v_h) {
+                maximize ();
+            } else if (v_w >0 && v_h > 0) {
+                resize ((int) v_w, (int) v_h);
+            }
+
+            
             player.set_uri (uri);
 
             if (restore_id > 0) {

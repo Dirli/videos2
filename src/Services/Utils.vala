@@ -205,9 +205,6 @@ namespace Videos2.Utils {
     }
 
     public void get_video_size (string uri, out uint width, out uint height) {
-        width = 0;
-        height = 0;
-
         var info = get_discoverer_info (uri);
         if (info == null) {
             return;
@@ -224,10 +221,6 @@ namespace Videos2.Utils {
         if (video_stream != null) {
             width = video_stream.get_width ();
             height = video_stream.get_height ();
-            if (width > 960 || height > 540) {
-                width = (uint) (540.0 / height * width);
-                height = 540;
-            }
         }
     }
 
